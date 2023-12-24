@@ -16,9 +16,18 @@ class ProviderController extends Controller
         $cover_photo = time() . '.' . $request->coverPhoto->extension();
         $request->coverPhoto->move(public_path('images'), $cover_photo);
 
-        $photo_gallary = time() . '.' . $request->photoGallary->extension();
-        $request->photoGallary->move(public_path('images'), $photo_gallary);
-
+        $image = array();
+        if ($files = $request->file('photoGellary')) {
+            foreach ($files as $file) {
+                $image_name = md5(rand(1000, 10000));
+                $ext = strtolower($file->getClientOriginalExtension());
+                $image_full_name = $image_name . '.' . $ext;
+                $upload_path = 'public/images/';
+                $image_url = $upload_path . $image_full_name;
+                $file->move($upload_path, $image_full_name);
+                $image[] = $image_url;
+            }
+        }
         $post_provider = Provider::create([
             'category_id' => $request->input('catId'),
             'business_name' => $request->input('businessName'),
@@ -26,7 +35,10 @@ class ProviderController extends Controller
             'description' => $request->input('description'),
             'available_service_our' => $request->input('serviceOur'),
             'cover_photo' => $cover_photo,
-            'gallary_photo' => $photo_gallary,
+            'gallary_photo' => implode('|', $image),
+        ]);
+        return response()->json([
+            'success'
         ]);
     }
 }
