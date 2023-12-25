@@ -20,3 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/post/provider', [ProviderController::class, 'postProvider']);
+Route::get('/get/provider', [ProviderController::class, 'getProvider']);
+Route::post('/post/service', [ProviderController::class, 'postService']);
+Route::get('/get/service', [ProviderController::class, 'getService']);
