@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+
 use App\Models\User;
 use App\Models\EmailVerification;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +19,7 @@ class UserController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
+    $request->validate([
             'name' => 'required|min:2',
             'email' => 'email|required|max:100|unique:users',
             'password' =>'required|confirmed|min:6',
@@ -40,10 +41,10 @@ class UserController extends Controller
         return response()->json([$user]);
     }
 
-
-
     public function sendOtp(Request $request)
     {
+        $user = User::where('email',$request->email)->first();
+        if($user){
         $otp = rand(100000,999999);
         $time = time();
 
@@ -64,9 +65,12 @@ class UserController extends Controller
         Mail::send('mailVerification',['data'=>$data],function($message) use ($data){
             $message->to($data['email'])->subject($data['title']);
         });
+        return response()->json(['message'=>'Otp is send.']);
     }
-
-
+    else{
+        return response()->json(['message'=>'You should register first.']);
+    }
+}
 
     public function login(Request $request)
     {
@@ -83,13 +87,9 @@ class UserController extends Controller
             return response() ->json(['error'=>'Unauthorized']);
         }
         return $this->responseWithToken($token);
-
     }
 
-
-
-
-        protected function responseWithToken($token){
+    protected function responseWithToken($token){
         return response()->json([
             'success'=>true,
             'access_token'=>$token,
@@ -98,21 +98,16 @@ class UserController extends Controller
         ]);
 
     }
-
-
-
     public function verification($id)
     {
         $user = User::where('id',$id)->first();
-        if(!$user || $user->is_verified == 1){
-            return response()->json(['message'=>'Please register First']);
+        $veryStatus= $user->is_verified;
+        if($veryStatus == 1){
+            return response()->json(['message'=>'You are already verified.']);
         }
- else{
+    else{
         $email = $user->email;
-
-        $this->sendOtp($user);
-
-        return response()->json(['message'=>'check your mail to collect your otp pin']);
+    return response()->json(['message'=>'Please send OTP to this email :  '.$email]);
     }
 }
 
@@ -132,13 +127,36 @@ class UserController extends Controller
                 User::where('id',$user->id)->update([
                     'is_verified' => 1
                 ]);
-                return response()->json(['success' => true,'msg'=> 'Mail has been verified']);
+                return response()->json(['success' => true,'msg'=> 'OTP has been verified']);
             }
             else{
                 return response()->json(['success' => false,'msg'=> 'Your OTP has been Expired']);
             }
 
         }
+    }
+
+    public function Otp($user){
+       $otp = rand(100000,999999);
+        $time = time();
+
+        EmailVerification::updateOrCreate(
+            ['email' => $user->email],
+            [
+            'email' => $user->email,
+            'otp' => $otp,
+            'created_at' => $time
+            ]
+        );
+
+        $data['email'] = $user->email;
+        $data['title'] = 'Mail Verification';
+
+        $data['body'] = 'Your OTP is:- '.$otp;
+
+        Mail::send('mailVerification',['data'=>$data],function($message) use ($data){
+            $message->to($data['email'])->subject($data['title']);
+        });
     }
 
     public function resendOtp(Request $request)
@@ -153,12 +171,10 @@ class UserController extends Controller
             return response()->json(['success' => false,'msg'=> 'Please try after some time']);
         }
         else{
-
-            $this->sendOtp($user);
+            $this->Otp($user);
             return response()->json(['success' => true,'msg'=> 'OTP has been sent']);
-        }
-
     }
+}
     public function resetPassword(request $request){
         $request->validate([
         'password'=>'required|string|min:6|confirmed'
@@ -191,38 +207,37 @@ public function profile()
     catch(\Exception $e){
         return response()->json(['status'=>false,'message'=>$e->getMessage()]);
     }
-    
-   
 }
+
 public function profileUpdate(Request $request){
     if(auth()->user()){
-$validator= Validator::make($request->all(),[
-    'id'=>'required',
-    'name'=>'required|string',
-    'email'=>'required|email|string',
-    'UserImage' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
-    'phone_number'=> 'required|min:10',
-    'address'=>'required|min:2'
-]);
-if ($validator->fails()){
-    return response()->json($validator->errors(),400);
-}
-$avatar = time() . '.' . $request->UserImage->extension();
-$request->UserImage->move(public_path('images'), $avatar);
+        $validator= Validator::make($request->all(),[
+            'id'=>'required',
+            'name'=>'required|string',
+            'email'=>'required|email|string',
+            'UserImage' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
+            'phone_number'=> 'required|min:10',
+            'address'=>'required|min:2'
+            ]);
+        if ($validator->fails()){
+        return response()->json($validator->errors(),400);
+        }
+        $avatar = time() . '.' . $request->UserImage->extension();
+        $request->UserImage->move(public_path('images'), $avatar);
 
-$user=User::find($request->id);
-$user->id=$request->id;
-$user->name=$request->name ;
-$user->email=$request->email ;
-$user->image=$avatar;
-$user->phone_number= $request->phone_number;
-$user->address = $request->address;
-$user->save();
-return response()->json(['status'=>true,'message'=>'user is updated','Data'=>$user]);  
-    }
-else{
-    return response()->json(['status'=>false,'message'=>'User is not Authenticated']);  
-}
+        $user=User::find($request->id);
+        $user->id=$request->id;
+        $user->name=$request->name ;
+        $user->email=$request->email ;
+        $user->image=$avatar;
+        $user->phone_number= $request->phone_number;
+        $user->address = $request->address;
+        $user->save();
+            return response()->json(['status'=>true,'message'=>'user is updated','Data'=>$user]);  
+                }
+            else{
+                return response()->json(['status'=>false,'message'=>'User is not Authenticated']);  
+            }
 }
 public function refreshToken()
     {

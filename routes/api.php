@@ -27,7 +27,8 @@ Route::post('/verified',[UserController::class,'verifiedOtp']);
 
 Route::get('/profile',[UserController::class,'profile']);
 
-Route::get('/resend-otp',[UserController::class,'resendOtp']);
+Route::post('/resendOtp',[UserController::class,'resendOtp']);
+
 Route::post('/getOtp',[UserController::class,'sendOtp']);
 
 Route::get('/refreshToken',[UserController::class,'refreshToken']);
