@@ -1,30 +1,30 @@
 <?php
 
-use App\Http\Controllers\AdminController;
+
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ClientController;
 use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
-use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\WebsitePagesController;
+use App\Http\Controllers\Api\ProviderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 /*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+ * |--------------------------------------------------------------------------
+ * | API Routes
+ * |--------------------------------------------------------------------------
+ * |
+ * | Here is where you can register API routes for your application. These
+ * | routes are loaded by the RouteServiceProvider and all of them will
+ * | be assigned to the "api" middleware group. Make something great!
+ * |
+ */
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::post('/register',[UserController::class,'register']);
 
 Route::post('/login',[UserController::class,'login']);
@@ -85,3 +85,18 @@ Route::middleware(['provider'])->group(function (){
 Route::middleware(['client'])->group(function (){
    //user
 });
+
+
+Route::post('/post/provider', [ProviderController::class, 'postProvider']);
+Route::get('/get/provider', [ProviderController::class, 'getProvider']);
+Route::post('/post/service', [ProviderController::class, 'postService']);
+Route::get('/get/service', [ProviderController::class, 'getService']);
+
+// ================== Booking ========================//
+
+Route::post('/post/booking', [ProviderController::class, 'postBooking']);
+Route::get('/get/booking', [ProviderController::class, 'getBooking']);
+Route::get('/edit/booking/{id}', [ProviderController::class, 'editBooking']);
+Route::post('/update/booking', [ProviderController::class, 'updateBooking']);
+Route::post('/update/status', [ProviderController::class, 'updateStatus']);
+Route::get('/booking/delete/{id}', [ProviderController::class, 'deletProvider']);
