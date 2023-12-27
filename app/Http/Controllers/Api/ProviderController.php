@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BookingRequest;
 use App\Http\Requests\ProviderRequest;
 use App\Http\Requests\ServiceRequest;
+use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Provider;
 use App\Models\Service;
@@ -86,6 +88,7 @@ class ProviderController extends Controller
             'set_booking_mony' => $request->input('bookingMony'),
             'available_service_our' => $request->input('serviceHour'),
         ]);
+
         if ($post_service) {
             return response()->json([
                 'status' => 'success',
@@ -111,6 +114,119 @@ class ProviderController extends Controller
             return response()->json([
                 'status' => 'false',
                 'message' => 'Service add faile'
+            ]);
+        }
+    }
+
+    // ====================== Booking =================//
+
+    public function postBooking(BookingRequest $request)
+    {
+        $post_booking = Booking::create([
+            'user_id' => $request->input('userId'),
+            'provider_id' => $request->input('providerId'),
+            'service_id' => $request->input('serviceId'),
+            'service' => $request->input('service'),
+            'price' => $request->input('price'),
+            'date' => $request->input('date'),
+            'time' => $request->input('time'),
+        ]);
+
+        if ($post_booking) {
+            return response()->json([
+                'status' => 'true',
+                'message' => 'Booking success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Booking faile'
+            ]);
+        }
+    }
+
+    public function getBooking()
+    {
+        $getBooking = Booking::all();
+        if ($getBooking) {
+            return response()->json([
+                'status' => 'true',
+                'message' => $getBooking
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Booking data not found',
+            ]);
+        }
+    }
+
+    public function editBooking($id)
+    {
+        $editBooking = Booking::where('id', $id)->first();
+        if ($editBooking) {
+            return response()->json([
+                'status' => 'success',
+                'booking' => $editBooking
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Booking data not found',
+            ]);
+        }
+    }
+
+    public function updateBooking(Request $request)
+    {
+        $updateBooking = Booking::find($request->id);
+        $updateBooking->date = $request->date;
+        $updateBooking->time = $request->time;
+        $updateBooking->save();
+        if ($updateBooking) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Booking update success',
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Booking update faile',
+            ]);
+        }
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $updateStatus = Booking::find($request->id);
+        $updateStatus->status = $request->status;
+        $updateStatus->save();
+        if ($updateStatus) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Booking status update success',
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Booking status update faile',
+            ]);
+        }
+    }
+
+    public function deletProvider($id)
+    {
+        $deleteProvider = Booking::where('id', $id)->delete();
+
+        if ($deleteProvider) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Booking delete success',
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Booking delete faile',
             ]);
         }
     }
