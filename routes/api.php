@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\OnboardController;
+use App\Http\Controllers\PackageController;
+use App\Http\Controllers\ProviderController;
+use App\Http\Controllers\WebsitePagesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -38,8 +45,43 @@ Route::group(['middleware'=>'api'],function($routes){
     Route::post('/reset-password',[UserController::class,'resetPassword']);
     Route::post('/profileUpdate',[UserController::class,'profileUpdate']);
 
-
-
-
 });
 
+
+Route::middleware(['admin'])->group(function (){
+    //category
+    Route::get('show-category', [CategoryController::class,'showCategory']);
+    Route::get('single-category/{id}', [CategoryController::class,'showSingleCategory']);
+    Route::post('add-category', [CategoryController::class,'addCategory']);
+    Route::post('update-category/{id}', [CategoryController::class,'updateCategory']);
+    Route::get('delete-category/{id}', [CategoryController::class,'deleteCategory']);
+
+//Package
+    Route::get('show-package', [PackageController::class,'showPackage']);
+    Route::get('single-package/{id}', [PackageController::class,'showSinglePackage']);
+    Route::post('add-package', [PackageController::class,'addPackage']);
+    Route::post('update-package/{id}', [PackageController::class,'updatePackage']);
+    Route::get('delete-package/{id}', [PackageController::class,'deletePackage']);
+
+//website pages
+    Route::get('show-website-pages',[WebsitePagesController::class,'showWebsitePages']);
+    Route::get('show-single-pages/{id}',[WebsitePagesController::class,'showSinglePages']);
+    Route::post('add-website-pages',[WebsitePagesController::class,'addWebsitePage']);
+    Route::post('update-website-pages/{id}',[WebsitePagesController::class,'updateWebsitePage']);
+    Route::get('delete-website-pages/{id}',[WebsitePagesController::class,'deleteWebsitePage']);
+
+//Onboard pages
+    Route::post('add-onboard',[OnboardController::class,'addOnboard']);
+//Route::post('update-onboard',[OnboardController::class,'updateOnboard']);
+    Route::get('show-onboard',[OnboardController::class,'showOnboard']);
+    Route::get('show-single-onboard/{id}',[OnboardController::class,'showSingleOnboard']);
+    Route::get('delete-single-onboard/{id}',[OnboardController::class,'deleteOnboard']);
+});
+
+Route::middleware(['provider'])->group(function (){
+    //provider
+});
+
+Route::middleware(['client'])->group(function (){
+   //user
+});
