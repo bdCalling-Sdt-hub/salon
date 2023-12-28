@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('auth/google',[UserController::class,'loginWithGoogle'])->name('login');
+Route::any('auth/google/callback',[UserController::class,'callbackFromGoogle'])->name('callback');
+Route::get('home',function(){
+    return view('home');
+})->name('home');

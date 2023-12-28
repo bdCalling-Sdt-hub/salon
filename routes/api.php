@@ -32,14 +32,20 @@ Route::post('/resendOtp',[UserController::class,'resendOtp']);
 Route::post('/getOtp',[UserController::class,'sendOtp']);
 
 Route::get('/refreshToken',[UserController::class,'refreshToken']);
+Route::get('auth/google',[UserController::class,'loginWithGoogle']);
+Route::post('auth/google/callback',[UserController::class,'callbackFromGoogle']);
 
+Route::post('/saveRating',[UserController::class,'saveRating']);
+Route::post('/updateRating/{id}',[UserController::class,'updateServiceRating']);
+Route::get('/deleteRating/{id}',[UserController::class,'deleteServiceRating']);
+Route::get('/showRating',[UserController::class,'showServiceRating']);
+Route::get('/editRating/{id}',[UserController::class,'editServiceRating']);
 Route::group(['middleware'=>'api'],function($routes){
     Route::get('/logout',[UserController::class,'logout']);
     Route::post('/reset-password',[UserController::class,'resetPassword']);
     Route::post('/profileUpdate',[UserController::class,'profileUpdate']);
-
-
-
+    Route::post('/send-notification',[UserController::class,'sendNotification']);
+  
 
 });
 
