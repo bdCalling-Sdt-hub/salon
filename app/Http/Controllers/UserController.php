@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LoginActivity;
 use Illuminate\Http\Request;
 
 use App\Models\User;
@@ -9,14 +10,13 @@ use App\Models\EmailVerification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Jenssegers\Agent\Agent;
 use Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Models\PasswordReset;
 
 class UserController extends Controller
 {
-    
-
     public function register(Request $request)
     {
     $request->validate([
@@ -74,19 +74,22 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string|min:6'
         ]);
         if ($validator->fails()){
             return response()->json($validator->errors(),400);
         }
+        $this->loginActivity($request->email,$request->password);
+
         if (!$token = auth()->attempt($validator->validated()))
         {
             return response() ->json(['error'=>'Unauthorized']);
         }
+
         return $this->responseWithToken($token);
+
     }
 
     protected function responseWithToken($token){
@@ -96,7 +99,6 @@ class UserController extends Controller
             'token_type'=>'bearer',
             'expires_in'=>auth()->factory()-> getTTL() * 60
         ]);
-
     }
     public function verification($id)
     {
@@ -197,11 +199,10 @@ class UserController extends Controller
     catch(\Exception $e){
         return response()->json(['status'=>false,'message'=>$e->getMessage()]);
     }
-}
+    }
 public function profile()
 {
     try{
-      
         return response()->json(auth()->user());
     }
     catch(\Exception $e){
@@ -233,10 +234,10 @@ public function profileUpdate(Request $request){
         $user->phone_number= $request->phone_number;
         $user->address = $request->address;
         $user->save();
-            return response()->json(['status'=>true,'message'=>'user is updated','Data'=>$user]);  
+            return response()->json(['status'=>true,'message'=>'user is updated','Data'=>$user]);
                 }
             else{
-                return response()->json(['status'=>false,'message'=>'User is not Authenticated']);  
+                return response()->json(['status'=>false,'message'=>'User is not Authenticated']);
             }
 }
 public function refreshToken()
@@ -247,5 +248,24 @@ public function refreshToken()
       else{
         return response()->json(['success'=>false,'message'=>'User is not authenticated.']);
       }
+    }
+
+    public function loginActivity($email,$password){
+        $admin = User::where('email', $email)->first();
+        if ($admin && Hash::check($password, $admin->password)) {
+            $agent = new Agent();
+            $browser = $agent->browser();
+            $device = $agent->device();
+
+            $activity = new LoginActivity([
+                'user_id' => $admin->id,
+                'browser' => $browser,
+                'device_name' => $device,
+                'location' => 'Dhaka Bangladesh',
+                'login_time' => now(),
+                'status' => ($admin && Hash::check($password, $admin->password)) ? 1 : 0,
+            ]);
+            $activity->save();
+        }
     }
 }

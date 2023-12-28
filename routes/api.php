@@ -2,8 +2,11 @@
 
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\GetController;
+use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\WebsitePagesController;
 use App\Http\Controllers\Api\ProviderController;
 use Illuminate\Http\Request;
@@ -44,7 +47,6 @@ Route::group(['middleware'=>'api'],function($routes){
     Route::get('/logout',[UserController::class,'logout']);
     Route::post('/reset-password',[UserController::class,'resetPassword']);
     Route::post('/profileUpdate',[UserController::class,'profileUpdate']);
-
 });
 
 
@@ -76,16 +78,22 @@ Route::middleware(['admin'])->group(function (){
     Route::get('show-onboard',[OnboardController::class,'showOnboard']);
     Route::get('show-single-onboard/{id}',[OnboardController::class,'showSingleOnboard']);
     Route::get('delete-single-onboard/{id}',[OnboardController::class,'deleteOnboard']);
+
+    // login activity
+    Route::get('login-activity',[LoginActivityController::class,'loginActivity']);
+    Route::get('sign-out-login/{id}',[LoginActivityController::class,'signOutLoginActivity']);
+
+    //get salon list
+    Route::get('get-salon-list',[GetController::class,'salonList']);
 });
 
 Route::middleware(['provider'])->group(function (){
     //provider
 });
 
-Route::middleware(['client'])->group(function (){
-   //user
+Route::middleware(['user'])->group(function (){
+    //user
 });
-
 
 Route::post('/post/provider', [ProviderController::class, 'postProvider']);
 Route::get('/get/provider', [ProviderController::class, 'getProvider']);
