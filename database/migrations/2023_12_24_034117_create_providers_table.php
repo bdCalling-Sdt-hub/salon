@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->text('available_service_our');
             $table->string('cover_photo');
             $table->string('gallary_photo');
+            $table->integer('status')->default(0);
             $table->timestamps();
         });
     }

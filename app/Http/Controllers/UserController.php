@@ -25,7 +25,8 @@ class UserController extends Controller
             'password' =>'required|confirmed|min:6',
             'UserImage' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048|dimensions:min_width=100,min_height=100,max_width=1000,max_height=1000',
             'phone_number'=> 'required|min:10',
-            'address'=>'required|min:2'
+            'address'=>'required|min:2',
+            'user_type'=>'string',
         ]);
         $avatar = time() . '.' . $request->UserImage->extension();
         $request->UserImage->move(public_path('images'), $avatar);
@@ -36,6 +37,7 @@ class UserController extends Controller
         $user->image = $avatar;
         $user->phone_number= $request->phone_number;
         $user->address = $request->address;
+        $user->user_type = $request->user_type;
         $user->save();
 
         return response()->json([$user]);
@@ -74,6 +76,7 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
             'password' => 'required|string|min:6'

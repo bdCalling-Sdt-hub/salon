@@ -6,6 +6,7 @@ use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\PercentageController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\WebsitePagesController;
 use App\Http\Controllers\Api\ProviderController;
@@ -85,6 +86,34 @@ Route::middleware(['admin'])->group(function (){
 
     //get salon list
     Route::get('get-salon-list',[GetController::class,'salonList']);
+    //get salon list with pagination
+    Route::get('get-salon-list/{id}',[GetController::class,'singleSalon']);
+
+    //Get Provider Request
+    Route::get('get-provider-request',[GetController::class,'getProviderRequest']);
+
+    //update provider request
+    Route::get('approve-provider-request/{id}',[GetController::class,'approveProviderRequest']);
+    Route::get('block-provider-request/{id}',[GetController::class,'blockProviderRequest']);
+
+    //provider block list
+    Route::get('provider-block-list',[GetController::class,'providerBlockList']);
+    Route::get('unblock-provider',[GetController::class,'unblockProvider']);
+    //get User List
+    Route::get('user-list',[GetController::class,'userList']);
+    //single user data
+    Route::get('single-user/{id}',[GetController::class,'singleUser']);
+
+    //search
+    //provider request search by name and id
+    Route::get('search-provider-request/{name}/{id?}',[GetController::class,'searchProviderRequest']);
+    //provider list search name,email,phone
+    //provider block list search by name and id
+    //user list search by name email and phone
+    //salon list search by name,email and phone
+
+    //booking percentage
+    Route::post('booking-percentage-set',[PercentageController::class,'percentageSet']);
 });
 
 Route::middleware(['provider'])->group(function (){

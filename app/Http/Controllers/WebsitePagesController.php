@@ -65,5 +65,4 @@ class WebsitePagesController extends Controller
             return ResponseMessage('Page not found');
         }
     }
-
 }
