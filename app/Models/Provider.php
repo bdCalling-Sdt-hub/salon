@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Model\Category;
+use App\Models\Service;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,4 +20,6 @@ class Provider extends Model
         'cover_photo',
         'gallary_photo',
     ];
+    
+
 }

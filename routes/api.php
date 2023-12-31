@@ -21,8 +21,25 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/post/provider', [ProviderController::class, 'postProvider']);
 Route::get('/get/provider', [ProviderController::class, 'getProvider']);
+Route::get('/edit/provider/{id}', [ProviderController::class, 'editProvider']);
+Route::post('/update/provider', [ProviderController::class, 'updateProvider']);
+Route::get('/delet/provider/cover/photo', [ProviderController::class, 'deleteProviderCoverImg']);
+Route::post('/update/provider/cover/photo', [ProviderController::class, 'providerCoverPhotoUpdate']);
+Route::get('/delet/provider/gallary/photo', [ProviderController::class, 'deleteProviderGallary']);
+Route::post('/update/provider/gallary/photo', [ProviderController::class, 'providerGallaryPhotoUpdate']);
+Route::get('/delete/provider/{id}', [ProviderController::class, 'deleteProvider']);
+
+// ======================SERVICE =======================//
+
 Route::post('/post/service', [ProviderController::class, 'postService']);
 Route::get('/get/service', [ProviderController::class, 'getService']);
+Route::get('/edit/service/{id}', [ProviderController::class, 'serviceEdit']);
+Route::get('/update/service/', [ProviderController::class, 'serviceUpdate']);
+Route::post('/post/update/service', [ProviderController::class, 'updateService']);
+Route::post('/post/update/service/image', [ProviderController::class, 'updateServiceImage']);
+Route::post('/post/delete/service/image', [ProviderController::class, 'deleteServiceGallary']);
+Route::get('/delete/service/{id}', [ProviderController::class, 'serviceDelete']);
+Route::get('/provider/all/service/{id}', [ProviderController::class, 'providerAllService']);
 
 // ================== Booking ========================//
 
@@ -31,4 +48,8 @@ Route::get('/get/booking', [ProviderController::class, 'getBooking']);
 Route::get('/edit/booking/{id}', [ProviderController::class, 'editBooking']);
 Route::post('/update/booking', [ProviderController::class, 'updateBooking']);
 Route::post('/update/status', [ProviderController::class, 'updateStatus']);
-Route::get('/booking/delete/{id}', [ProviderController::class, 'deletProvider']);
+Route::get('/booking/delete/{id}', [ProviderController::class, 'cancelBooking']);
+
+// ==================== CATEOGORY ============================//
+
+Route::get('/get/category', [ProviderController::class, 'category']);

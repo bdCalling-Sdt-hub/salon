@@ -30,6 +30,5 @@ class BookingRequest extends FormRequest
             'date' => ['required'],
             'time' => ['required'],
         ];
-
     }
 }
