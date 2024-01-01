@@ -7,7 +7,6 @@ use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PercentageController;
-use App\Http\Controllers\TestController;
 use App\Http\Controllers\WebsitePagesController;
 use App\Http\Controllers\Api\ProviderController;
 use Illuminate\Http\Request;
@@ -43,11 +42,15 @@ Route::post('/resendOtp',[UserController::class,'resendOtp']);
 Route::post('/getOtp',[UserController::class,'sendOtp']);
 
 Route::get('/refreshToken',[UserController::class,'refreshToken']);
+Route::get('auth/google',[UserController::class,'loginWithGoogle']);
+Route::post('auth/google/callback',[UserController::class,'callbackFromGoogle']);
+
 
 Route::group(['middleware'=>'api'],function($routes){
     Route::get('/logout',[UserController::class,'logout']);
     Route::post('/reset-password',[UserController::class,'resetPassword']);
     Route::post('/profileUpdate',[UserController::class,'profileUpdate']);
+    Route::post('/send-notification',[UserController::class,'sendNotification']);
 });
 
 
@@ -114,26 +117,35 @@ Route::middleware(['admin'])->group(function (){
 
     //booking percentage
     Route::post('booking-percentage-set',[PercentageController::class,'percentageSet']);
+
+    //review
+    Route::get('/deleteRating/{id}',[UserController::class,'deleteServiceRating']);
+    Route::get('/showRating',[UserController::class,'showServiceRating']);
+    Route::get('/editRating/{id}',[UserController::class,'editServiceRating']);
 });
 
 Route::middleware(['provider'])->group(function (){
     //provider
+
+    Route::post('/post/provider', [ProviderController::class, 'postProvider']);
+    Route::get('/get/provider', [ProviderController::class, 'getProvider']);
+    Route::post('/post/service', [ProviderController::class, 'postService']);
+    Route::get('/get/service', [ProviderController::class, 'getService']);
+
+// ================== Booking ========================//
+
+    Route::post('/post/booking', [ProviderController::class, 'postBooking']);
+    Route::get('/get/booking', [ProviderController::class, 'getBooking']);
+    Route::get('/edit/booking/{id}', [ProviderController::class, 'editBooking']);
+    Route::post('/update/booking', [ProviderController::class, 'updateBooking']);
+    Route::post('/update/status', [ProviderController::class, 'updateStatus']);
+    Route::get('/booking/delete/{id}', [ProviderController::class, 'deletProvider']);
+
 });
 
 Route::middleware(['user'])->group(function (){
     //user
+    Route::post('/saveRating',[UserController::class,'saveRating']);
+    Route::post('/updateRating/{id}',[UserController::class,'updateServiceRating']);
 });
 
-Route::post('/post/provider', [ProviderController::class, 'postProvider']);
-Route::get('/get/provider', [ProviderController::class, 'getProvider']);
-Route::post('/post/service', [ProviderController::class, 'postService']);
-Route::get('/get/service', [ProviderController::class, 'getService']);
-
-// ================== Booking ========================//
-
-Route::post('/post/booking', [ProviderController::class, 'postBooking']);
-Route::get('/get/booking', [ProviderController::class, 'getBooking']);
-Route::get('/edit/booking/{id}', [ProviderController::class, 'editBooking']);
-Route::post('/update/booking', [ProviderController::class, 'updateBooking']);
-Route::post('/update/status', [ProviderController::class, 'updateStatus']);
-Route::get('/booking/delete/{id}', [ProviderController::class, 'deletProvider']);

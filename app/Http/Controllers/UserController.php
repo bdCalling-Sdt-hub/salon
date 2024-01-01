@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\LoginActivity;
+use App\Events\SendNotification;
 use Illuminate\Http\Request;
-
+use App\Models\ServiceRating;
 use App\Models\User;
 use App\Models\EmailVerification;
 use Illuminate\Support\Facades\Hash;
@@ -14,7 +15,7 @@ use Jenssegers\Agent\Agent;
 use Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Models\PasswordReset;
-
+use Laravel\Socialite\Facades\Socialite;
 class UserController extends Controller
 {
     public function register(Request $request)
@@ -252,8 +253,8 @@ public function refreshToken()
         return response()->json(['success'=>false,'message'=>'User is not authenticated.']);
       }
     }
-
-    public function loginActivity($email,$password){
+    public function loginActivity($email,$password)
+    {
         $admin = User::where('email', $email)->first();
         if ($admin && Hash::check($password, $admin->password)) {
             $agent = new Agent();
@@ -269,6 +270,102 @@ public function refreshToken()
                 'status' => ($admin && Hash::check($password, $admin->password)) ? 1 : 0,
             ]);
             $activity->save();
+        }
+    }
+    public function loginWithGoogle(){
+        return  Socialite::driver('google')->redirect();
+     }
+     public function callbackFromGoogle(){
+        try{
+         $user= Socialite::driver('google')->user();
+         $is_user = User::where('email',$user->getEmail())->first();
+         if(!$is_user){
+            $saveUser= User::updateOrCreate(
+                 [
+                     'google_id'=>$user->getId()
+                 ],
+                 [
+                     'name'=>$user->getName(),
+                     'email'=>$user->getEmail(),
+                     'password'=>Hash::make($user->getName().'@'.$user->getId())
+                 ]
+             );
+         }else{
+             $saveUser= User::where('email',$user->getEmail())->update([
+                 'google_id'=>$user->getId(),
+             ]);
+             $saveUser= User::where('email',$user->getEmail())->first();
+         }
+
+         Auth::loginUsingId($saveUser->id);
+         return redirect()->route('home');
+        }catch(\Throwable $th){
+
+         throw $th;
+        }
+     }
+     public function saveRating(Request $request){
+
+        $validator =Validator::make($request->all(),[
+        'user_id'=>'required',
+        'service_id'=>'required',
+        'review'=>'required',
+        'rating'=>'required',
+        ]);
+        if ($validator->fails()){
+            return response()->json($validator->errors(),400);
+
+        }
+        $checkUser=auth()->user();
+        $userId= $checkUser->id;
+
+        $rating = new ServiceRating();
+        $rating->user_id = $userId;
+        $rating->service_id = $request->service_id;
+        $rating->review=$request->review ;
+        $rating->rating=$request->rating ;
+        $rating->save();
+        return response()->json(['message'=>'Review and ratings are added.']);
+        }
+
+        public function editServiceRating($id)
+        {
+            $editeRating = ServiceRating::where('id',$id)->first();
+            return response()->json([
+                'status'=>'success',
+                'message'=>$editeRating
+            ]);
+
+        }
+
+        public function updateServiceRating(Request $request,$id){
+            $rating=ServiceRating::find($id);
+            $rating->review=$request->review ;
+            $rating->rating=$request->rating ;
+            $rating->save();
+            return response(['status'=>'200','message'=>'Ratings and reviews are updated successfully']);
+           }
+
+
+           public function deleteServiceRating($id){
+            $rating=ServiceRating::find($id);
+            $rating->delete();
+            return response(['status'=>'200','message'=>'Ratings and reviews  are deleted successfully']);
+           }
+
+           public function showServiceRating(){
+            $rating=ServiceRating::all();
+            return $rating;
+           }
+           public function sendNotification(Request $request)
+    {
+        try {
+
+            event(new SendNotification($request->message, auth()->user()->id));
+
+            return response()->json(['success'=>true,'msg'=>'Notification Added']);
+        } catch (\Exception $e) {
+            return response()->json(['success'=>false,'msg'=>$e->getMessage()]);
         }
     }
 }
