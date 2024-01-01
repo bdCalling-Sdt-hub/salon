@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 
 class ProviderController extends Controller
 {
+    // ====================PROVIDER======================//
+
     public function postProvider(ProviderRequest $request)
     {
         $cover_photo = time() . '.' . $request->coverPhoto->extension();
@@ -66,6 +68,155 @@ class ProviderController extends Controller
         }
     }
 
+    public function editProvider($id)
+    {
+        $editProvider = Provider::where('id', $id)->first();
+        if ($editProvider) {
+            return response()->json([
+                'status' => 'success',
+                'provider' => $editProvider
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'provider' => $editProvider
+            ]);
+        }
+    }
+
+    public function updateProvider(Request $request)
+    {
+        $updateProvider = Provider::find($request->id);
+        $updateProvider->category_id = $request->catId;
+        $updateProvider->business_name = $request->businessName;
+        $updateProvider->address = $request->address;
+        $updateProvider->description = $request->description;
+        $updateProvider->available_service_our = $request->serviceOur;
+        $updateProvider->save();
+        if ($updateProvider) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'provider update success',
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'provider update fail',
+            ]);
+        }
+    }
+
+    public function providerCoverPhotoUpdate(Request $request)
+    {
+        $cover_photo_update = time() . '.' . $request->coverPhoto->extension();
+        $request->coverPhoto->move(public_path('images'), $cover_photo_update);
+
+        $updateProviderCoverImg = Provider::find($request->id);
+        $updateProviderCoverImg->cover_photo = $cover_photo_update;
+        $updateProviderCoverImg->save();
+
+        if ($updateProviderCoverImg) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'update provider cover photo success',
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'update provider cover photo fail',
+            ]);
+        }
+    }
+
+    public function deleteProviderCoverImg(Request $request)
+    {
+        $deleteProviderCoverImg = Provider::find($request->id);
+        $deleteProviderCoverImg->id = $request->id;
+        if (file_exists('cover_photo' . $deleteProviderCoverImg->cover_photo) AND !empty($deleteProviderCoverImg->cover_photo)) {
+            unlink('cover_photo' . $deleteProviderCoverImg->cover_photo);
+        }
+        $deleteProviderCoverImg->cover_photo = '';
+        $deleteProviderCoverImg->save();
+        if ($deleteProviderCoverImg == true) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Provider cover images delete success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'faile',
+                'message' => 'Provider cover images  delete faile'
+            ]);
+        }
+    }
+
+    public function providerGallaryPhotoUpdate(Request $request)
+    {
+        $image = array();
+        if ($files = $request->file('photoGellary')) {
+            foreach ($files as $file) {
+                $gellery_photo = time() . '.' . $file->getClientOriginalName();
+                $file->move(public_path('images'), $gellery_photo);
+                $image[] = $gellery_photo;
+            }
+        }
+
+        $updateProviderCoverImg = Provider::find($request->id);
+        $updateProviderCoverImg->gallary_photo = $image;
+        $updateProviderCoverImg->save();
+
+        if ($updateProviderCoverImg) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'update provider gallary photo success',
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'update provider gallary photo fail',
+            ]);
+        }
+    }
+
+    public function deleteProviderGallary(Request $request)
+    {
+        $deleteProviderGallaryImg = Provider::find($request->id);
+        if (file_exists('gallary_photo' . $deleteProviderGallaryImg->gallary_photo) AND !empty($deleteProviderGallaryImg->gallary_photo)) {
+            unlink('gallary_photo' . $deleteProviderGallaryImg->gallary_photo);
+        }
+        $deleteProviderGallaryImg->gallary_photo = '';
+        $deleteProviderGallaryImg->save();
+        if ($deleteProviderGallaryImg == true) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Provider gallary images delete success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'faile',
+                'message' => 'Provider gallary images  delete faile'
+            ]);
+        }
+    }
+
+    public function deleteProvider($id)
+    {
+        $deleteProvider = Provider::where('id', $id)->delete();
+        if ($deleteProvider == true) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Provider delete success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'faile',
+                'message' => 'Provider delete faile'
+            ]);
+        }
+    }
+
+    // ========================= SERVICE =======================//
+
     public function postService(ServiceRequest $request)
     {
         $image = array();
@@ -116,6 +267,120 @@ class ProviderController extends Controller
                 'message' => 'Service add faile'
             ]);
         }
+    }
+
+    public function serviceEdit($id)
+    {
+        $editService = Service::where('id', $id)->first();
+        if ($editService) {
+            return response()->json([
+                'status' => 'true',
+                'service' => $editService
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Service data not found'
+            ]);
+        }
+    }
+
+    public function updateService(Request $request)
+    {
+        $updateService = Service::find($request->id);
+        $updateService->id = $request->id;
+        $updateService->category_id = $request->catId;
+        $updateService->provider_id = $request->providerId;
+        $updateService->service_name = $request->serviceName;
+        $updateService->service_description = $request->description;
+        $updateService->service_duration = $request->serviceOur;
+        $updateService->salon_service_charge = $request->serviceCharge;
+        $updateService->home_service_charge = $request->homServiceCharge;
+        $updateService->set_booking_mony = $request->bookingMony;
+        $updateService->available_service_our = $request->serviceHour;
+        $updateService->save();
+        if ($updateService) {
+            return response()->json([
+                'status' => 'true',
+                'message' => 'update service success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'update service faile'
+            ]);
+        }
+    }
+
+    public function updateServiceImage(Request $request)
+    {
+        $image = array();
+        if ($files = $request->file('servicePhotoGellary')) {
+            foreach ($files as $file) {
+                $service_gellery_photo = time() . '.' . $file->getClientOriginalName();
+                $file->move(public_path('images'), $service_gellery_photo);
+                $image[] = $service_gellery_photo;
+            }
+        }
+        $updateServiceImg = Service::find($request->id);
+        $updateServiceImg->id = $request->id;
+        $updateServiceImg->gallary_photo = implode('|', $image);
+        $updateServiceImg->save();
+        if ($updateServiceImg) {
+            return response()->json([
+                'status' => 'true',
+                'message' => 'update service image success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'message' => 'update service image faile'
+            ]);
+        }
+    }
+
+    public function deleteServiceGallary(Request $request)
+    {
+        $deleteServiceGallaryImg = Service::find($request->id);
+        $deleteServiceGallaryImg->id = $request->id;
+        if (file_exists('gallary_photo' . $deleteServiceGallaryImg->gallary_photo) AND !empty($deleteServiceGallaryImg->gallary_photo)) {
+            unlink('gallary_photo' . $deleteServiceGallaryImg->gallary_photo);
+        }
+        $deleteServiceGallaryImg->gallary_photo = '';
+        $deleteServiceGallaryImg->save();
+        if ($deleteServiceGallaryImg == true) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Service gallary images delete success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'faile',
+                'message' => 'Service gallary images  delete faile'
+            ]);
+        }
+    }
+
+    public function serviceDelete($id)
+    {
+        $deleteService = Service::where('id', $id)->delete();
+        if ($deleteService == true) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Service delete success'
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'faile',
+                'message' => 'Service delete faile'
+            ]);
+        }
+    }
+
+    public function providerAllService($id)
+    {
+        $allService = Service::where('provider_id', $id)->get();
+        return $allService;
     }
 
     // ====================== Booking =================//
@@ -179,20 +444,30 @@ class ProviderController extends Controller
 
     public function updateBooking(Request $request)
     {
-        $updateBooking = Booking::find($request->id);
-        $updateBooking->date = $request->date;
-        $updateBooking->time = $request->time;
-        $updateBooking->save();
-        if ($updateBooking) {
+        $date = $request->date;
+        $time = $request->time;
+        $scedulCheck = Booking::where('date', $date)->where('time', $time)->count();
+        if ($scedulCheck) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Booking update success',
+                'status' => false,
+                'message' => 'Sloat not avlable'
             ]);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Booking update faile',
-            ]);
+            $updateBooking = Booking::find($request->id);
+            $updateBooking->date = $request->date;
+            $updateBooking->time = $request->time;
+            $updateBooking->save();
+            if ($updateBooking) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Booking update success',
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'false',
+                    'message' => 'Booking update faile',
+                ]);
+            }
         }
     }
 
@@ -214,11 +489,11 @@ class ProviderController extends Controller
         }
     }
 
-    public function deletProvider($id)
+    public function cancelBooking($id)
     {
-        $deleteProvider = Booking::where('id', $id)->delete();
+        $cancelBooking = Booking::where('id', $id)->delete();
 
-        if ($deleteProvider) {
+        if ($cancelBooking) {
             return response()->json([
                 'status' => 'success',
                 'message' => 'Booking delete success',
@@ -229,5 +504,18 @@ class ProviderController extends Controller
                 'message' => 'Booking delete faile',
             ]);
         }
+    }
+
+    public function category()
+    {
+        // return Category::with('provider')->get();
+
+        $data = Category::join('providers', 'providers.category_id', '=', 'categories.id')
+            ->join('services', 'services.provider_id', '=', 'providers.id')
+            ->get();
+        return response()->json([
+            'status' => 'success',
+            'Category' => $data
+        ]);
     }
 }

@@ -2,25 +2,23 @@
 
 namespace App\Models;
 
-use App\Models\Category;
-use App\Models\Provider;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Service extends Model
+class Catalogue extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'category_id',
         'provider_id',
-        'service_name',
-        'service_description',
-        'gallary_photo',
+        'service_id',
+        'catalog_name',
+        'catalog_description',
+        'image',
         'service_duration',
         'salon_service_charge',
         'home_service_charge',
-        'set_booking_mony',
-        'available_service_our',
+        'booking_money',
+        'service_hour',
     ];
 }

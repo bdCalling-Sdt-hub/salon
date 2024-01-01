@@ -8,6 +8,8 @@ use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PercentageController;
 use App\Http\Controllers\WebsitePagesController;
+
+use App\Http\Controllers\Api\CataloguController;
 use App\Http\Controllers\Api\ProviderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -126,20 +128,21 @@ Route::middleware(['admin'])->group(function (){
 
 Route::middleware(['provider'])->group(function (){
     //provider
+//
+//    Route::post('/post/provider', [ProviderController::class, 'postProvider']);
+//    Route::get('/get/provider', [ProviderController::class, 'getProvider']);
+//    Route::post('/post/service', [ProviderController::class, 'postService']);
+//    Route::get('/get/service', [ProviderController::class, 'getService']);
+//
+//// ================== Booking ========================//
+//
+//    Route::post('/post/booking', [ProviderController::class, 'postBooking']);
+//    Route::get('/get/booking', [ProviderController::class, 'getBooking']);
+//    Route::get('/edit/booking/{id}', [ProviderController::class, 'editBooking']);
+//    Route::post('/update/booking', [ProviderController::class, 'updateBooking']);
+//    Route::post('/update/status', [ProviderController::class, 'updateStatus']);
+//    Route::get('/booking/delete/{id}', [ProviderController::class, 'deletProvider']);
 
-    Route::post('/post/provider', [ProviderController::class, 'postProvider']);
-    Route::get('/get/provider', [ProviderController::class, 'getProvider']);
-    Route::post('/post/service', [ProviderController::class, 'postService']);
-    Route::get('/get/service', [ProviderController::class, 'getService']);
-
-// ================== Booking ========================//
-
-    Route::post('/post/booking', [ProviderController::class, 'postBooking']);
-    Route::get('/get/booking', [ProviderController::class, 'getBooking']);
-    Route::get('/edit/booking/{id}', [ProviderController::class, 'editBooking']);
-    Route::post('/update/booking', [ProviderController::class, 'updateBooking']);
-    Route::post('/update/status', [ProviderController::class, 'updateStatus']);
-    Route::get('/booking/delete/{id}', [ProviderController::class, 'deletProvider']);
 
 });
 
@@ -149,3 +152,47 @@ Route::middleware(['user'])->group(function (){
     Route::post('/updateRating/{id}',[UserController::class,'updateServiceRating']);
 });
 
+Route::post('/post/provider', [ProviderController::class, 'postProvider']);
+Route::get('/get/provider', [ProviderController::class, 'getProvider']);
+Route::get('/edit/provider/{id}', [ProviderController::class, 'editProvider']);
+Route::post('/update/provider', [ProviderController::class, 'updateProvider']);
+Route::get('/delet/provider/cover/photo', [ProviderController::class, 'deleteProviderCoverImg']);
+Route::post('/update/provider/cover/photo', [ProviderController::class, 'providerCoverPhotoUpdate']);
+Route::get('/delet/provider/gallary/photo', [ProviderController::class, 'deleteProviderGallary']);
+Route::post('/update/provider/gallary/photo', [ProviderController::class, 'providerGallaryPhotoUpdate']);
+Route::get('/delete/provider/{id}', [ProviderController::class, 'deleteProvider']);
+
+// ======================SERVICE =======================//
+
+Route::post('/post/service', [ProviderController::class, 'postService']);
+Route::get('/get/service', [ProviderController::class, 'getService']);
+Route::get('/edit/service/{id}', [ProviderController::class, 'serviceEdit']);
+Route::get('/update/service/', [ProviderController::class, 'serviceUpdate']);
+Route::post('/post/update/service', [ProviderController::class, 'updateService']);
+Route::post('/post/update/service/image', [ProviderController::class, 'updateServiceImage']);
+Route::post('/post/delete/service/image', [ProviderController::class, 'deleteServiceGallary']);
+Route::get('/delete/service/{id}', [ProviderController::class, 'serviceDelete']);
+Route::get('/provider/all/service/{id}', [ProviderController::class, 'providerAllService']);
+
+// ================== Booking ========================//
+
+Route::post('/post/booking', [ProviderController::class, 'postBooking']);
+Route::get('/get/booking', [ProviderController::class, 'getBooking']);
+Route::get('/edit/booking/{id}', [ProviderController::class, 'editBooking']);
+Route::post('/update/booking', [ProviderController::class, 'updateBooking']);
+Route::post('/update/status', [ProviderController::class, 'updateStatus']);
+Route::get('/booking/delete/{id}', [ProviderController::class, 'cancelBooking']);
+
+// ==================== CATEOGORY ============================//
+
+Route::get('/get/category', [ProviderController::class, 'category']);
+
+// ====================CATALOUG ==============================//
+
+Route::post('/post/catalouge', [CataloguController::class, 'postCataloug']);
+Route::get('/get/catalouge', [CataloguController::class, 'getCataloug']);
+Route::get('/get/singel/catalouge/{id}', [CataloguController::class, 'singleCataloug']);
+Route::post('/update/catalouge', [CataloguController::class, 'updateCatalouge']);
+Route::post('/update/catalouge/image', [CataloguController::class, 'updateCatalougeImg']);
+Route::post('/catalouge/image/delete', [CataloguController::class, 'deleteCatalougImg']);
+Route::get('/delete/catalouge/{id}', [CataloguController::class, 'deleteCatlouge']);
