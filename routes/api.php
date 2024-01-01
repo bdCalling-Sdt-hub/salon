@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CataloguController;
 use App\Http\Controllers\Api\ProviderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -53,3 +54,13 @@ Route::get('/booking/delete/{id}', [ProviderController::class, 'cancelBooking'])
 // ==================== CATEOGORY ============================//
 
 Route::get('/get/category', [ProviderController::class, 'category']);
+
+// ====================CATALOUG ==============================//
+
+Route::post('/post/catalouge', [CataloguController::class, 'postCataloug']);
+Route::get('/get/catalouge', [CataloguController::class, 'getCataloug']);
+Route::get('/get/singel/catalouge/{id}', [CataloguController::class, 'singleCataloug']);
+Route::post('/update/catalouge', [CataloguController::class, 'updateCatalouge']);
+Route::post('/update/catalouge/image', [CataloguController::class, 'updateCatalougeImg']);
+Route::post('/catalouge/image/delete', [CataloguController::class, 'deleteCatalougImg']);
+Route::get('/delete/catalouge/{id}', [CataloguController::class, 'deleteCatlouge']);
