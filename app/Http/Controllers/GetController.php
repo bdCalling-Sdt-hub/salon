@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BookingRequest;
+use App\Models\Booking;
 use App\Models\Provider;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -111,4 +113,18 @@ class GetController extends Controller
         return ResponseMethod('provider data', $users);
     }
 
+    public function getAppointmentList(){
+       //
+
+//        $data = Country::join('state', 'state.country_id', '=', 'country.country_id')
+//            ->join('city', 'city.state_id', '=', 'state.state_id')
+//            ->get(['country.country_name', 'state.state_name', 'city.city_name']);
+
+        $booking = Booking::select('bookings.*', 'users.name as client_name','providers.business_name as name')
+            ->join('users', 'bookings.user_id', '=', 'users.id')
+            ->join('providers','bookings.provider_id', '=', 'providers.id')
+            ->first();
+        return $booking;
+
+    }
 }

@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DistanceController;
 use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
@@ -24,7 +25,6 @@ use App\Http\Controllers\UserController;
  * | be assigned to the "api" middleware group. Make something great!
  * |
  */
-
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -127,21 +127,6 @@ Route::middleware(['admin'])->group(function (){
 });
 
 Route::middleware(['provider'])->group(function (){
-    //provider
-//
-//    Route::post('/post/provider', [ProviderController::class, 'postProvider']);
-//    Route::get('/get/provider', [ProviderController::class, 'getProvider']);
-//    Route::post('/post/service', [ProviderController::class, 'postService']);
-//    Route::get('/get/service', [ProviderController::class, 'getService']);
-//
-//// ================== Booking ========================//
-//
-//    Route::post('/post/booking', [ProviderController::class, 'postBooking']);
-//    Route::get('/get/booking', [ProviderController::class, 'getBooking']);
-//    Route::get('/edit/booking/{id}', [ProviderController::class, 'editBooking']);
-//    Route::post('/update/booking', [ProviderController::class, 'updateBooking']);
-//    Route::post('/update/status', [ProviderController::class, 'updateStatus']);
-//    Route::get('/booking/delete/{id}', [ProviderController::class, 'deletProvider']);
 
 
 });
@@ -150,7 +135,13 @@ Route::middleware(['user'])->group(function (){
     //user
     Route::post('/saveRating',[UserController::class,'saveRating']);
     Route::post('/updateRating/{id}',[UserController::class,'updateServiceRating']);
+
+    //find Nearest Location
+    Route::get('/find-nearest-location',[DistanceController::class,'findNearestLocation']);
+
 });
+
+// ======================Provider =======================//
 
 Route::post('/post/provider', [ProviderController::class, 'postProvider']);
 Route::get('/get/provider', [ProviderController::class, 'getProvider']);
@@ -161,6 +152,7 @@ Route::post('/update/provider/cover/photo', [ProviderController::class, 'provide
 Route::get('/delet/provider/gallary/photo', [ProviderController::class, 'deleteProviderGallary']);
 Route::post('/update/provider/gallary/photo', [ProviderController::class, 'providerGallaryPhotoUpdate']);
 Route::get('/delete/provider/{id}', [ProviderController::class, 'deleteProvider']);
+
 
 // ======================SERVICE =======================//
 
@@ -196,3 +188,8 @@ Route::post('/update/catalouge', [CataloguController::class, 'updateCatalouge'])
 Route::post('/update/catalouge/image', [CataloguController::class, 'updateCatalougeImg']);
 Route::post('/catalouge/image/delete', [CataloguController::class, 'deleteCatalougImg']);
 Route::get('/delete/catalouge/{id}', [CataloguController::class, 'deleteCatlouge']);
+
+
+// ====================Appointment from dashboard ==============================//
+
+Route::get('appointment-list',[GetController::class,'getAppointmentList']);

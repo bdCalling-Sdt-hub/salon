@@ -29,6 +29,7 @@ class ProviderController extends Controller
                 $image[] = $gellery_photo;
             }
         }
+        $address = $request->address;
         $post_provider = Provider::create([
             'category_id' => $request->input('catId'),
             'business_name' => $request->input('businessName'),
@@ -37,17 +38,19 @@ class ProviderController extends Controller
             'available_service_our' => $request->input('serviceOur'),
             'cover_photo' => $cover_photo,
             'gallary_photo' => implode('|', $image),
+            'latitude' => $this->findLatitude($address),
+            'longitude' => $this->findLongitude($address),
         ]);
-
         if ($post_provider) {
+
             return response()->json([
                 'status' => 'success',
-                'message' => 'Provider add successfully'
+                'message' => 'post added successfully',
             ]);
         } else {
             return response()->json([
                 'status' => 'false',
-                'message' => 'Provider add faile'
+                'message' => 'Provider add failed'
             ]);
         }
     }
@@ -395,6 +398,7 @@ class ProviderController extends Controller
             'price' => $request->input('price'),
             'date' => $request->input('date'),
             'time' => $request->input('time'),
+
         ]);
 
         if ($post_booking) {
@@ -518,4 +522,46 @@ class ProviderController extends Controller
             'Category' => $data
         ]);
     }
+
+
+    public function findLatitude($address){
+        $result = app('geocoder')->geocode($address)->get();
+        $coordinates = $result[0]->getCoordinates();
+        $lat = $coordinates->getLatitude();
+        return $lat;
+    }
+    public function findLongitude($address){
+        $result = app('geocoder')->geocode($address)->get();
+        $coordinates = $result[0]->getCoordinates();
+        $long = $coordinates->getLongitude();
+        return $long;
+    }
+
+//    public function findLatitude($address)
+//    {
+//        $result = app('geocoder')->geocode($address)->get();
+//
+//        if (!empty($result) && $result->count() > 0) {
+//            $coordinates = $result[0]->getCoordinates();
+//            $lat = $coordinates->getLatitude();
+//            return $lat;
+//        } else {
+//            // Handle the case where geocoding was unsuccessful
+//            return null;
+//        }
+//    }
+//
+//    public function findLongitude($address)
+//    {
+//        $result = app('geocoder')->geocode($address)->get();
+//
+//        if (!empty($result) && $result->count() > 0) {
+//            $coordinates = $result[0]->getCoordinates();
+//            $long = $coordinates->getLongitude();
+//            return $long;
+//        } else {
+//            // Handle the case where geocoding was unsuccessful
+//            return null;
+//        }
+//    }
 }

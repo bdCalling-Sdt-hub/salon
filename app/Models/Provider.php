@@ -19,7 +19,9 @@ class Provider extends Model
         'available_service_our',
         'cover_photo',
         'gallary_photo',
+        'latitude',
+        'longitude',
     ];
-    
+
 
 }
