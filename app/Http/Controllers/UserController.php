@@ -249,6 +249,24 @@ public function refreshToken()
         return response()->json(['success'=>false,'message'=>'User is not authenticated.']);
       }
     }
+    public function deleteUser($id){
+
+        $user=  User::find($id);
+        $user ->delete();
+           if($user){
+                return response()->json([
+                    'status'=>True,
+                'message'=> "user is deleted"
+                ]);
+            
+        }else
+        {
+            return response([
+                'status'=>false,
+                'message'=> "you have no access"
+            ]);
+            }
+    }
     public function loginWithGoogle(){
         return  Socialite::driver('google')->redirect();
      }

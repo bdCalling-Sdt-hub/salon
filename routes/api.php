@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FlutterwaveController;
+use App\Http\Controllers\TrashController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -33,6 +34,7 @@ Route::post('/resendOtp',[UserController::class,'resendOtp']);
 Route::post('/getOtp',[UserController::class,'sendOtp']);
 
 Route::get('/refreshToken',[UserController::class,'refreshToken']);
+Route::get('/delete/{id}',[UserController::class,'deleteUser']);
 Route::get('auth/google',[UserController::class,'loginWithGoogle']);
 Route::post('auth/google/callback',[UserController::class,'callbackFromGoogle']);
 
@@ -51,5 +53,9 @@ Route::group(['middleware'=>'api'],function($routes){
 });
 
 Route::post('/pay', [FlutterwaveController::class, 'initialize']);
-
 Route::get('/rave/callback', [FlutterwaveController::class, 'callback']);
+
+Route::get('/all_user_with_trash',[TrashController::class,'all_user_with_trash']);
+Route::get('/trash_user_list',[TrashController::class,'trash_user_list']);
+Route::get('/trash_restore/{id}',[TrashController::class,'trash_restore']);
+Route::get('/trash_permanent_delete/{id}',[TrashController::class,'trash_permanent_delete']);
