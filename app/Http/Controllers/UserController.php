@@ -39,6 +39,7 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([$user]);
+        
     }
 
     public function sendOtp(Request $request)
@@ -330,6 +331,7 @@ public function refreshToken()
            } 
         
         
+           
            public function showServiceRating(){
             $rating=ServiceRating::all();
             return $rating;

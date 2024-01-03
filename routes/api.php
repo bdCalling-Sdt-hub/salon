@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\FlutterwaveController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -49,3 +50,6 @@ Route::group(['middleware'=>'api'],function($routes){
 
 });
 
+Route::post('/pay', [FlutterwaveController::class, 'initialize']);
+
+Route::get('/rave/callback', [FlutterwaveController::class, 'callback']);
