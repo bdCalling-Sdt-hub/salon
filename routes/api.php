@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DistanceController;
+use App\Http\Controllers\FlutterwaveController;
 use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
@@ -118,6 +119,9 @@ Route::middleware(['admin'])->group(function (){
     Route::get('/deleteRating/{id}',[UserController::class,'deleteServiceRating']);
     Route::get('/showRating',[UserController::class,'showServiceRating']);
     Route::get('/editRating/{id}',[UserController::class,'editServiceRating']);
+
+    //notification
+    Route::post('/send-admin-notification',[UserController::class,'sendNotification']);
 });
 
 Route::middleware(['provider'])->group(function (){
@@ -203,13 +207,17 @@ Route::get('trash-restore/{id}',[TrashController::class,'trashRestore']);
 
 //search
 //provider request search by name and id
-Route::get('search-provider-request/{name}',[GetController::class,'searchProviderRequest']);
+Route::get('search-provider-request/{name?}',[GetController::class,'searchProviderRequest']);
 //provider list search name,email,phone
-Route::get('search-provider/{name}',[GetController::class,'searchProvider']);
+Route::get('search-provider/{name?}',[GetController::class,'searchProvider']);
 //provider block list search by name and id
-Route::get('provider-block-list-search/{name}',[GetController::class,'searchProviderBlock']);
+Route::get('provider-block-list-search/{name?}',[GetController::class,'searchProviderBlock']);
 //user list search by name email and phone
-Route::get('user-list-search/{name}',[GetController::class,'searchUser']);
-
+Route::get('search-user/{name?}',[GetController::class,'searchUser']);
 //salon list search by name
 Route::get('salon-search/{name?}',[GetController::class,'searchSalon']);
+
+
+//payment api
+Route::post('/pay', [FlutterwaveController::class, 'initialize'])->name('paynow');
+Route::get('/rave/callback', [FlutterwaveController::class, 'callback'])->name('payment.callback');

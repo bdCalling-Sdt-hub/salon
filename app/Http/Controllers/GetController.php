@@ -123,18 +123,23 @@ class GetController extends Controller
     }
 
     //search provider block
-    public function searchProviderBlock($name){
-
-        $query = User::where('user_type', 'provider');
-        if ($name) {
-            $query->where('name', 'like', '%' . $name . '%');
+    public function searchProviderBlock($name=null){
+        if (!is_null($name)){
+            $block_provider = User::where('user_type', 'provider');
+            if (!is_null($block_provider)){
+                $block_provider->where('name', 'like', '%' . $name . '%');
+                return ResponseMethod('Block Provider data', $block_provider);
+            }
+            return ResponseMessage('block provider not found');
         }
-        $users = $query->get();
-        return ResponseMethod('block provider data', $users);
+        return ResponseMessage('write name which one you want to find');
     }
 
     //search provider
     public function searchProvider($name){
+        if (!is_null($name)){
+
+        }
         $query = Provider::where('user_type', 'provider');
         if ($name) {
             $query->where('name', 'like', '%' . $name . '%');
@@ -144,38 +149,31 @@ class GetController extends Controller
     }
 
     //search user
-    public function searchUser($name){
-        $query = Provider::where('user_type', 'user');
-        if ($name) {
-            $query->where('name', 'like', '%' . $name . '%');
+    public function searchUser($name=null){
+        if (!is_null($name)){
+            $user = User::where('user_type', 'user')->where('name', 'like', '%' . $name . '%')->get();
+
+            if ($user->count() > 0){
+                return ResponseMethod('user data', $user);
+            }
+            return ResponseMessage('user not found');
         }
-        $users = $query->get();
-        return ResponseMethod('User data', $users);
+        return ResponseMessage('provide name for search');
     }
 
     //search salon
 
-    public function searchSalon(Request $request, $name=null){
-
-        $validator = Validator::make($request->all(), [
-            'business_name' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
+    public function searchSalon($name=null){
 
         if (!is_null($name)) {
             $users = Provider::where('business_name', 'like', '%' . $name . '%')->get();
 
-            if ($users->isEmpty()) {
-                return ResponseMessage('salon not found');
+            if ($users->count() > 0) {
+                return ResponseMethod('salon data', $users);
             }
-
-            return ResponseMethod('salon data', $users);
+            return ResponseMessage('salon not found');
         }
-
-        return ResponseMessage('salon not found');
+        return ResponseMessage('provide name for searching');
     }
 
 

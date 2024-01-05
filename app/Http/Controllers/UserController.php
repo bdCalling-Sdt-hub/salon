@@ -29,6 +29,7 @@ class UserController extends Controller
             'address'=>'required|min:2',
             'user_type'=>'string',
         ]);
+        $message = " send a registration request";
         $avatar = time() . '.' . $request->UserImage->extension();
         $request->UserImage->move(public_path('images'), $avatar);
         $user = new User();
@@ -40,7 +41,6 @@ class UserController extends Controller
         $user->address = $request->address;
         $user->user_type = $request->user_type;
         $user->save();
-
         return response()->json([$user]);
     }
 
