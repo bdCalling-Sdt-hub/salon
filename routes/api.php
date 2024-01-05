@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PercentageController;
+use App\Http\Controllers\TrashController;
 use App\Http\Controllers\WebsitePagesController;
 
 use App\Http\Controllers\Api\CataloguController;
@@ -128,7 +129,6 @@ Route::middleware(['admin'])->group(function (){
 
 Route::middleware(['provider'])->group(function (){
 
-
 });
 
 Route::middleware(['user'])->group(function (){
@@ -138,7 +138,6 @@ Route::middleware(['user'])->group(function (){
 
     //find Nearest Location
     Route::get('/find-nearest-location',[DistanceController::class,'findNearestLocation']);
-
 });
 
 // ======================Provider =======================//
@@ -193,3 +192,17 @@ Route::get('/delete/catalouge/{id}', [CataloguController::class, 'deleteCatlouge
 // ====================Appointment from dashboard ==============================//
 
 Route::get('appointment-list',[GetController::class,'getAppointmentList']);
+
+
+//review from admin
+
+Route::get('review',[GetController::class,'getReview']);
+
+//delete user from admin
+Route::get('delete-user/{id}',[GetController::class,'deleteUser']);
+
+// ====================Trash from dashboard ==============================//
+
+Route::get('all-user',[TrashController::class,'allUser']);
+Route::get('trash-user',[TrashController::class,'trashUser']);
+Route::get('trash-restore/{id}',[TrashController::class,'trashRestore']);

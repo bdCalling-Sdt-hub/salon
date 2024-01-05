@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('service_ratings', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->integer('service_id');
             $table->text('review');
             $table->double('rating',3,2);
@@ -21,10 +22,6 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('service_ratings');
