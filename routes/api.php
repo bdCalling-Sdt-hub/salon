@@ -110,13 +110,6 @@ Route::middleware(['admin'])->group(function (){
     //single user data
     Route::get('single-user/{id}',[GetController::class,'singleUser']);
 
-    //search
-    //provider request search by name and id
-    Route::get('search-provider-request/{name}/{id?}',[GetController::class,'searchProviderRequest']);
-    //provider list search name,email,phone
-    //provider block list search by name and id
-    //user list search by name email and phone
-    //salon list search by name,email and phone
 
     //booking percentage
     Route::post('booking-percentage-set',[PercentageController::class,'percentageSet']);
@@ -206,3 +199,17 @@ Route::get('delete-user/{id}',[GetController::class,'deleteUser']);
 Route::get('all-user',[TrashController::class,'allUser']);
 Route::get('trash-user',[TrashController::class,'trashUser']);
 Route::get('trash-restore/{id}',[TrashController::class,'trashRestore']);
+
+
+//search
+//provider request search by name and id
+Route::get('search-provider-request/{name}',[GetController::class,'searchProviderRequest']);
+//provider list search name,email,phone
+Route::get('search-provider/{name}',[GetController::class,'searchProvider']);
+//provider block list search by name and id
+Route::get('provider-block-list-search/{name}',[GetController::class,'searchProviderBlock']);
+//user list search by name email and phone
+Route::get('user-list-search/{name}',[GetController::class,'searchUser']);
+
+//salon list search by name
+Route::get('salon-search/{name?}',[GetController::class,'searchSalon']);

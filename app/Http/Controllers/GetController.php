@@ -8,6 +8,7 @@ use App\Models\Provider;
 use App\Models\ServiceRating;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class GetController extends Controller
 {
@@ -111,20 +112,73 @@ class GetController extends Controller
     }
 
     //search provider request
-    public function searchProviderRequest($name=null,$id = null){
-
-        $query = User::where('user_type', 'provider');
+    public function searchProviderRequest($name){
+        $query = User::where('user_type', 'provider')->where('user_status',0);
 
         if ($name) {
             $query->where('name', 'like', '%' . $name . '%');
         }
-        if ($id) {
-            $query->Where('id', $id);
+        $users = $query->get();
+        return ResponseMethod('provider Request list', $users);
+    }
+
+    //search provider block
+    public function searchProviderBlock($name){
+
+        $query = User::where('user_type', 'provider');
+        if ($name) {
+            $query->where('name', 'like', '%' . $name . '%');
         }
         $users = $query->get();
+        return ResponseMethod('block provider data', $users);
+    }
 
+    //search provider
+    public function searchProvider($name){
+        $query = Provider::where('user_type', 'provider');
+        if ($name) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+        $users = $query->get();
         return ResponseMethod('provider data', $users);
     }
+
+    //search user
+    public function searchUser($name){
+        $query = Provider::where('user_type', 'user');
+        if ($name) {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+        $users = $query->get();
+        return ResponseMethod('User data', $users);
+    }
+
+    //search salon
+
+    public function searchSalon(Request $request, $name=null){
+
+        $validator = Validator::make($request->all(), [
+            'business_name' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        if (!is_null($name)) {
+            $users = Provider::where('business_name', 'like', '%' . $name . '%')->get();
+
+            if ($users->isEmpty()) {
+                return ResponseMessage('salon not found');
+            }
+
+            return ResponseMethod('salon data', $users);
+        }
+
+        return ResponseMessage('salon not found');
+    }
+
+
 
     public function getAppointmentList(){
         $booking = Booking::select('bookings.*', 'users.name as client_name','providers.business_name as name')
