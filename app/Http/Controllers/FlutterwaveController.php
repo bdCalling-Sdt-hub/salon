@@ -20,7 +20,7 @@ class FlutterwaveController extends Controller
         $data = [
             'payment_options' => $request->payment_type,
             'amount' => $request->payment,
-//            'email' => $request->email,
+            'email' => $request->email,
             'tx_ref' => $reference,
             'currency' => "KES",
             'redirect_url' => route('payment.callback'),
@@ -32,16 +32,15 @@ class FlutterwaveController extends Controller
 
             "customizations" => [
                 "title" => 'Buy Me Coffee',
-                "description" => "Let express love of coffee"
+                "description" => "Let express love of coffee",
             ]
         ];
 
         $payment = Flutterwave::initializePayment($data);
 
-
         if ($payment['status'] !== 'success') {
             // notify something went wrong
-            return;
+            return response()->json('payment status is not success');
         }
         return ($payment['data']['link']);
     }
@@ -57,9 +56,9 @@ class FlutterwaveController extends Controller
             $transactionID = Flutterwave::getTransactionIDFromCallback();
             $data = Flutterwave::verifyTransaction($transactionID);
 
-            event(new PaymentDataEvent($data));
+            dd($data);
 
-
+//            event(new PaymentDataEvent($data));
         }
         elseif ($status ==  'cancelled'){
             //Put desired action/code after transaction has been cancelled here
@@ -76,5 +75,4 @@ class FlutterwaveController extends Controller
         // Update the transaction to note that you have given value for the transaction
         // You can also redirect to your success page from here
     }
-
 }
