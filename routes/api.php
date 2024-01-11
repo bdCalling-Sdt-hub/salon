@@ -49,7 +49,6 @@ Route::get('/refreshToken',[UserController::class,'refreshToken']);
 Route::get('auth/google',[UserController::class,'loginWithGoogle']);
 Route::post('auth/google/callback',[UserController::class,'callbackFromGoogle']);
 
-
 Route::group(['middleware'=>'api'],function($routes){
     Route::get('/logout',[UserController::class,'logout']);
     Route::post('/reset-password',[UserController::class,'resetPassword']);
@@ -132,9 +131,6 @@ Route::middleware(['user'])->group(function (){
     //user
     Route::post('/saveRating',[UserController::class,'saveRating']);
     Route::post('/updateRating/{id}',[UserController::class,'updateServiceRating']);
-
-    //find Nearest Location
-    Route::get('/find-nearest-location',[DistanceController::class,'findNearestLocation']);
 });
 
 // ======================Provider =======================//
@@ -217,7 +213,22 @@ Route::get('search-user/{name?}',[GetController::class,'searchUser']);
 //salon list search by name
 Route::get('salon-search/{name?}',[GetController::class,'searchSalon']);
 
-
 //payment api
 Route::post('/pay', [FlutterwaveController::class, 'initialize'])->name('paynow');
 Route::get('/rave/callback', [FlutterwaveController::class, 'callback'])->name('payment.callback');
+
+// Review
+Route::get('review',[GetController::class,'getReviews']);
+Route::get('review-by-id/{id}',[GetController::class,'getReviewsByProviderId']);
+//Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
+Route::get('review-average-rating/{id}',[GetController::class,'test']);
+
+
+//find nearest location by lat long
+Route::get('/find-nearest-location/{lat}/{long}/',[DistanceController::class,'findNearestLocationByLatLong']);
+//find Nearest Location
+Route::get('/find-nearest-location',[DistanceController::class,'findNearestLocation']);
+
+//filter from user
+
+Route::get('/filter-nearest-salon/{lat}/{long}',[DistanceController::class,'findNearestSalon']);

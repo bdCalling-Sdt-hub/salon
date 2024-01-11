@@ -16,27 +16,35 @@ class FlutterwaveController extends Controller
         //This generates a payment reference
         $reference = Flutterwave::generateReference();
 
+        $data = array("id"=>"288200108");
         // Enter the details of the payment
         $data = [
-            'payment_options' => $request->payment_type,
-            'amount' => $request->payment,
-            'email' => $request->email,
+            "service_id"=>'2',
+            'payment_options' => 'card',
+            'amount' => 200,
+            'email' => 'mdjusef143@gmail.com',
             'tx_ref' => $reference,
             'currency' => "KES",
             'redirect_url' => route('payment.callback'),
             'customer' => [
-                'email' => request()->email,
-                "phone_number" => request()->phone,
-                "name" => request()->name
+                'id'=>2,
+                'email' => 'mdjusef143@gmail.com',
+                "phone_number" => '01849965506',
+                "name" => 'md jusef',
+                "service_id"=>'2',
             ],
 
             "customizations" => [
                 "title" => 'Buy Me Coffee',
                 "description" => "Let express love of coffee",
+                "service_id"=>'2',
             ]
         ];
+        $custom_code = [
+            "customer_info" => "its okay",
+        ];
 
-        $payment = Flutterwave::initializePayment($data);
+        $payment = Flutterwave::initializePayment($data,$custom_code);
 
         if ($payment['status'] !== 'success') {
             // notify something went wrong
@@ -57,8 +65,10 @@ class FlutterwaveController extends Controller
             $data = Flutterwave::verifyTransaction($transactionID);
 
             dd($data);
+//            $amount = $data['data']['amount'];
+//            dd($amount);
 
-//            event(new PaymentDataEvent($data));
+            event(new PaymentDataEvent($data));
         }
         elseif ($status ==  'cancelled'){
             //Put desired action/code after transaction has been cancelled here

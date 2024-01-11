@@ -8,6 +8,7 @@ use App\Models\Provider;
 use App\Models\ServiceRating;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class GetController extends Controller
@@ -186,13 +187,55 @@ class GetController extends Controller
         return $booking;
     }
 
-    public function getReview(){
-        $review = ServiceRating::select('service_ratings.*','users.name as provider_name')
-            ->join('users','service_ratings.user_id','=','users.id')
-            ->join('services','service_ratings.service_id','=','services.id')
-            ->join('providers','services.provider_id', '=', 'providers.id')
-            ->join('users','providers.provider_id', '=' , 'users.id')
+    public function getReviews(){
+//        $review = ServiceRating::select('service_ratings.*','users.name as provider_name')
+//            ->join('users','service_ratings.user_id','=','users.id')
+//            ->join('services','service_ratings.service_id','=','services.id')
+//            ->join('providers','services.provider_id', '=', 'providers.id')
+//            ->join('users','providers.provider_id', '=' , 'users.id')
+//            ->get();
+//        return $review;
+        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
+            ->join('services', 'service_ratings.service_id', '=', 'services.id')
+            ->join('providers', 'services.provider_id', '=', 'providers.id')
+            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
+            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
             ->get();
-        return $review;
+        return $reviews;
     }
+
+    public function getReviewsByProviderId($providerId){
+        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
+            ->join('services', 'service_ratings.service_id', '=', 'services.id')
+            ->join('providers', 'services.provider_id', '=', 'providers.id')
+            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
+            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
+            ->where('provider.id', '=', $providerId) // Filter by provider ID
+            ->get();
+        return $reviews;
+    }
+
+    //review average rating
+
+    public function averageReviewRating($providerId){
+        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
+            ->join('services', 'service_ratings.service_id', '=', 'services.id')
+            ->join('providers', 'services.provider_id', '=', 'providers.id')
+            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
+            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
+            ->where('provider.id', '=', $providerId) // Filter by provider ID
+            ->get();
+        return $reviews;
+    }
+            public function test($latitude,$longitude){
+
+                $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
+            * cos( radians( latitude ) )
+            * cos( radians( longitude ) - radians('$longitude') )
+            + sin( radians('$latitude') )
+            * sin( radians( latitude ) ) ) ) AS distance"))->havingRaw('distance < 300')->orderBy('distance')
+                    ->get();
+                return ResponseMethod('Nearest Salon Data',$salon);
+            }
+
 }
