@@ -11,7 +11,7 @@ class PaymentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,13 +22,13 @@ class PaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'catId' => ['required'],
-            'businessName' => ['required'],
-            'address' => ['required'],
-            'description' => ['required'],
-            'serviceOur' => ['required'],
-            'photoGellary' => ['required'],
-            'coverPhoto' => ['required'],
+            // 'paymentType' => ['required'],
+            // 'amount' => ['required'],
+            // 'currency' => ['required'],
+            // 'providerEmail' => ['required'],
+            // 'userEmail' => ['required'],
+            // 'title' => ['required'],
+            // 'service' => ['required'],
         ];
     }
 }

@@ -10,7 +10,9 @@ use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Provider;
 use App\Models\Service;
+use App\Models\ServiceRating;
 use Illuminate\Http\Request;
+use DB;
 
 class ProviderController extends Controller
 {
@@ -29,6 +31,7 @@ class ProviderController extends Controller
                 $image[] = $gellery_photo;
             }
         }
+        $address = $request->address;
         $post_provider = Provider::create([
             'category_id' => $request->input('catId'),
             'business_name' => $request->input('businessName'),
@@ -37,12 +40,19 @@ class ProviderController extends Controller
             'available_service_our' => $request->input('serviceOur'),
             'cover_photo' => $cover_photo,
             'gallary_photo' => implode('|', $image),
+            'latitude' => $this->findLatitude($address),
+            'longitude' => $this->findLongitude($address),
         ]);
-
         if ($post_provider) {
-            return ResponseMethod('success', 'Provider add successfully');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'post added successfully',
+            ]);
         } else {
-            return ResponseErrorMethod('error', 'Provider add faile');
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Provider add failed'
+            ]);
         }
     }
 
@@ -263,7 +273,7 @@ class ProviderController extends Controller
         if ($updateServiceImg) {
             return ResponseMethod('success', 'update service image success');
         } else {
-            return ResponseErrorMethod('error', 'update service image faile');
+            return ResponseErrorMessage('error', 'update service image faile');
         }
     }
 
@@ -279,7 +289,7 @@ class ProviderController extends Controller
         if ($deleteServiceGallaryImg == true) {
             return ResponseMethod('success', 'Service gallary images delete success');
         } else {
-            return ResponseErrorMethod('error', 'Service gallary images delete success');
+            return ResponseErrorMessage('error', 'Service gallary images delete success');
         }
     }
 
@@ -289,7 +299,7 @@ class ProviderController extends Controller
         if ($deleteService == true) {
             return ResponseMethod('success', 'Service delete success');
         } else {
-            return ResponseErrorMethod('error', 'Service delete faile');
+            return ResponseErrorMessage('error', 'Service delete faile');
         }
     }
 
@@ -299,73 +309,73 @@ class ProviderController extends Controller
         if ($allService == true) {
             return ResponseMethod('success', $allService);
         } else {
-            return ResponseErrorMethod('error', 'Provider data not found');
+            return ResponseErrorMessage('error', 'Provider data not found');
         }
     }
 
     // ====================== Booking =================//
 
-    public function postBooking(BookingRequest $request)
+    public function booking()
     {
-        $post_booking = Booking::create([
-            'user_id' => $request->input('userId'),
-            'provider_id' => $request->input('providerId'),
-            'service_id' => $request->input('serviceId'),
-            'service' => $request->input('service'),
-            'price' => $request->input('price'),
-            'date' => $request->input('date'),
-            'time' => $request->input('time'),
-        ]);
-
-        if ($post_booking) {
-            return ResponseMethod('success', 'Booking success');
-        } else {
-            return ResponseErrorMethod('error', 'Booking faile');
-        }
-    }
-
-    public function getBooking()
-    {
-        $getBooking = Booking::all();
+        $authUser = auth()->user()->id;
+        $getBooking = Booking::where('provider_id', $authUser)->get();
 
         if ($getBooking) {
             return ResponseMethod('success', $getBooking);
         } else {
-            return ResponseErrorMethod('error', 'Booking data not found');
+            return ResponseErrorMessage('error', 'Booking data not found');
         }
     }
 
-    public function editBooking($id)
+    public function bookingRequest()
     {
-        $editBooking = Booking::where('id', $id)->first();
-        if ($editBooking) {
-            return ResponseMethod('success', $editBooking);
+        $authUser = auth()->user()->id;
+        $getBooking = Booking::where('provider_id', $authUser)->where('status', '0')->get();
+
+        if ($getBooking) {
+            return ResponseMethod('success', $getBooking);
         } else {
-            return ResponseErrorMethod('error', 'Booking data not found');
+            return ResponseErrorMessage('error', 'Booking data not found');
         }
     }
 
-    public function updateBooking(Request $request)
+    public function bookingDetails($id)
     {
-        $date = $request->date;
-        $time = $request->time;
-        $scedulCheck = Booking::where('date', $date)->where('time', $time)->count();
-        if ($scedulCheck) {
-            return ResponseErrorMethod('false', 'Sloat not avlable');
-        } else {
-            $updateBooking = Booking::find($request->id);
-            $updateBooking->date = $request->date;
-            $updateBooking->time = $request->time;
-            $updateBooking->save();
-            if ($updateBooking) {
-                return ResponseMethod('success', 'Booking update success');
+        $authUser = auth()->user();
+        if ($authUser) {
+            $editBooking = Booking::where('id', $id)->first();
+            if ($editBooking) {
+                return ResponseMethod('success', $editBooking);
             } else {
-                return ResponseErrorMethod('false', 'Booking update faile');
+                return ResponseErrorMessage('error', 'Booking data not found');
             }
         }
     }
 
-    public function updateStatus(Request $request)
+    public function re_shedule_appoinment(Request $request)
+    {
+        $authUser = auth()->user();
+        if ($authUser) {
+            $date = $request->date;
+            $time = $request->time;
+            $scedulCheck = Booking::where('date', $date)->where('time', $time)->count();
+            if ($scedulCheck) {
+                return ResponseErrorMethod('false', 'Sloat not avlable');
+            } else {
+                $updateBooking = Booking::find($request->id);
+                $updateBooking->date = $request->date;
+                $updateBooking->time = $request->time;
+                $updateBooking->save();
+                if ($updateBooking) {
+                    return ResponseMethod('success', 'Booking update success');
+                } else {
+                    return ResponseErrorMessage('false', 'Booking update faile');
+                }
+            }
+        }
+    }
+
+    public function bookingAccept(Request $request)
     {
         $updateStatus = Booking::find($request->id);
         $updateStatus->status = $request->status;
@@ -373,11 +383,11 @@ class ProviderController extends Controller
         if ($updateStatus) {
             return ResponseMethod('success', 'Booking status update success');
         } else {
-            return ResponseErrorMethod('error', 'Booking status update faile');
+            return ResponseErrorMessage('error', 'Booking status update faile');
         }
     }
 
-    public function cancelBooking($id)
+    public function decline($id)
     {
         $cancelBooking = Booking::where('id', $id)->delete();
 
@@ -388,16 +398,84 @@ class ProviderController extends Controller
         }
     }
 
-    public function category()
+    public function approvedBooking()
     {
-        $CategoryData = Category::join('providers', 'providers.category_id', '=', 'categories.id')
-            ->join('services', 'services.provider_id', '=', 'providers.id')
-            ->get();
+        $authUser = auth()->user()->id;
+        $getBooking = Booking::where('provider_id', $authUser)->get();
 
-        if ($CategoryData) {
-            return ResponseMethod('success', $CategoryData);
+        if ($getBooking) {
+            return ResponseMethod('success', $getBooking);
         } else {
-            return ResponseErrorMethod('error', 'Data not found');
+            return ResponseErrorMessage('error', 'Booking data not found');
         }
     }
+
+    public function bookingHistory()
+    {
+        $authUser = auth()->user()->id;
+        $getBooking = Booking::where('provider_id', $authUser)->get();
+
+        if ($getBooking) {
+            return ResponseMethod('success', $getBooking);
+        } else {
+            return ResponseErrorMessage('error', 'Booking data not found');
+        }
+    }
+
+    public function reviewProvider()
+    {
+        $authUser = auth()->user()->id;
+        if ($authUser) {
+            $allReview = ServiceRating::where('provider_id', $authUser)->get();
+            if ($allReview) {
+                return ResponseMethod('success', $allReview);
+            } else {
+                return ResponseErrorMessage('error', 'Booking data not found');
+            }
+        }
+    }
+
+    public function findLatitude($address)
+    {
+        $result = app('geocoder')->geocode($address)->get();
+        $coordinates = $result[0]->getCoordinates();
+        $lat = $coordinates->getLatitude();
+        return $lat;
+    }
+
+    public function findLongitude($address)
+    {
+        $result = app('geocoder')->geocode($address)->get();
+        $coordinates = $result[0]->getCoordinates();
+        $long = $coordinates->getLongitude();
+        return $long;
+    }
+
+    //    public function findLatitude($address)
+    //    {
+    //        $result = app('geocoder')->geocode($address)->get();
+    //
+    //        if (!empty($result) && $result->count() > 0) {
+    //            $coordinates = $result[0]->getCoordinates();
+    //            $lat = $coordinates->getLatitude();
+    //            return $lat;
+    //        } else {
+    //            // Handle the case where geocoding was unsuccessful
+    //            return null;
+    //        }
+    //    }
+    //
+    //    public function findLongitude($address)
+    //    {
+    //        $result = app('geocoder')->geocode($address)->get();
+    //
+    //        if (!empty($result) && $result->count() > 0) {
+    //            $coordinates = $result[0]->getCoordinates();
+    //            $long = $coordinates->getLongitude();
+    //            return $long;
+    //        } else {
+    //            // Handle the case where geocoding was unsuccessful
+    //            return null;
+    //        }
+    //    }
 }
