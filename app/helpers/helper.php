@@ -1,13 +1,17 @@
 <?php
 
-function ResponseMethod($message,$data)
+function ResponseMethod($status, $message)
 {
     return response()->json([
+        'status' => $status,
         'message' => $message,
-        'data' => $data,
     ]);
 }
-function ResponseMessage($message){
-    return response()->json($message);
-}
 
+function ResponseErrorMessage($status, $message)
+{
+    return response()->json([
+        'status' => $status,
+        'message' => $message,
+    ]);
+}

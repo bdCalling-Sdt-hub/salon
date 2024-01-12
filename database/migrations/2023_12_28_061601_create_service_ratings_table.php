@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,8 +14,10 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id');
             $table->integer('service_id');
+            $table->integer('provider_id');
+            $table->integer('catalogue_id')->nullable();
             $table->text('review');
-            $table->double('rating',3,2);
+            $table->double('rating', 5, 1);
             $table->integer('status')->default(0);
             $table->timestamps();
         });

@@ -22,7 +22,6 @@ class BookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'userId' => ['required'],
             'providerId' => ['required'],
             'serviceId' => ['required'],
             'service' => ['required'],

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\ServiceRating;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,4 +22,9 @@ class Catalogue extends Model
         'booking_money',
         'service_hour',
     ];
+
+    public function catalouges()
+    {
+        return $this->hasMany(ServiceRating::class);
+    }
 }

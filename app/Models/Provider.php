@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Model\Category;
 use App\Models\Service;
+use App\Models\ServiceRating;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,5 +24,13 @@ class Provider extends Model
         'longitude',
     ];
 
+    public function salonDetails()
+    {
+        return $this->hasMany(Service::class);
+    }
 
+    public function providerRating()
+    {
+        return $this->hasMany(ServiceRating::class);
+    }
 }

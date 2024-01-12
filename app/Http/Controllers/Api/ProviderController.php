@@ -10,7 +10,9 @@ use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Provider;
 use App\Models\Service;
+use App\Models\ServiceRating;
 use Illuminate\Http\Request;
+use DB;
 
 class ProviderController extends Controller
 {
@@ -42,7 +44,6 @@ class ProviderController extends Controller
             'longitude' => $this->findLongitude($address),
         ]);
         if ($post_provider) {
-
             return response()->json([
                 'status' => 'success',
                 'message' => 'post added successfully',
@@ -60,14 +61,11 @@ class ProviderController extends Controller
         $all_provider_data = Provider::orderBy('id', 'desc')->get();
         if ($all_provider_data) {
             return response()->json([
-                'status' => 'true',
+                'status' => 'success',
                 'service' => $all_provider_data
             ]);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Data not found'
-            ]);
+            return ResponseErrorMethod('error', 'Data not found');
         }
     }
 
@@ -80,10 +78,7 @@ class ProviderController extends Controller
                 'provider' => $editProvider
             ]);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'provider' => $editProvider
-            ]);
+            return ResponseErrorMethod('error', 'Data not found');
         }
     }
 
@@ -97,15 +92,9 @@ class ProviderController extends Controller
         $updateProvider->available_service_our = $request->serviceOur;
         $updateProvider->save();
         if ($updateProvider) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'provider update success',
-            ]);
+            return ResponseMethod('success', 'provider update success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'provider update fail',
-            ]);
+            return ResponseErrorMethod('error', 'provider update fail');
         }
     }
 
@@ -119,15 +108,9 @@ class ProviderController extends Controller
         $updateProviderCoverImg->save();
 
         if ($updateProviderCoverImg) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'update provider cover photo success',
-            ]);
+            return ResponseMethod('success', 'provider cover photo success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'update provider cover photo fail',
-            ]);
+            return ResponseErrorMethod('error', 'update provider cover photo fail');
         }
     }
 
@@ -141,15 +124,9 @@ class ProviderController extends Controller
         $deleteProviderCoverImg->cover_photo = '';
         $deleteProviderCoverImg->save();
         if ($deleteProviderCoverImg == true) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Provider cover images delete success'
-            ]);
+            return ResponseMethod('success', 'Provider cover images delete success');
         } else {
-            return response()->json([
-                'status' => 'faile',
-                'message' => 'Provider cover images  delete faile'
-            ]);
+            return ResponseErrorMethod('error', 'Provider cover images  delete faile');
         }
     }
 
@@ -169,15 +146,9 @@ class ProviderController extends Controller
         $updateProviderCoverImg->save();
 
         if ($updateProviderCoverImg) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'update provider gallary photo success',
-            ]);
+            return ResponseMethod('success', 'update provider gallary photo success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'update provider gallary photo fail',
-            ]);
+            return ResponseErrorMethod('error', 'update provider gallary photo fail');
         }
     }
 
@@ -190,15 +161,9 @@ class ProviderController extends Controller
         $deleteProviderGallaryImg->gallary_photo = '';
         $deleteProviderGallaryImg->save();
         if ($deleteProviderGallaryImg == true) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Provider gallary images delete success'
-            ]);
+            return ResponseMethod('success', 'Provider gallary images delete success');
         } else {
-            return response()->json([
-                'status' => 'faile',
-                'message' => 'Provider gallary images  delete faile'
-            ]);
+            return ResponseErrorMethod('error', 'Provider gallary images  delete faile');
         }
     }
 
@@ -206,15 +171,9 @@ class ProviderController extends Controller
     {
         $deleteProvider = Provider::where('id', $id)->delete();
         if ($deleteProvider == true) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Provider delete success'
-            ]);
+            return ResponseMethod('success', 'Provider delete success');
         } else {
-            return response()->json([
-                'status' => 'faile',
-                'message' => 'Provider delete faile'
-            ]);
+            return ResponseErrorMethod('error', 'Provider delete faile');
         }
     }
 
@@ -244,15 +203,9 @@ class ProviderController extends Controller
         ]);
 
         if ($post_service) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Service add successfully'
-            ]);
+            return ResponseMethod('success', 'Service add successfully');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Service add faile'
-            ]);
+            return ResponseErrorMethod('error', 'Service add faile');
         }
     }
 
@@ -261,14 +214,11 @@ class ProviderController extends Controller
         $all_service = Service::orderBy('id', 'desc')->get();
         if ($all_service) {
             return response()->json([
-                'status' => 'true',
+                'status' => 'success',
                 'service' => $all_service
             ]);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Service add faile'
-            ]);
+            return ResponseErrorMethod('error', 'Service data not found');
         }
     }
 
@@ -277,14 +227,11 @@ class ProviderController extends Controller
         $editService = Service::where('id', $id)->first();
         if ($editService) {
             return response()->json([
-                'status' => 'true',
+                'status' => 'success',
                 'service' => $editService
             ]);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Service data not found'
-            ]);
+            return ResponseErrorMethod('error', 'Service data not found');
         }
     }
 
@@ -303,15 +250,9 @@ class ProviderController extends Controller
         $updateService->available_service_our = $request->serviceHour;
         $updateService->save();
         if ($updateService) {
-            return response()->json([
-                'status' => 'true',
-                'message' => 'update service success'
-            ]);
+            return ResponseMethod('success', 'update service success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'update service faile'
-            ]);
+            return ResponseErrorMethod('error', 'update service faile');
         }
     }
 
@@ -330,15 +271,9 @@ class ProviderController extends Controller
         $updateServiceImg->gallary_photo = implode('|', $image);
         $updateServiceImg->save();
         if ($updateServiceImg) {
-            return response()->json([
-                'status' => 'true',
-                'message' => 'update service image success'
-            ]);
+            return ResponseMethod('success', 'update service image success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'update service image faile'
-            ]);
+            return ResponseErrorMessage('error', 'update service image faile');
         }
     }
 
@@ -352,15 +287,9 @@ class ProviderController extends Controller
         $deleteServiceGallaryImg->gallary_photo = '';
         $deleteServiceGallaryImg->save();
         if ($deleteServiceGallaryImg == true) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Service gallary images delete success'
-            ]);
+            return ResponseMethod('success', 'Service gallary images delete success');
         } else {
-            return response()->json([
-                'status' => 'faile',
-                'message' => 'Service gallary images  delete faile'
-            ]);
+            return ResponseErrorMessage('error', 'Service gallary images delete success');
         }
     }
 
@@ -368,200 +297,185 @@ class ProviderController extends Controller
     {
         $deleteService = Service::where('id', $id)->delete();
         if ($deleteService == true) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Service delete success'
-            ]);
+            return ResponseMethod('success', 'Service delete success');
         } else {
-            return response()->json([
-                'status' => 'faile',
-                'message' => 'Service delete faile'
-            ]);
+            return ResponseErrorMessage('error', 'Service delete faile');
         }
     }
 
     public function providerAllService($id)
     {
         $allService = Service::where('provider_id', $id)->get();
-        return $allService;
+        if ($allService == true) {
+            return ResponseMethod('success', $allService);
+        } else {
+            return ResponseErrorMessage('error', 'Provider data not found');
+        }
     }
 
     // ====================== Booking =================//
 
-    public function postBooking(BookingRequest $request)
+    public function booking()
     {
-        $post_booking = Booking::create([
-            'user_id' => $request->input('userId'),
-            'provider_id' => $request->input('providerId'),
-            'service_id' => $request->input('serviceId'),
-            'service' => $request->input('service'),
-            'price' => $request->input('price'),
-            'date' => $request->input('date'),
-            'time' => $request->input('time'),
+        $authUser = auth()->user()->id;
+        $getBooking = Booking::where('provider_id', $authUser)->get();
 
-        ]);
-
-        if ($post_booking) {
-            return response()->json([
-                'status' => 'true',
-                'message' => 'Booking success'
-            ]);
-        } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Booking faile'
-            ]);
-        }
-    }
-
-    public function getBooking()
-    {
-        $getBooking = Booking::all();
         if ($getBooking) {
-            return response()->json([
-                'status' => 'true',
-                'message' => $getBooking
-            ]);
+            return ResponseMethod('success', $getBooking);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Booking data not found',
-            ]);
+            return ResponseErrorMessage('error', 'Booking data not found');
         }
     }
 
-    public function editBooking($id)
+    public function bookingRequest()
     {
-        $editBooking = Booking::where('id', $id)->first();
-        if ($editBooking) {
-            return response()->json([
-                'status' => 'success',
-                'booking' => $editBooking
-            ]);
+        $authUser = auth()->user()->id;
+        $getBooking = Booking::where('provider_id', $authUser)->where('status', '0')->get();
+
+        if ($getBooking) {
+            return ResponseMethod('success', $getBooking);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Booking data not found',
-            ]);
+            return ResponseErrorMessage('error', 'Booking data not found');
         }
     }
 
-    public function updateBooking(Request $request)
+    public function bookingDetails($id)
     {
-        $date = $request->date;
-        $time = $request->time;
-        $scedulCheck = Booking::where('date', $date)->where('time', $time)->count();
-        if ($scedulCheck) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Sloat not avlable'
-            ]);
-        } else {
-            $updateBooking = Booking::find($request->id);
-            $updateBooking->date = $request->date;
-            $updateBooking->time = $request->time;
-            $updateBooking->save();
-            if ($updateBooking) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Booking update success',
-                ]);
+        $authUser = auth()->user();
+        if ($authUser) {
+            $editBooking = Booking::where('id', $id)->first();
+            if ($editBooking) {
+                return ResponseMethod('success', $editBooking);
             } else {
-                return response()->json([
-                    'status' => 'false',
-                    'message' => 'Booking update faile',
-                ]);
+                return ResponseErrorMessage('error', 'Booking data not found');
             }
         }
     }
 
-    public function updateStatus(Request $request)
+    public function re_shedule_appoinment(Request $request)
+    {
+        $authUser = auth()->user();
+        if ($authUser) {
+            $date = $request->date;
+            $time = $request->time;
+            $scedulCheck = Booking::where('date', $date)->where('time', $time)->count();
+            if ($scedulCheck) {
+                return ResponseErrorMethod('false', 'Sloat not avlable');
+            } else {
+                $updateBooking = Booking::find($request->id);
+                $updateBooking->date = $request->date;
+                $updateBooking->time = $request->time;
+                $updateBooking->save();
+                if ($updateBooking) {
+                    return ResponseMethod('success', 'Booking update success');
+                } else {
+                    return ResponseErrorMessage('false', 'Booking update faile');
+                }
+            }
+        }
+    }
+
+    public function bookingAccept(Request $request)
     {
         $updateStatus = Booking::find($request->id);
         $updateStatus->status = $request->status;
         $updateStatus->save();
         if ($updateStatus) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Booking status update success',
-            ]);
+            return ResponseMethod('success', 'Booking status update success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Booking status update faile',
-            ]);
+            return ResponseErrorMessage('error', 'Booking status update faile');
         }
     }
 
-    public function cancelBooking($id)
+    public function decline($id)
     {
         $cancelBooking = Booking::where('id', $id)->delete();
 
         if ($cancelBooking) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Booking delete success',
-            ]);
+            return ResponseMethod('success', 'Booking delete success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Booking delete faile',
-            ]);
+            return ResponseErrorMethod('error', 'Booking delete faile');
         }
     }
 
-    public function category()
+    public function approvedBooking()
     {
-        // return Category::with('provider')->get();
+        $authUser = auth()->user()->id;
+        $getBooking = Booking::where('provider_id', $authUser)->get();
 
-        $data = Category::join('providers', 'providers.category_id', '=', 'categories.id')
-            ->join('services', 'services.provider_id', '=', 'providers.id')
-            ->get();
-        return response()->json([
-            'status' => 'success',
-            'Category' => $data
-        ]);
+        if ($getBooking) {
+            return ResponseMethod('success', $getBooking);
+        } else {
+            return ResponseErrorMessage('error', 'Booking data not found');
+        }
     }
 
+    public function bookingHistory()
+    {
+        $authUser = auth()->user()->id;
+        $getBooking = Booking::where('provider_id', $authUser)->get();
 
-    public function findLatitude($address){
+        if ($getBooking) {
+            return ResponseMethod('success', $getBooking);
+        } else {
+            return ResponseErrorMessage('error', 'Booking data not found');
+        }
+    }
+
+    public function reviewProvider()
+    {
+        $authUser = auth()->user()->id;
+        if ($authUser) {
+            $allReview = ServiceRating::where('provider_id', $authUser)->get();
+            if ($allReview) {
+                return ResponseMethod('success', $allReview);
+            } else {
+                return ResponseErrorMessage('error', 'Booking data not found');
+            }
+        }
+    }
+
+    public function findLatitude($address)
+    {
         $result = app('geocoder')->geocode($address)->get();
         $coordinates = $result[0]->getCoordinates();
         $lat = $coordinates->getLatitude();
         return $lat;
     }
-    public function findLongitude($address){
+
+    public function findLongitude($address)
+    {
         $result = app('geocoder')->geocode($address)->get();
         $coordinates = $result[0]->getCoordinates();
         $long = $coordinates->getLongitude();
         return $long;
     }
 
-//    public function findLatitude($address)
-//    {
-//        $result = app('geocoder')->geocode($address)->get();
-//
-//        if (!empty($result) && $result->count() > 0) {
-//            $coordinates = $result[0]->getCoordinates();
-//            $lat = $coordinates->getLatitude();
-//            return $lat;
-//        } else {
-//            // Handle the case where geocoding was unsuccessful
-//            return null;
-//        }
-//    }
-//
-//    public function findLongitude($address)
-//    {
-//        $result = app('geocoder')->geocode($address)->get();
-//
-//        if (!empty($result) && $result->count() > 0) {
-//            $coordinates = $result[0]->getCoordinates();
-//            $long = $coordinates->getLongitude();
-//            return $long;
-//        } else {
-//            // Handle the case where geocoding was unsuccessful
-//            return null;
-//        }
-//    }
+    //    public function findLatitude($address)
+    //    {
+    //        $result = app('geocoder')->geocode($address)->get();
+    //
+    //        if (!empty($result) && $result->count() > 0) {
+    //            $coordinates = $result[0]->getCoordinates();
+    //            $lat = $coordinates->getLatitude();
+    //            return $lat;
+    //        } else {
+    //            // Handle the case where geocoding was unsuccessful
+    //            return null;
+    //        }
+    //    }
+    //
+    //    public function findLongitude($address)
+    //    {
+    //        $result = app('geocoder')->geocode($address)->get();
+    //
+    //        if (!empty($result) && $result->count() > 0) {
+    //            $coordinates = $result[0]->getCoordinates();
+    //            $long = $coordinates->getLongitude();
+    //            return $long;
+    //        } else {
+    //            // Handle the case where geocoding was unsuccessful
+    //            return null;
+    //        }
+    //    }
 }
