@@ -20,25 +20,38 @@ class UserController extends Controller
 {
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|min:2',
-            'email' => 'email|required|max:100|unique:users',
-            'password' => 'required|confirmed|min:6',
-            'user_type' => 'string',
-        ]);
+        $user = User::where('email', $request->email)
+            ->where('is_verified', 0)
+            ->first();
 
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->latitude = $request->latitude;
-        $user->longitude = $request->longitude;
-        $user->user_type = $request->user_type;
-        $user->save();
-        $this->Otp($user);
-        return response()->json(['success' => true,
-            'user' => $user,
-            'msg' => 'OTP has been sent']);
+        if ($user) {
+            $otp = $this->Otp($user);
+            return response(['message' => 'Please check your email for get otp.', 'exists' => true], 200);
+        } else {
+            Validator::extend('contains_dot', function ($attribute, $value, $parameters, $validator) {
+                return strpos($value, '.') !== false;
+            });
+
+            $request->validate([
+                'name' => 'required|min:2',
+                'email' => 'email|required|max:100|unique:users',
+                'password' => 'required|confirmed|min:6',
+                'user_type' => 'string',
+            ]);
+
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = Hash::make($request->password);
+            $user->latitude = $request->latitude;
+            $user->longitude = $request->longitude;
+            $user->user_type = $request->user_type;
+            $user->save();
+            $this->Otp($user);
+            return response()->json(['success' => true,
+                'user' => $user,
+                'msg' => 'OTP has been sent']);
+        }
     }
 
     public function sendOtp(Request $request)
@@ -77,6 +90,7 @@ class UserController extends Controller
             'email' => 'required|string|email',
             'password' => 'required|string|min:6'
         ]);
+
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
