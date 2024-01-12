@@ -42,6 +42,7 @@ class ProviderController extends Controller
             'gallary_photo' => implode('|', $image),
             'latitude' => $this->findLatitude($address),
             'longitude' => $this->findLongitude($address),
+            'provider_id' => auth()->user()->id,
         ]);
         if ($post_provider) {
             return response()->json([

@@ -1,5 +1,4 @@
 <?php
-
 function ResponseMethod($status, $message)
 {
     return response()->json([
@@ -8,10 +7,11 @@ function ResponseMethod($status, $message)
     ]);
 }
 
-function ResponseErrorMessage($status, $message)
+function ResponseErroMethod($status, $message)
 {
     return response()->json([
         'status' => $status,
         'message' => $message,
     ]);
 }
+?>

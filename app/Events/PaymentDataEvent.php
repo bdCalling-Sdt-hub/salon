@@ -10,24 +10,21 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SendNotification implements ShouldBroadcast
+class PaymentDataEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message,$userId;
-
-
-    public function __construct($message,$userId)
+   public $data;
+    public function __construct($data)
     {
         //
-        $this->message = $message;
-        $this->userId = $userId;
+        $this->data = $data;
     }
 
-
-    public function broadcastOn()
+    public function broadcastOn(): array
     {
-        // return new PrivateChannel('channel-name');
-        return new Channel('notify-channel');
+        return [
+            new PrivateChannel('channel-name'),
+        ];
     }
 }

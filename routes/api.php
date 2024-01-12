@@ -6,11 +6,13 @@ use App\Http\Controllers\Api\ProviderController;
 use App\Http\Controllers\Api\PymentController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DistanceController;
+use App\Http\Controllers\EarningsController;
 use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PercentageController;
+use App\Http\Controllers\TrashController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebsitePagesController;
 use Illuminate\Http\Request;
@@ -120,6 +122,13 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/deleteRating/{id}', [UserController::class, 'deleteServiceRating']);
     Route::get('/showRating', [UserController::class, 'showServiceRating']);
     Route::get('/editRating/{id}', [UserController::class, 'editServiceRating']);
+    //review
+    Route::get('/deleteRating/{id}',[UserController::class,'deleteServiceRating']);
+    Route::get('/showRating',[UserController::class,'showServiceRating']);
+    Route::get('/editRating/{id}',[UserController::class,'editServiceRating']);
+
+    //notification
+    Route::post('/send-admin-notification',[UserController::class,'sendNotification']);
 });
 
 Route::middleware(['provider'])->group(function () {
@@ -206,6 +215,51 @@ Route::middleware(['user'])->group(function () {
 // ====================Appointment from dashboard ==============================//
 
 Route::get('appointment-list', [GetController::class, 'getAppointmentList']);
+
+
+//review from admin
+
+Route::get('review',[GetController::class,'getReview']);
+
+//delete user from admin
+Route::get('delete-user/{id}',[GetController::class,'deleteUser']);
+
+// ====================Trash from dashboard ==============================//
+
+Route::get('all-user',[TrashController::class,'allUser']);
+Route::get('trash-user',[TrashController::class,'trashUser']);
+Route::get('trash-restore/{id}',[TrashController::class,'trashRestore']);
+
+
+//search
+//provider request search by name and id
+Route::get('search-provider-request/{name?}',[GetController::class,'searchProviderRequest']);
+//provider list search name,email,phone
+Route::get('search-provider/{name?}',[GetController::class,'searchProvider']);
+//provider block list search by name and id
+Route::get('provider-block-list-search/{name?}',[GetController::class,'searchProviderBlock']);
+//user list search by name email and phone
+Route::get('search-user/{name?}',[GetController::class,'searchUser']);
+//salon list search by name
+Route::get('salon-search/{name?}',[GetController::class,'searchSalon']);
+
+// Review
+Route::get('review',[GetController::class,'getReviews']);
+Route::get('review-by-id/{id}',[GetController::class,'getReviewsByProviderId']);
+//Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
+Route::get('review-average-rating/{id}',[GetController::class,'test']);
+
+
+//find nearest location by lat long
+Route::get('/find-nearest-location/{lat}/{long}/',[DistanceController::class,'findNearestLocationByLatLong']);
+//find Nearest Location
+Route::get('/find-nearest-location',[DistanceController::class,'findNearestLocation']);
+
+//filter from user
+
+Route::get('/filter-nearest-salon/{lat}/{long}',[DistanceController::class,'findNearestSalon']);
+
+Route::get('earnings',[EarningsController::class,'Earnings']);
 
 Route::get('/search/category', [HomeController::class, 'searchCategory']);
 

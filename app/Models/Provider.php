@@ -22,6 +22,7 @@ class Provider extends Model
         'gallary_photo',
         'latitude',
         'longitude',
+        'provider_id'
     ];
 
     public function salonDetails()
