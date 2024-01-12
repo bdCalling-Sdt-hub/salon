@@ -4,7 +4,6 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DistanceController;
 use App\Http\Controllers\EarningsController;
-use App\Http\Controllers\FlutterwaveController;
 use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
