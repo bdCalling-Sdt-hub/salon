@@ -27,15 +27,9 @@ class CataloguController extends Controller
         ]);
 
         if ($post_catalogu) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Catalouge add successfully'
-            ]);
+            return ResponseMethod('success', 'Catalouge add successfully');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Catalouge add faile'
-            ]);
+            return ResponseErroMethod('error', 'Catalouge add faile');
         }
     }
 
@@ -49,10 +43,7 @@ class CataloguController extends Controller
                 'Catalouge' => $get_catalouge
             ]);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Catalouge not found'
-            ]);
+            return ResponseErroMethod('error', 'Catalouge not found');
         }
     }
 
@@ -66,10 +57,7 @@ class CataloguController extends Controller
                 'Catalouge' => $single_catalouge
             ]);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Catalouge not found'
-            ]);
+            return ResponseErroMethod('error', 'Catalouge not found');
         }
     }
 
@@ -88,15 +76,9 @@ class CataloguController extends Controller
         $update_catalouge->service_hour = $request->serviceHoure;
         $update_catalouge->save();
         if ($update_catalouge) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'update catalog success'
-            ]);
+            return ResponseMethod('success', 'update catalog success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Catalouge update fail'
-            ]);
+            return ResponseErrorMethod('error', 'Catalouge update fail');
         }
     }
 
@@ -110,15 +92,9 @@ class CataloguController extends Controller
         $update_catalouge_img->image = $cataloug_photo;
         $update_catalouge_img->save();
         if ($update_catalouge_img) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'update catalog images success'
-            ]);
+            return ResponseMethod('success', 'update catalog images success');
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Catalouge update image fail'
-            ]);
+            return ResponseErrorMethod('error', 'Catalouge update image fail');
         }
     }
 
@@ -132,15 +108,9 @@ class CataloguController extends Controller
         $deleteCatalougImg->image = '';
         $deleteCatalougImg->save();
         if ($deleteCatalougImg == true) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Catalouge images delete success'
-            ]);
+            return ResponseMethod('success', 'Catalouge images  delete success');
         } else {
-            return response()->json([
-                'status' => 'faile',
-                'message' => 'Catalouge images  delete faile'
-            ]);
+            return ResponseErrorMethod('error', 'Catalouge image delete fail');
         }
     }
 
@@ -148,15 +118,9 @@ class CataloguController extends Controller
     {
         $deleteCataloug = Catalogue::where('id', $id);
         if ($deleteCataloug == true) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Catalouge  delete success'
-            ]);
+            return ResponseMethod('success', 'Catalouge   delete success');
         } else {
-            return response()->json([
-                'status' => 'faile',
-                'message' => 'Catalouge   delete faile'
-            ]);
+            return ResponseErrorMethod('error', 'Catalouge  delete fail');
         }
     }
 }

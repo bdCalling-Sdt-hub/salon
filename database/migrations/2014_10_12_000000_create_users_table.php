@@ -21,8 +21,8 @@ class CreateUsersTable extends Migration
             $table->integer('is_verified')->default(0);
             $table->string('password');
             $table->string('image')->nullable();
-            $table->integer('phone_number');
-            $table->string('address');
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->string('user_type');
             $table->string('user_status')->default(0);
             $table->rememberToken();

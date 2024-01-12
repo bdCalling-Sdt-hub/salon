@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Category;
 use App\Models\Provider;
+use App\Models\ServiceRating;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,4 +23,14 @@ class Service extends Model
         'set_booking_mony',
         'available_service_our',
     ];
+
+    public function ServiceRating()
+    {
+        return $this->hasMany(ServiceRating::class);
+    }
+
+    public function salonDetails()
+    {
+        return $this->belongsTo(Provider::class);
+    }
 }
