@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use EdwardMuss\Rave\Facades\Rave as Flutterwave;
 use Illuminate\Http\Request;
+use DB;
 
 class PymentController extends Controller
 {
@@ -110,11 +111,15 @@ class PymentController extends Controller
 
     public function MonthlyIncome()
     {
-        $monthIncom = Payment::selectRow('MONTH(created_at) as month, COUNT(*) as count')
-            ->whereYear('created_at', date('Y'))
-            ->groupeBy('month')
+        $monthIncom = Payment::select(
+            DB::raw('(COUNT(*)) as count'),
+            DB::raw('(MONTHNAME(created_at) as month_name')
+        )
+            ->whereYear('created_at', '2024')
+            ->groupBy('month_name')
             ->orderBy('month')
-            ->get();
+            ->get()
+            ->toArray();
 
         return $monthIncom;
     }
