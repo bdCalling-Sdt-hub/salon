@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DistanceController;
+use App\Http\Controllers\EarningsController;
 use App\Http\Controllers\FlutterwaveController;
 use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
@@ -213,10 +214,6 @@ Route::get('search-user/{name?}',[GetController::class,'searchUser']);
 //salon list search by name
 Route::get('salon-search/{name?}',[GetController::class,'searchSalon']);
 
-//payment api
-Route::post('/pay', [FlutterwaveController::class, 'initialize'])->name('paynow');
-Route::get('/rave/callback', [FlutterwaveController::class, 'callback'])->name('payment.callback');
-
 // Review
 Route::get('review',[GetController::class,'getReviews']);
 Route::get('review-by-id/{id}',[GetController::class,'getReviewsByProviderId']);
@@ -232,3 +229,5 @@ Route::get('/find-nearest-location',[DistanceController::class,'findNearestLocat
 //filter from user
 
 Route::get('/filter-nearest-salon/{lat}/{long}',[DistanceController::class,'findNearestSalon']);
+
+Route::get('earnings',[EarningsController::class,'Earnings']);
