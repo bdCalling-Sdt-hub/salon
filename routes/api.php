@@ -188,6 +188,9 @@ Route::middleware(['user'])->group(function () {
     // find Nearest Location
     Route::get('/find-nearest-location', [DistanceController::class, 'findNearestLocation']);
 
+    //filter
+    Route::get('/filter', [DistanceController::class, 'filter']);
+
     // ==================== USER HOME PAGE   ============================//
 
     Route::get('/user/home', [HomeController::class, 'userHome']);
@@ -210,6 +213,13 @@ Route::middleware(['user'])->group(function () {
     Route::post('/re-schdule', [HomeController::class, 'reSchedule']);
     Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
     Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
+
+    // ========================= PAYMENT METHOD ROUTE =======================//
+
+// The route that the button calls to initialize payment
+    Route::post('/pay', [PymentController::class, 'initialize'])->name('paynow');
+// The callback url after a payment
+
 });
 
 // ====================Appointment from dashboard ==============================//
@@ -265,9 +275,9 @@ Route::get('/search/category', [HomeController::class, 'searchCategory']);
 
 Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
 
-// ========================= PYMENT METHOD ROUTE =======================//
-
-// The route that the button calls to initialize payment
-Route::post('/pay', [PymentController::class, 'initialize'])->name('paynow');
-// The callback url after a payment
+//payment callback url
 Route::get('/rave/callback', [PymentController::class, 'callback'])->name('callback');
+
+
+//get booking history
+Route::get('booking-history',[GetController::class,'bookingHistory']);

@@ -13,19 +13,19 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->string('transaction_id');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->text('payment_type');
             $table->string('amount');
-            $table->string('status');
             $table->string('email');
             $table->string('name');
-            $table->string('phone_number');
+            $table->text('currency');
+            $table->text('tx_ref');
+            $table->string('status');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('payments');
