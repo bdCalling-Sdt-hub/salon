@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\Provider;
 use App\Models\ServiceRating;
 use App\Models\User;
@@ -184,7 +185,19 @@ class GetController extends Controller
             ->join('users', 'bookings.user_id', '=', 'users.id')
             ->join('providers','bookings.provider_id', '=', 'providers.id')
             ->first();
-        return $booking;
+        if ($booking){
+            return response()->json([
+                'status'=>200,
+                'message' => 'booking list',
+                'data' => $booking,
+            ]);
+        }else{
+            return response()->json([
+                'status' => 404,
+                'message' => 'Data Not found',
+                'data' => 'Not found',
+            ]);
+        }
     }
 
     public function getReviews(){
@@ -238,4 +251,19 @@ class GetController extends Controller
                 return ResponseMethod('Nearest Salon Data',$salon);
             }
 
+    public function bookingHistory(){
+        $booking_history = Payment::all();
+        if ($booking_history){
+            return response()->json([
+                'status' => 'success',
+                'data' => $booking_history,
+            ]);
+        }
+        else{
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Booking history is empty'
+            ]);
+        }
+    }
 }
