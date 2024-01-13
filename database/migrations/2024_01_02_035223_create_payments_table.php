@@ -20,7 +20,6 @@ return new class extends Migration {
             $table->text('tx_ref');
             $table->string('time');
             $table->string('status');
-
             $table->timestamps();
         });
     }

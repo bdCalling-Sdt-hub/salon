@@ -366,6 +366,8 @@ class ProviderController extends Controller
                 $updateBooking->date = $request->date;
                 $updateBooking->time = $request->time;
                 $updateBooking->save();
+                
+
                 if ($updateBooking) {
                     return ResponseMethod('success', 'Booking update success');
                 } else {

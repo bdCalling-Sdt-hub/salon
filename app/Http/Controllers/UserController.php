@@ -8,6 +8,7 @@ use App\Models\LoginActivity;
 use App\Models\PasswordReset;
 use App\Models\ServiceRating;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -127,7 +128,8 @@ class UserController extends Controller
 
     public function verifiedOtp(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $user = User::where(['email' => $request->email])->first();
+
         $otpData = EmailVerification::where('otp', $request->otp)->first();
         if (!$otpData) {
             return response()->json(['success' => false, 'msg' => 'You entered wrong OTP']);
@@ -137,11 +139,22 @@ class UserController extends Controller
 
             if ($currentTime >= $time && $time >= $currentTime - (180 + 5)) {
                 User::where('id', $user->id)->update([
-                    'is_verified' => 1
+                    'is_verified' => 1,
                 ]);
-                return response()->json(['success' => true, 'msg' => 'OTP has been verified']);
+
+                // =================NOTIFICATION================= //
+                // $notification = \Notification::send($user, new UserNotification($user));
+                // $this->sendNotification('is registered', $user);
+
+                // =================END NOTIFICATION=================//
+
+                return response()->json([
+                    'status' => 'success',
+                    'Notification' => sendNotification('is registered', $user),
+                    'Otp' => 'OTP has been verified'
+                ]);
             } else {
-                return response()->json(['success' => false, 'msg' => 'Your OTP has been Expired']);
+                return response()->json(['success' => false, 'message' => 'Your OTP has been Expired']);
             }
         }
     }
@@ -333,14 +346,14 @@ class UserController extends Controller
         return $rating;
     }
 
-    public function sendNotification(Request $request)
-    {
-        try {
-            event(new SendNotification($request->message, auth()->user()->id));
-
-            return response()->json(['success' => true, 'msg' => 'Notification Added']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
-        }
-    }
+    // public function sendNotification($message, $data)
+    // {
+    //     try {
+    //         event(new SendNotification($message, $data));
+    //         \Notification::send($data, new UserNotification($data));
+    //         return response()->json(['success' => true, 'msg' => 'Notification Added']);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+    //     }
+    // }
 }

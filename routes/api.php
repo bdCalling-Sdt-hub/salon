@@ -49,7 +49,7 @@ Route::group(['middleware' => 'api'], function ($routes) {
     Route::get('/logout', [UserController::class, 'logout']);
     Route::post('/reset-password', [UserController::class, 'resetPassword']);
     Route::post('/profileUpdate', [UserController::class, 'profileUpdate']);
-    Route::post('/send-notification', [UserController::class, 'sendNotification']);
+    // Route::post('/send-notification', [UserController::class, 'sendNotification']);
 });
 
 Route::middleware(['admin'])->group(function () {
