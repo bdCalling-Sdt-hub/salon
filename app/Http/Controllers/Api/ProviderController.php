@@ -13,6 +13,7 @@ use App\Models\Service;
 use App\Models\ServiceRating;
 use Illuminate\Http\Request;
 use DB;
+use Geocoder\Laravel\Facades\Geocoder;
 
 class ProviderController extends Controller
 {

@@ -130,12 +130,11 @@ Route::middleware(['admin'])->group(function () {
     //notification
     Route::post('/send-admin-notification',[UserController::class,'sendNotification']);
 });
-Route::post('/post/provider', [ProviderController::class, 'postProvider']);
 
 Route::middleware(['provider'])->group(function () {
     // ======================Provider =======================//
 
-//    Route::post('/post/provider', [ProviderController::class, 'postProvider']);
+    Route::post('/post/provider', [ProviderController::class, 'postProvider']);
     Route::get('/get/provider', [ProviderController::class, 'getProvider']);
     Route::get('/edit/provider/{id}', [ProviderController::class, 'editProvider']);
     Route::post('/update/provider', [ProviderController::class, 'updateProvider']);
@@ -189,8 +188,11 @@ Route::middleware(['user'])->group(function () {
     // find Nearest Location
     Route::get('/find-nearest-location', [DistanceController::class, 'findNearestLocation']);
 
+    //find nearest location by lat long
+    Route::get('/find-nearest-location/{lat}/{long}/',[DistanceController::class,'findNearestLocationByLatLong']);
+
     //filter
-    Route::get('/filter', [DistanceController::class, 'filter']);
+//    Route::get('/filter', [DistanceController::class, 'filter']);
 
     // ==================== USER HOME PAGE   ============================//
 
@@ -261,10 +263,7 @@ Route::get('review-by-id/{id}',[GetController::class,'getReviewsByProviderId']);
 Route::get('review-average-rating/{id}',[GetController::class,'test']);
 
 
-//find nearest location by lat long
-Route::get('/find-nearest-location/{lat}/{long}/',[DistanceController::class,'findNearestLocationByLatLong']);
-//find Nearest Location
-Route::get('/find-nearest-location',[DistanceController::class,'findNearestLocation']);
+
 
 //filter from user
 
@@ -282,3 +281,11 @@ Route::get('/rave/callback', [PymentController::class, 'callback'])->name('callb
 
 //get booking history
 Route::get('booking-history',[GetController::class,'bookingHistory']);
+
+// route for user and provider
+//Route::middleware(['both'])->group(function () {
+//
+//}
+
+//filter
+Route::get('filter/{name?}',[GetController::class,'filter']);

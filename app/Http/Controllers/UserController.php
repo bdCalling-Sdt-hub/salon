@@ -100,7 +100,7 @@ class UserController extends Controller
             if(Auth::user()->is_verified==0){
                 return response()->json(['error' => 'Your email is not verified'], 401);
             }else{
-                return $this->respondWithToken($token);
+                return $this->responseWithToken($token);
             }
 
         }

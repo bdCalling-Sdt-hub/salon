@@ -155,6 +155,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+        Geocoder\Laravel\Providers\GeocoderService::class,
     ])->toArray(),
 
     /*

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
+use App\Models\Category;
 use App\Models\Payment;
 use App\Models\Provider;
 use App\Models\ServiceRating;
@@ -266,4 +267,20 @@ class GetController extends Controller
             ]);
         }
     }
+
+    public function filter($category_name = null){
+            if (!is_null($category_name)) {
+                $salon = Provider::select('providers.*')
+                    ->Join('categories', 'providers.category_id', '=', 'categories.id')
+                    ->where('category_name', 'like', '%' . $category_name . '%')
+                    ->get();
+                if ($salon->count() > 0) {
+                    return ResponseMethod('Salon data', $salon);
+                }
+
+                return ResponseMessage('Salon not found');
+            }
+
+            return ResponseMessage('Provide category name for search');
+        }
 }
