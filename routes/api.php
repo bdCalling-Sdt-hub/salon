@@ -130,11 +130,12 @@ Route::middleware(['admin'])->group(function () {
     //notification
     Route::post('/send-admin-notification',[UserController::class,'sendNotification']);
 });
+Route::post('/post/provider', [ProviderController::class, 'postProvider']);
 
 Route::middleware(['provider'])->group(function () {
     // ======================Provider =======================//
 
-    Route::post('/post/provider', [ProviderController::class, 'postProvider']);
+//    Route::post('/post/provider', [ProviderController::class, 'postProvider']);
     Route::get('/get/provider', [ProviderController::class, 'getProvider']);
     Route::get('/edit/provider/{id}', [ProviderController::class, 'editProvider']);
     Route::post('/update/provider', [ProviderController::class, 'updateProvider']);

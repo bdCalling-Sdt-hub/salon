@@ -13,9 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use Jenssegers\Agent\Agent;
-use Validator;
-
 class UserController extends Controller
 {
     public function register(Request $request)
@@ -48,9 +47,10 @@ class UserController extends Controller
             $user->user_type = $request->user_type;
             $user->save();
             $this->Otp($user);
-            return response()->json(['success' => true,
-                'user' => $user,
-                'msg' => 'OTP has been sent']);
+//            return response()->json(['success' => true,
+//                'user' => $user,
+//                'msg' => 'OTP has been sent']);
+            return sendNotification('is registered',$user);
         }
     }
 
@@ -86,23 +86,28 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(),[
             'email' => 'required|string|email',
             'password' => 'required|string|min:6'
         ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+        if ($validator->fails()){
+            return response()->json($validator->errors(),400);
         }
-        $this->loginActivity($request->email, $request->password);
+        $credentials = $request->only('email', 'password');
+        if ($token = auth()->attempt($credentials)){
 
-        if (!$token = auth()->attempt($validator->validated())) {
-            return response()->json(['error' => 'Unauthorized']);
+
+            if(Auth::user()->is_verified==0){
+                return response()->json(['error' => 'Your email is not verified'], 401);
+            }else{
+                return $this->respondWithToken($token);
+            }
+
         }
 
-        return $this->responseWithToken($token);
+        return response()->json(['error' => 'Your credential is wrong'], 401);
+
     }
-
     protected function responseWithToken($token)
     {
         return response()->json([
@@ -139,7 +144,13 @@ class UserController extends Controller
                 User::where('id', $user->id)->update([
                     'is_verified' => 1
                 ]);
-                return response()->json(['success' => true, 'msg' => 'OTP has been verified']);
+
+                $token = auth()->login($user);
+                return response()->json([
+                    'success' => true,
+                    'msg' => 'OTP has been verified',
+                    'token' => $this->responseWithToken($token),
+                ]);
             } else {
                 return response()->json(['success' => false, 'msg' => 'Your OTP has been Expired']);
             }
@@ -265,6 +276,7 @@ class UserController extends Controller
             $browser = $agent->browser();
             $device = $agent->device();
 
+
             $activity = new LoginActivity([
                 'user_id' => $admin->id,
                 'browser' => $browser,
@@ -333,18 +345,18 @@ class UserController extends Controller
         return $rating;
     }
 
-    public function sendNotification(Request $request)
-    {
-        try {
-            event(new SendNotification($request->message, $request->name));
-
-            return response()->json([
-                'success' => true,
-                'msg' => 'Notification Added',
-//                'data' => auth()->user()->name,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
-        }
-    }
+//    public function sendNotification(Request $request)
+//    {
+//        try {
+//            event(new SendNotification($request->message, $request->name));
+//
+//            return response()->json([
+//                'success' => true,
+//                'msg' => 'Notification Added',
+////                'data' => auth()->user()->name,
+//            ]);
+//        } catch (\Exception $e) {
+//            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+//        }
+//    }
 }
