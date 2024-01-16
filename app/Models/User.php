@@ -53,4 +53,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Payment::class,'user_id');
     }
+
+    public function subscription() :HasMany
+    {
+        return $this->hasMany(Subscription::class,'user_id');
+    }
 }

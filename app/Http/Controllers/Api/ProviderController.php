@@ -452,32 +452,4 @@ class ProviderController extends Controller
         $long = $coordinates->getLongitude();
         return $long;
     }
-
-    //    public function findLatitude($address)
-    //    {
-    //        $result = app('geocoder')->geocode($address)->get();
-    //
-    //        if (!empty($result) && $result->count() > 0) {
-    //            $coordinates = $result[0]->getCoordinates();
-    //            $lat = $coordinates->getLatitude();
-    //            return $lat;
-    //        } else {
-    //            // Handle the case where geocoding was unsuccessful
-    //            return null;
-    //        }
-    //    }
-    //
-    //    public function findLongitude($address)
-    //    {
-    //        $result = app('geocoder')->geocode($address)->get();
-    //
-    //        if (!empty($result) && $result->count() > 0) {
-    //            $coordinates = $result[0]->getCoordinates();
-    //            $long = $coordinates->getLongitude();
-    //            return $long;
-    //        } else {
-    //            // Handle the case where geocoding was unsuccessful
-    //            return null;
-    //        }
-    //    }
 }
