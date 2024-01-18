@@ -50,7 +50,7 @@ class UserController extends Controller
 //            return response()->json(['success' => true,
 //                'user' => $user,
 //                'msg' => 'OTP has been sent']);
-            return sendNotification('is registered',$user);
+            return sendNotification('is registered',$user,);
         }
     }
 
@@ -207,7 +207,6 @@ class UserController extends Controller
         $user->save();
 
         PasswordReset::where('email', $user->email)->delete();
-
         return '<h1> Your password has been reset successfully</h1>';
     }
 
@@ -237,26 +236,34 @@ class UserController extends Controller
                 'id' => 'required',
                 'name' => 'required|string',
                 'email' => 'required|email|string',
-                'UserImage' => 'required|image|mimes:jpg,png,jpeg,gif,svg',
+                'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
             ]);
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 400);
             }
-            $avatar = time() . '.' . $request->UserImage->extension();
-            $request->UserImage->move(public_path('images'), $avatar);
 
             $user = User::find($request->id);
-            $user->id = $request->id;
+            $user->id = auth()->user()->id;
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->image = $avatar;
-            $user->latitude = $request->latitude;
-            $user->longitude = $request->longitude;
-            $user->save();
+
+            if ($request->file('image')) {
+                unlink($user->image);
+                $user->image = $this->saveImage($request);
+            }
+            $user->update();
             return response()->json(['status' => true, 'message' => 'user is updated', 'Data' => $user]);
         } else {
             return response()->json(['status' => false, 'message' => 'User is not Authenticated']);
         }
+    }
+    protected function saveImage($request){
+        $image = $request->file('image');
+        $imageName = rand() . '.' . $image->getClientOriginalExtension();
+        $directory = 'Asset/user-image/';
+        $imgUrl = $directory . $imageName;
+        $image->move($directory, $imageName);
+        return $imgUrl;
     }
 
     public function refreshToken()

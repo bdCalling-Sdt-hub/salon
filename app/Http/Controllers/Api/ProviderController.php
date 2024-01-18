@@ -21,6 +21,8 @@ class ProviderController extends Controller
 
     public function postProvider(ProviderRequest $request)
     {
+
+
         $cover_photo = time() . '.' . $request->coverPhoto->extension();
         $request->coverPhoto->move(public_path('images'), $cover_photo);
 
@@ -33,14 +35,17 @@ class ProviderController extends Controller
             }
         }
         $address = $request->address;
+        $image_decode = json_encode($image);
+        $service_hour = $request->serviceOur;
+        $decode = json_decode($service_hour, true);
         $post_provider = Provider::create([
             'category_id' => $request->input('catId'),
             'business_name' => $request->input('businessName'),
             'address' => $request->input('address'),
             'description' => $request->input('description'),
-            'available_service_our' => $request->input('serviceOur'),
+            'available_service_our' => $decode,
             'cover_photo' => $cover_photo,
-            'gallary_photo' => implode('|', $image),
+            'gallary_photo' => $image_decode,
             'latitude' => $this->findLatitude($address),
             'longitude' => $this->findLongitude($address),
             'provider_id' => auth()->user()->id,

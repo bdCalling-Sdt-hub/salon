@@ -14,6 +14,7 @@ use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PercentageController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\TrashController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebsitePagesController;
@@ -149,6 +150,11 @@ Route::middleware(['admin'])->group(function () {
 });
 
 Route::middleware(['provider'])->group(function () {
+
+    // Test
+    Route::post('add-cat',[TestController::class,'addCat']);
+    Route::post('add-sal',[TestController::class,'addSal']);
+    Route::post('add-ser',[TestController::class,'addSer']);
     // ======================Provider =======================//
 
     Route::post('/post/provider', [ProviderController::class, 'postProvider']);
@@ -202,6 +208,8 @@ Route::middleware(['provider'])->group(function () {
 });
 
 Route::middleware(['user'])->group(function () {
+
+    Route::post('add-rev',[TestController::class,'saveRev']);
     // user
     Route::post('/saveRating', [UserController::class, 'saveRating']);
     Route::post('/updateRating/{id}', [UserController::class, 'updateServiceRating']);
@@ -307,6 +315,11 @@ Route::get('booking-history',[GetController::class,'bookingHistory']);
 
 //filter
 Route::get('filter/{name?}',[GetController::class,'filter']);
+
+
+Route::get('relation-filter',[TestController::class,'relationFilter']);
+Route::get('get-reviews',[TestController::class,'getReviews']);
+
 
 
 
