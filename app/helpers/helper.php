@@ -46,4 +46,10 @@ function sendNotification($message, $data=null, $payment = null)
             return response()->json(['success' => false, 'msg' => $e->getMessage()]);
         }
     }
+    function ResponseMessage($message){
+        return response()->json([
+            'status' => true,
+            'message' => $message,
+        ]);
+    }
 ?>

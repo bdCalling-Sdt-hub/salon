@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
+use App\Models\Category;
 use App\Models\Payment;
 use App\Models\Provider;
 use App\Models\ServiceRating;
@@ -184,6 +185,28 @@ class GetController extends Controller
         $booking = Booking::select('bookings.*', 'users.name as client_name','providers.business_name as name')
             ->join('users', 'bookings.user_id', '=', 'users.id')
             ->join('providers','bookings.provider_id', '=', 'providers.id')
+            ->paginate(12);
+        if ($booking){
+            return response()->json([
+                'status'=>200,
+                'message' => 'booking list',
+                'data' => $booking,
+            ]);
+        }else{
+            return response()->json([
+                'status' => 404,
+                'message' => 'Data Not found',
+                'data' => 'Not found',
+            ]);
+        }
+    }
+
+    public function appointmentListbyId($id){
+
+        $booking = Booking::select('bookings.*', 'users.name as client_name','providers.business_name as name')
+            ->join('users', 'bookings.user_id', '=', 'users.id')
+            ->join('providers','bookings.provider_id', '=', 'providers.id')
+            ->where('bookings.id', '=', $id)
             ->first();
         if ($booking){
             return response()->json([
@@ -265,5 +288,49 @@ class GetController extends Controller
                 'message' => 'Booking history is empty'
             ]);
         }
+    }
+
+    public function filter($category_name = null){
+            if (!is_null($category_name)) {
+                $salon = Provider::select('providers.*')
+                    ->Join('categories', 'providers.category_id', '=', 'categories.id')
+                    ->where('category_name', 'like', '%' . $category_name . '%')
+                    ->get();
+                if ($salon->count() > 0) {
+                    return ResponseMethod('Salon data', $salon);
+                }
+
+                return ResponseMessage('Salon not found');
+            }
+
+            return ResponseMessage('Provide category name for search');
+        }
+
+        public function paymentHistory(){
+            $payment_history = Payment::paginate(9);
+            if($payment_history){
+                return response()->json([
+                    'status' => 200,
+                    'data' => $payment_history,
+                ]);
+            }
+            return response()->json([
+                'status' => 404,
+                'message' => 'No data found'
+            ]);
+        }
+
+    public function paymentHistoryById($id){
+        $payment_history = Payment::where('id',$id)->first();
+        if($payment_history){
+            return response()->json([
+                'status' => 200,
+                'data' => $payment_history,
+            ]);
+        }
+        return response()->json([
+            'status' => 404,
+            'message' => 'No data found'
+        ]);
     }
 }

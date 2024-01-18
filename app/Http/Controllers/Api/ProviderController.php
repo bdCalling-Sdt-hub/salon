@@ -14,6 +14,7 @@ use App\Models\ServiceRating;
 use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
 use DB;
+use Geocoder\Laravel\Facades\Geocoder;
 
 class ProviderController extends Controller
 {
@@ -21,7 +22,13 @@ class ProviderController extends Controller
 
     public function postProvider(ProviderRequest $request)
     {
+
+
+//         $cover_photo = time() . '.' . $request->coverPhoto->extension();
+//         $request->coverPhoto->move(public_path('images'), $cover_photo);
+
         $auth_user = auth()->user()->id;
+
 
         $image = array();
         if ($files = $request->file('photoGellary')) {
@@ -35,6 +42,22 @@ class ProviderController extends Controller
         $cover_photo = time() . '.' . $request->coverPhoto->extension();
         $request->coverPhoto->move(public_path('images'), $cover_photo);
         $address = $request->address;
+
+//         $image_decode = json_encode($image);
+//         $service_hour = $request->serviceOur;
+//         $decode = json_decode($service_hour, true);
+//         $post_provider = Provider::create([
+//             'category_id' => $request->input('catId'),
+//             'business_name' => $request->input('businessName'),
+//             'address' => $request->input('address'),
+//             'description' => $request->input('description'),
+//             'available_service_our' => $decode,
+//             'cover_photo' => $cover_photo,
+//             'gallary_photo' => $image_decode,
+//             'latitude' => $this->findLatitude($address),
+//             'longitude' => $this->findLongitude($address),
+//             'provider_id' => auth()->user()->id,
+//         ]);
         $post_provider = new Provider();
         $post_provider->user_id = $auth_user;
         $post_provider->category_id = $request->catId;
@@ -479,32 +502,4 @@ class ProviderController extends Controller
         $long = $coordinates->getLongitude();
         return $long;
     }
-
-    //    public function findLatitude($address)
-    //    {
-    //        $result = app('geocoder')->geocode($address)->get();
-    //
-    //        if (!empty($result) && $result->count() > 0) {
-    //            $coordinates = $result[0]->getCoordinates();
-    //            $lat = $coordinates->getLatitude();
-    //            return $lat;
-    //        } else {
-    //            // Handle the case where geocoding was unsuccessful
-    //            return null;
-    //        }
-    //    }
-    //
-    //    public function findLongitude($address)
-    //    {
-    //        $result = app('geocoder')->geocode($address)->get();
-    //
-    //        if (!empty($result) && $result->count() > 0) {
-    //            $coordinates = $result[0]->getCoordinates();
-    //            $long = $coordinates->getLongitude();
-    //            return $long;
-    //        } else {
-    //            // Handle the case where geocoding was unsuccessful
-    //            return null;
-    //        }
-    //    }
 }

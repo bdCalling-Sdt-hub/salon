@@ -19,6 +19,7 @@ class PymentController extends Controller
 
         // Enter the details of the payment
         $data = [
+            'id' => auth()->user()->id,
             'payment_options' => request()->payment_type,
             'amount' => request()->amount,
             'email' => request()->email,
@@ -33,6 +34,7 @@ class PymentController extends Controller
                 'id' => auth()->user()->id,
                 'title' => request()->service_name,
                 'description' => request()->description,
+                'package' => request()->package,
             ]
         ];
 
@@ -53,8 +55,6 @@ class PymentController extends Controller
             $transactionID = Flutterwave::getTransactionIDFromCallback();
             $data = Flutterwave::verifyTransaction($transactionID);
 
-//            dd($data);
-
             $payment = new Payment();
             $payment->user_id = 1;
             $payment->tx_ref = $data['data']['tx_ref'];
@@ -72,7 +72,6 @@ class PymentController extends Controller
                     'message' => 'Payment complete',
                 ]);
             }
-
         } elseif ($status == 'cancelled') {
             return response()->json([
                 'status' => 'cancelled',

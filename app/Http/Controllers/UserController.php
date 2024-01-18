@@ -14,9 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use Jenssegers\Agent\Agent;
-use Validator;
-
 class UserController extends Controller
 {
     public function register(Request $request)
@@ -53,6 +52,11 @@ class UserController extends Controller
             $user->image = $avatar;
             $user->save();
             $this->Otp($user);
+//            return response()->json(['success' => true,
+//                'user' => $user,
+//                'msg' => 'OTP has been sent']);
+//             return sendNotification('is registered',$user,);
+
             return response()->json(['success' => true,
                 'user' => $user,
                 'msg' => 'OTP has been sent'], 200);
@@ -91,23 +95,31 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(),[
             'email' => 'required|string|email',
             'password' => 'required|string|min:6'
         ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+        if ($validator->fails()){
+            return response()->json($validator->errors(),400);
         }
-        $this->loginActivity($request->email, $request->password);
+        $credentials = $request->only('email', 'password');
+        if ($token = auth()->attempt($credentials)){
+
+
+            if(Auth::user()->is_verified==0){
+                return response()->json(['error' => 'Your email is not verified'], 401);
+            }else{
+                return $this->responseWithToken($token);
+            }
+
 
         if (!$token = auth()->attempt($validator->validated())) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->responseWithToken($token);
-    }
+        return response()->json(['error' => 'Your credential is wrong'], 401);
 
+    }
     protected function responseWithToken($token)
     {
         return response()->json([
@@ -146,6 +158,7 @@ class UserController extends Controller
                 User::where('id', $user->id)->update([
                     'is_verified' => 1,
                 ]);
+
                 $token = auth()->login($user);
                 return response()->json([
                     'status' => 'success',
@@ -208,6 +221,9 @@ class UserController extends Controller
         $user = User::find($check_user);
         $user->password = Hash::make($request->password);
         $user->save();
+
+//         PasswordReset::where('email', $user->email)->delete();
+
         return response()->json(['Your password changes'], 200);
     }
 
@@ -238,9 +254,12 @@ class UserController extends Controller
         if (auth()->user()) {
             $check_user = auth()->user()->id;
             $validator = Validator::make($request->all(), [
-                'name' => 'string',
-                'email' => 'email|string',
-                //  'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
+
+                'id' => 'required',
+                'name' => 'required|string',
+                'email' => 'required|email|string',
+                'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
+
             ]);
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 400);
@@ -253,6 +272,7 @@ class UserController extends Controller
             $user->address = $request->address;
             $user->phone_number = $request->phone_number;
 
+
             if ($request->file('image')) {
                 unlink($user->image);
                 $user->image = $this->saveImage($request);
@@ -262,6 +282,14 @@ class UserController extends Controller
         } else {
             return response()->json(['status' => false, 'message' => 'User is not Authenticated']);
         }
+    }
+    protected function saveImage($request){
+        $image = $request->file('image');
+        $imageName = rand() . '.' . $image->getClientOriginalExtension();
+        $directory = 'Asset/user-image/';
+        $imgUrl = $directory . $imageName;
+        $image->move($directory, $imageName);
+        return $imgUrl;
     }
 
     protected function saveImage($request)
@@ -290,6 +318,7 @@ class UserController extends Controller
             $agent = new Agent();
             $browser = $agent->browser();
             $device = $agent->device();
+
 
             $activity = new LoginActivity([
                 'user_id' => $admin->id,
@@ -360,16 +389,6 @@ class UserController extends Controller
     }
 
 
-    // public function sendNotification($message, $data)
-    // {
-    //     try {
-    //         event(new SendNotification($message, $data));
-    //         \Notification::send($data, new UserNotification($data));
-    //         return response()->json(['success' => true, 'msg' => 'Notification Added']);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['success' => false, 'msg' => $e->getMessage()]);
-    //     }
-    // }
 
     public function sendNotification(Request $request)
     {
