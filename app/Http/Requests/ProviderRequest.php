@@ -29,7 +29,6 @@ class ProviderRequest extends FormRequest
             'serviceOur' => ['required'],
             'photoGellary' => ['required'],
             'coverPhoto' => ['required'],
-            'phone' => ['required']
         ];
     }
 }

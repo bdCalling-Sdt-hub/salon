@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->string('salon_service_charge')->nullable();
             $table->string('home_service_charge')->nullable();
             $table->string('booking_money');
-            $table->string('service_hour');
+            $table->text('service_hour');
 
             $table->timestamps();
         });

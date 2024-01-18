@@ -23,7 +23,6 @@ class ServiceRequest extends FormRequest
     {
         return [
             'catId' => ['required'],
-            'providerId' => ['required'],
             'serviceName' => ['required'],
             'description' => ['required'],
             'servicePhotoGellary' => ['required'],

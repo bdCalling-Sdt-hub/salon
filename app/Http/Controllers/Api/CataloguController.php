@@ -11,10 +11,11 @@ class CataloguController extends Controller
 {
     public function postCataloug(CatalougeRequest $request)
     {
+        $auth_user = auth()->user()->id;
         $cataloug_photo = time() . '.' . $request->catalougPhoto->extension();
         $request->catalougPhoto->move(public_path('images'), $cataloug_photo);
         $post_catalogu = Catalogue::create([
-            'provider_id' => $request->input('providerId'),
+            'provider_id' => $auth_user,
             'service_id' => $request->input('serviceId'),
             'catalog_name' => $request->input('catalougName'),
             'catalog_description' => $request->input('description'),
@@ -29,43 +30,75 @@ class CataloguController extends Controller
         if ($post_catalogu) {
             return ResponseMethod('success', 'Catalouge add successfully');
         } else {
-            return ResponseErroMethod('error', 'Catalouge add faile');
+            return ResponseErrorMessage('error', 'Catalouge add faile');
         }
     }
 
-    public function getCataloug()
+    public function getCataloug($id)
     {
-        $get_catalouge = Catalogue::all();
+        $all_provider_data = Catalogue::where('service_id', $id)->with('salonDetails')->get();
+        $decodedData = [];
+        foreach ($all_provider_data as $item) {
+            $item['service_hour'] = json_decode($item['service_hour'], true);  // Decode only the 'module_class' field
+            $item['image'] = json_decode($item['image'], true);
+            $decodedData[] = $item;  // Add the updated item to the new array
+        }
 
-        if ($get_catalouge) {
+        if ($all_provider_data) {
             return response()->json([
                 'status' => 'success',
-                'Catalouge' => $get_catalouge
-            ]);
+                'provider' => $decodedData,
+            ], 200);
         } else {
-            return ResponseErroMethod('error', 'Catalouge not found');
+            return ResponseErrorMessage('error', 'Data not found');
         }
+        // $get_catalouge = Catalogue::all();
+
+        // if ($get_catalouge) {
+        //     return response()->json([
+        //         'status' => 'success',
+        //         'Catalouge' => $get_catalouge
+        //     ]);
+        // } else {
+        //     return ResponseErroMethod('error', 'Catalouge not found');
+        // }
     }
 
     public function singleCataloug($id)
     {
-        $single_catalouge = Catalogue::where('id', $id)->get();
+        $service_catalouge = Catalogue::where('service_id', $id)->get();
+
+        $decodedData = [];
+        foreach ($service_catalouge as $item) {
+            $item['available_service_our'] = json_decode($item['available_service_our'], true);  // Decode only the 'module_class' field
+            $decodedData[] = $item;  // Add the updated item to the new array
+        }
+
+        if ($all_provider_data) {
+            return response()->json([
+                'status' => 'success',
+                'provider' => $decodedData,
+            ], 200);
+        } else {
+            return ResponseErrorMessage('error', 'Data not found');
+        }
 
         if ($single_catalouge) {
             return response()->json([
                 'status' => 'success',
                 'Catalouge' => $single_catalouge
-            ]);
+            ], 200);
         } else {
-            return ResponseErroMethod('error', 'Catalouge not found');
+            return ResponseErrorMessage('error', 'Catalouge not found');
         }
     }
 
     public function updateCatalouge(CatalougeRequest $request)
     {
+        $auth_user = auth()->user()->id;
         $update_catalouge = Catalogue::find($request->id);
         $update_catalouge->id = $request->id;
-        $update_catalouge->provider_id = $request->providerId;
+        $update_catalouge->provider_id = $auth_user;
         $update_catalouge->service_id = $request->serviceId;
         $update_catalouge->catalog_name = $request->catalougName;
         $update_catalouge->catalog_description = $request->description;
@@ -78,7 +111,7 @@ class CataloguController extends Controller
         if ($update_catalouge) {
             return ResponseMethod('success', 'update catalog success');
         } else {
-            return ResponseErrorMethod('error', 'Catalouge update fail');
+            return ResponseErrorMessage('error', 'Catalouge update fail');
         }
     }
 
@@ -94,7 +127,7 @@ class CataloguController extends Controller
         if ($update_catalouge_img) {
             return ResponseMethod('success', 'update catalog images success');
         } else {
-            return ResponseErrorMethod('error', 'Catalouge update image fail');
+            return ResponseErrorMessage('error', 'Catalouge update image fail');
         }
     }
 
@@ -110,7 +143,7 @@ class CataloguController extends Controller
         if ($deleteCatalougImg == true) {
             return ResponseMethod('success', 'Catalouge images  delete success');
         } else {
-            return ResponseErrorMethod('error', 'Catalouge image delete fail');
+            return ResponseErrorMessage('error', 'Catalouge image delete fail');
         }
     }
 
@@ -120,7 +153,7 @@ class CataloguController extends Controller
         if ($deleteCataloug == true) {
             return ResponseMethod('success', 'Catalouge   delete success');
         } else {
-            return ResponseErrorMethod('error', 'Catalouge  delete fail');
+            return ResponseErrorMessage('error', 'Catalouge  delete fail');
         }
     }
 }

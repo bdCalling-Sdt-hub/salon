@@ -11,18 +11,83 @@ use App\Models\Provider;
 use App\Models\Service;
 use App\Models\ServiceRating;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use DB;
 
 class HomeController extends Controller
 {
+    public function read_at() {}
+
+    public function markRead(Request $request)
+    {
+        $user = auth()->user();
+
+        if ($user) {
+            $notifications = $user->notifications()->orderBy('created_at', 'desc')->get();
+
+            return response()->json([
+                'status' => 'success',
+                'notifications' => $notifications,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+
+        // Unredable notification//
+
+        // $user = auth()->user();
+
+        // if ($user) {
+        //     // Retrieve unread notifications, order them by the created_at timestamp in descending order
+        //     $notifications = $user->unreadNotifications()->orderBy('created_at', 'desc')->get();
+
+        //     return response()->json([
+        //         'status' => 'success',
+        //         'notifications' => $notifications,
+        //     ]);
+        // } else {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'User not authenticated',
+        //     ], 401);
+        // }
+    }
+
+    public function readNotification()
+    {
+        $user = auth()->user();
+
+        if ($user) {
+            // Mark all unread notifications as read
+            $user->unreadNotifications->markAsRead();
+
+            // Retrieve and return the updated notifications
+            $notifications = $user->notifications;
+
+            return response()->json([
+                'status' => 'success',
+                'notifications' => $notifications,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+    }
+
     public function salounList($id)
     {
         $saloun = Provider::where('category_id', $id)->get();
         if ($saloun) {
             return ResponseMethod('success', $saloun);
         } else {
-            return ResponseErrorMethod('error', 'Provider data not found');
+            return ResponseErrorMessage('error', 'Provider data not found');
         }
     }
 
@@ -32,18 +97,28 @@ class HomeController extends Controller
         if ($salounService) {
             return ResponseMethod('success', $salounService);
         } else {
-            return ResponseErrorMethod('error', 'Provider service not found');
+            return ResponseErrorMessage('error', 'Provider service not found');
         }
     }
 
     public function serviceDetails($id)
     {
-        return Service::where('id', $id)->with('ServiceRating')->get();
+        $serviceDetails = Service::where('id', $id)->with('ServiceRating')->get();
+        if ($serviceDetails) {
+            return ResponseMethod('success', $serviceDetails);
+        } else {
+            return ResponseErrorMessage('error', 'Provider service not found');
+        }
     }
 
     public function selonDetails($id)
     {
-        return Provider::where('id', $id)->with('salonDetails', 'providerRating')->get();
+        $selonDetails = Provider::where('id', $id)->with('salonDetails', 'providerRating')->get();
+        if ($selonDetails) {
+            return ResponseMethod('success', $selonDetails);
+        } else {
+            return ResponseErrorMessage('error', 'Provider service not found');
+        }
     }
 
     public function catalouge($id)
@@ -53,7 +128,7 @@ class HomeController extends Controller
         if ($showCatloug) {
             return ResponseMethod('success', $showCatloug);
         } else {
-            return ResponseErrorMethod('error', 'This service catalouge not found');
+            return ResponseErrorMessage('error', 'This service catalouge not found');
         }
     }
 
@@ -69,7 +144,7 @@ class HomeController extends Controller
             'review' => $totlaReview,
             'rating' => $avgRating,
             'cataloug_details' => $catalougeDetails
-        ]);
+        ], 200);
     }
 
     public function bookingAppoinment($id)
@@ -91,7 +166,12 @@ class HomeController extends Controller
                 'provider' => $providerInfo,
                 'userDetails' => $userDetails,
                 'bookingHistory' => $bookingDetails
-            ]);
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'false',
+                'user unauthenticate'
+            ], 401);
         }
     }
 
@@ -111,7 +191,13 @@ class HomeController extends Controller
             ]);
 
             if ($post_booking) {
-                return ResponseMethod('success', 'Booking success');
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Booking success',
+                    'Notification' => sendNotification('Send your booking request', $updateBooking),
+                ], 200)(
+                    'success',
+                );
             } else {
                 return ResponseErrorMessage('error', 'Booking faile');
             }
@@ -129,7 +215,7 @@ class HomeController extends Controller
                 return response()->json([
                     'status' => 'pending',
                     'message' => 'pending your request'
-                ]);
+                ], 202);
             } else {
                 $providerInfo = Provider::where('id', $providerId)->first();
                 $userInfo = $bookingDetails->user_id;
@@ -139,7 +225,7 @@ class HomeController extends Controller
                     'provider' => $providerInfo,
                     'userDetails' => $userDetails,
                     'bookingHistory' => $bookingDetails
-                ]);
+                ], 200);
             }
         }
     }
@@ -187,7 +273,12 @@ class HomeController extends Controller
                 $updateBooking->time = $request->time;
                 $updateBooking->save();
                 if ($updateBooking) {
-                    return ResponseMethod('success', 'Booking update success');
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'update schedule success',
+                        'Notification' => sendNotification('user booking re-shedule', $updateBooking),
+                    ], 200);
+                    ResponseMethod('success', 'Booking update success');
                 } else {
                     return ResponseErrorMessage('false', 'Booking update faile');
                 }
@@ -205,7 +296,7 @@ class HomeController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'booking details' => $bookingDetails
-                ]);
+                ], 200);
             } else {
                 return ResponseErrorMessage('error', 'Data not found');
             }
@@ -226,7 +317,7 @@ class HomeController extends Controller
             'provider' => $provider,
             'review' => $totlaReview,
             'average rating' => $avgRating
-        ]);
+        ], 200);
     }
 
     public function searchCategory(Request $request)
@@ -237,7 +328,7 @@ class HomeController extends Controller
             return response()->json([
                 'status' => 'success',
                 'searcgResult' => $findCategory
-            ]);
+            ], 200);
         } else {
             return ResponseErrorMessage('error', 'Search data not found');
         }

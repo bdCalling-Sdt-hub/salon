@@ -12,15 +12,12 @@ return new class extends Migration {
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->integer('provider_id');
             $table->integer('user_id');
             $table->text('pyment_type');
             $table->string('amount');
             $table->text('currency');
             $table->text('tx_ref');
-            $table->string('time');
             $table->string('status');
-
             $table->timestamps();
         });
     }
