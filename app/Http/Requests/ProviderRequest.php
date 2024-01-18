@@ -11,7 +11,7 @@ class ProviderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -29,7 +29,6 @@ class ProviderRequest extends FormRequest
             'serviceOur' => ['required'],
             'photoGellary' => ['required'],
             'coverPhoto' => ['required'],
-            'phone' => ['required']
         ];
     }
 }

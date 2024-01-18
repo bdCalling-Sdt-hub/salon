@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\Provider;
 use App\Models\Service;
 use App\Models\ServiceRating;
+use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
 use DB;
 
@@ -20,8 +21,7 @@ class ProviderController extends Controller
 
     public function postProvider(ProviderRequest $request)
     {
-        $cover_photo = time() . '.' . $request->coverPhoto->extension();
-        $request->coverPhoto->move(public_path('images'), $cover_photo);
+        $auth_user = auth()->user()->id;
 
         $image = array();
         if ($files = $request->file('photoGellary')) {
@@ -31,42 +31,59 @@ class ProviderController extends Controller
                 $image[] = $gellery_photo;
             }
         }
+
+        $cover_photo = time() . '.' . $request->coverPhoto->extension();
+        $request->coverPhoto->move(public_path('images'), $cover_photo);
         $address = $request->address;
-        $post_provider = Provider::create([
-            'category_id' => $request->input('catId'),
-            'business_name' => $request->input('businessName'),
-            'address' => $request->input('address'),
-            'description' => $request->input('description'),
-            'available_service_our' => $request->input('serviceOur'),
-            'cover_photo' => $cover_photo,
-            'gallary_photo' => implode('|', $image),
-            'latitude' => $this->findLatitude($address),
-            'longitude' => $this->findLongitude($address),
-            'provider_id' => auth()->user()->id,
-        ]);
+        $post_provider = new Provider();
+        $post_provider->user_id = $auth_user;
+        $post_provider->category_id = $request->catId;
+        $post_provider->address = $request->address;
+        $post_provider->business_name = $request->businessName;
+        $post_provider->description = $request->description;
+        $post_provider->available_service_our = $request->serviceOur;
+        $post_provider->cover_photo = $cover_photo;
+        $post_provider->gallary_photo = implode('|', $image);
+        $post_provider->latitude = $this->findLatitude($address);
+        $post_provider->longitude = $this->findLongitude($address);
+        $post_provider->save();
         if ($post_provider) {
-            return response()->json([
-                'status' => 'success',
-                'message' => 'post added successfully',
-            ]);
+            return ResponseMethod('success', $post_provider);
         } else {
-            return response()->json([
-                'status' => 'false',
-                'message' => 'Provider add failed'
-            ]);
+            return ResponseErrorMessage('Add information faile');
         }
     }
 
     public function getProvider()
     {
-        $all_provider_data = Provider::orderBy('id', 'desc')->get();
-        if ($all_provider_data) {
-            return response()->json([
-                'status' => 'success',
-                'service' => $all_provider_data
-            ]);
-        } else {
-            return ResponseErrorMethod('error', 'Data not found');
+        {
+            $user_id = auth()->user()->id;
+            $service_catalouge = Provider::where('user_id', $user_id)->with('salonDetails')->get();
+
+            $decodedData = [];
+            foreach ($service_catalouge as $item) {
+                // $item['available_service_our'] = json_decode($item['available_service_our'], true);  // Decode only the 'module_class' field
+                $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
+                $decodedData[] = $item;  // Add the updated item to the new array
+            }
+
+            if ($service_catalouge) {
+                return response()->json([
+                    'status' => 'success',
+                    'provider' => $decodedData,
+                ], 200);
+            } else {
+                return ResponseErrorMessage('error', 'Data not found');
+            }
+
+            if ($single_catalouge) {
+                return response()->json([
+                    'status' => 'success',
+                    'Catalouge' => $single_catalouge
+                ], 200);
+            } else {
+                return ResponseErrorMessage('error', 'Catalouge not found');
+            }
         }
     }
 
@@ -77,7 +94,7 @@ class ProviderController extends Controller
             return response()->json([
                 'status' => 'success',
                 'provider' => $editProvider
-            ]);
+            ], 200);
         } else {
             return ResponseErrorMethod('error', 'Data not found');
         }
@@ -95,7 +112,7 @@ class ProviderController extends Controller
         if ($updateProvider) {
             return ResponseMethod('success', 'provider update success');
         } else {
-            return ResponseErrorMethod('error', 'provider update fail');
+            return ResponseErrorMessage('error', 'provider update fail');
         }
     }
 
@@ -111,7 +128,7 @@ class ProviderController extends Controller
         if ($updateProviderCoverImg) {
             return ResponseMethod('success', 'provider cover photo success');
         } else {
-            return ResponseErrorMethod('error', 'update provider cover photo fail');
+            return ResponseErrorMessage('error', 'update provider cover photo fail');
         }
     }
 
@@ -127,7 +144,7 @@ class ProviderController extends Controller
         if ($deleteProviderCoverImg == true) {
             return ResponseMethod('success', 'Provider cover images delete success');
         } else {
-            return ResponseErrorMethod('error', 'Provider cover images  delete faile');
+            return ResponseErrorMessage('error', 'Provider cover images  delete faile');
         }
     }
 
@@ -149,7 +166,7 @@ class ProviderController extends Controller
         if ($updateProviderCoverImg) {
             return ResponseMethod('success', 'update provider gallary photo success');
         } else {
-            return ResponseErrorMethod('error', 'update provider gallary photo fail');
+            return ResponseErrorMessage('error', 'update provider gallary photo fail');
         }
     }
 
@@ -164,7 +181,7 @@ class ProviderController extends Controller
         if ($deleteProviderGallaryImg == true) {
             return ResponseMethod('success', 'Provider gallary images delete success');
         } else {
-            return ResponseErrorMethod('error', 'Provider gallary images  delete faile');
+            return ResponseErrorMessage('error', 'Provider gallary images  delete faile');
         }
     }
 
@@ -174,7 +191,7 @@ class ProviderController extends Controller
         if ($deleteProvider == true) {
             return ResponseMethod('success', 'Provider delete success');
         } else {
-            return ResponseErrorMethod('error', 'Provider delete faile');
+            return ResponseErrorMessage('error', 'Provider delete faile');
         }
     }
 
@@ -190,9 +207,10 @@ class ProviderController extends Controller
                 $image[] = $service_gellery_photo;
             }
         }
+        $auth_user = auth()->user()->id;
         $post_service = Service::create([
             'category_id' => $request->input('catId'),
-            'provider_id' => $request->input('providerId'),
+            'provider_id' => $request->providerid,
             'service_name' => $request->input('serviceName'),
             'service_description' => $request->input('description'),
             'gallary_photo' => implode('|', $image),
@@ -204,22 +222,23 @@ class ProviderController extends Controller
         ]);
 
         if ($post_service) {
-            return ResponseMethod('success', 'Service add successfully');
+            return ResponseMethod('success', $post_service);
         } else {
-            return ResponseErrorMethod('error', 'Service add faile');
+            return ResponseErrorMessage('error', 'Service add faile');
         }
     }
 
     public function getService()
     {
-        $all_service = Service::orderBy('id', 'desc')->get();
+        $auth_user = auth()->user()->id;
+        $all_service = Service::where('provider_id', $auth_user)->get();
         if ($all_service) {
             return response()->json([
                 'status' => 'success',
                 'service' => $all_service
-            ]);
+            ], 200);
         } else {
-            return ResponseErrorMethod('error', 'Service data not found');
+            return ResponseErrorMessage('error', 'Service data not found');
         }
     }
 
@@ -230,9 +249,9 @@ class ProviderController extends Controller
             return response()->json([
                 'status' => 'success',
                 'service' => $editService
-            ]);
+            ], 200);
         } else {
-            return ResponseErrorMethod('error', 'Service data not found');
+            return ResponseErrorMessage('error', 'Service data not found');
         }
     }
 
@@ -253,7 +272,7 @@ class ProviderController extends Controller
         if ($updateService) {
             return ResponseMethod('success', 'update service success');
         } else {
-            return ResponseErrorMethod('error', 'update service faile');
+            return ResponseErrorMessage('error', 'update service faile');
         }
     }
 
@@ -367,8 +386,12 @@ class ProviderController extends Controller
                 $updateBooking->date = $request->date;
                 $updateBooking->time = $request->time;
                 $updateBooking->save();
+
                 if ($updateBooking) {
-                    return ResponseMethod('success', 'Booking update success');
+                    return response()->json([
+                        'status' => 'success',
+                        'Notification' => sendNotification('Booking re-shedule', $updateBooking),
+                    ], 200);
                 } else {
                     return ResponseErrorMessage('false', 'Booking update faile');
                 }
@@ -378,11 +401,16 @@ class ProviderController extends Controller
 
     public function bookingAccept(Request $request)
     {
+        $bookingInfo = Booking::where('id', $request->id)->get();
         $updateStatus = Booking::find($request->id);
         $updateStatus->status = $request->status;
         $updateStatus->save();
         if ($updateStatus) {
-            return ResponseMethod('success', 'Booking status update success');
+            return response()->json([
+                'status' => 'success',
+                'Notification' => sendNotification('Booking accepted', $updateStatus),
+                'message' => 'Accept your request'
+            ], 200);
         } else {
             return ResponseErrorMessage('error', 'Booking status update faile');
         }

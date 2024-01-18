@@ -8,47 +8,58 @@ use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
-    public function showCategory(){
-        $categories = Category::all();
-        return ResponseMethod('Category list',$categories);
+    public function showCategory()
+    {
+        $user = auth()->user();
+
+        if ($user->userType = 'provider' || $user->userType = 'user' || $user->userType = 'admin') {
+            $categories = Category::all();
+            return ResponseMethod('Category list', $categories);
+        } else {
+            return response()->json([
+                'message' => 'you are not authorized'
+            ]);
+        }
     }
 
-    public function showSingleCategory($id){
-        $category = Category::where('id',$id)->first();
-        if($category){
-            return ResponseMethod('Category list',$category);
-        }
-        else{
+    public function showSingleCategory($id)
+    {
+        $category = Category::where('id', $id)->first();
+        if ($category) {
+            return ResponseMethod('Category list', $category);
+        } else {
             return ResponseMessage('Category Not Exist');
         }
-
     }
 
-    public function addCategory(Request $request){
-        $validator = Validator::make($request->all(),[
+    public function addCategory(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'category_name' => 'required|string|min:2|max:15|unique:categories',
             'category_image' => 'required|mimes:jpg,png,jpeg,gif,svg|max:2048',
         ]);
         if ($validator->fails()) {
-            return response()->json($validator->errors(),400);
+            return response()->json($validator->errors(), 400);
         }
         $category = new Category();
         $category->category_name = $request->category_name;
-        if ($request->file('category_image')){
+        if ($request->file('category_image')) {
             $category->category_image = $this->saveImage($request);
         }
         $category->save();
-        return ResponseMethod('Category add successfully',$category);
+        return ResponseMethod('Category add successfully', $category);
     }
-    public function updateCategory(Request $request,$id){
-        $category = Category::where('id',$id)->first();
+
+    public function updateCategory(Request $request, $id)
+    {
+        $category = Category::where('id', $id)->first();
         if ($category) {
-            $validator = Validator::make($request->all(),[
+            $validator = Validator::make($request->all(), [
                 'category_name' => 'string|min:2|max:15',
                 'category_image' => 'mimes:jpg,png,jpeg,gif,svg|max:2048',
             ]);
             if ($validator->fails()) {
-                return response()->json($validator->errors(),400);
+                return response()->json($validator->errors(), 400);
             }
 
             $category->category_name = $request->category_name;
@@ -64,10 +75,10 @@ class CategoryController extends Controller
         }
     }
 
-    public function deleteCategory($id){
-
-        $category = Category::where('id',$id)->first();
-        if($category){
+    public function deleteCategory($id)
+    {
+        $category = Category::where('id', $id)->first();
+        if ($category) {
             if ($category->category_image) {
                 unlink($category->category_image);
             }
@@ -77,7 +88,8 @@ class CategoryController extends Controller
         return responseMessage('Category Not Found');
     }
 
-    protected function saveImage($request){
+    protected function saveImage($request)
+    {
         $image = $request->file('category_image');
         $imageName = rand() . '.' . $image->getClientOriginalExtension();
         $directory = 'adminAsset/category-image/';
@@ -85,5 +97,4 @@ class CategoryController extends Controller
         $image->move($directory, $imageName);
         return $imgUrl;
     }
-
 }

@@ -22,7 +22,6 @@ class CatalougeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'providerId' => ['required'],
             'serviceId' => ['required'],
             'catalougName' => ['required'],
             'description' => ['required'],
