@@ -43,18 +43,23 @@ Route::get('/profile', [UserController::class, 'profile']);
 Route::post('/resendOtp', [UserController::class, 'resendOtp']);
 
 Route::post('/getOtp', [UserController::class, 'sendOtp']);
+Route::post('/change-password', [UserController::class, 'changePassword']);
 
 Route::get('/refreshToken', [UserController::class, 'refreshToken']);
 Route::group(['middleware' => 'api'], function ($routes) {
     Route::get('/logout', [UserController::class, 'logout']);
     Route::post('/reset-password', [UserController::class, 'resetPassword']);
     Route::post('/profileUpdate', [UserController::class, 'profileUpdate']);
+    Route::post('/profileUpdate/img', [UserController::class, 'updateProfileImg']);
+
+    Route::get('/notification', [HomeController::class, 'markRead']);
+    Route::get('/read-at/notification', [HomeController::class, 'readNotification']);
     // Route::post('/send-notification', [UserController::class, 'sendNotification']);
 });
 
 Route::middleware(['admin'])->group(function () {
     // category
-    Route::get('show-category', [CategoryController::class, 'showCategory']);
+
     Route::get('single-category/{id}', [CategoryController::class, 'showSingleCategory']);
     Route::post('add-category', [CategoryController::class, 'addCategory']);
     Route::post('update-category/{id}', [CategoryController::class, 'updateCategory']);
@@ -124,7 +129,7 @@ Route::middleware(['admin'])->group(function () {
 
 Route::middleware(['provider'])->group(function () {
     // ======================Provider =======================//
-
+    Route::get('show-category', [CategoryController::class, 'showCategory']);
     Route::post('/post/provider', [ProviderController::class, 'postProvider']);
     Route::get('/get/provider', [ProviderController::class, 'getProvider']);
     Route::get('/edit/provider/{id}', [ProviderController::class, 'editProvider']);
@@ -150,7 +155,7 @@ Route::middleware(['provider'])->group(function () {
     // ====================CATALOUG ==============================//
 
     Route::post('/post/catalouge', [CataloguController::class, 'postCataloug']);
-    Route::get('/get/catalouge', [CataloguController::class, 'getCataloug']);
+    Route::get('/get/catalouge/{id}', [CataloguController::class, 'getCataloug']);
     Route::get('/get/singel/catalouge/{id}', [CataloguController::class, 'singleCataloug']);
     Route::post('/update/catalouge', [CataloguController::class, 'updateCatalouge']);
     Route::post('/update/catalouge/image', [CataloguController::class, 'updateCatalougeImg']);
@@ -169,9 +174,19 @@ Route::middleware(['provider'])->group(function () {
     Route::get('/approved/booking', [ProviderController::class, 'approvedBooking']);
     Route::get('/booking/history', [ProviderController::class, 'bookingHistory']);
     Route::get('/review/provider', [ProviderController::class, 'reviewProvider']);
+
+    // ========================== EARNING =========================//
+
+    Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
+    Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
+    Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
 });
 
 Route::middleware(['user'])->group(function () {
+    // category route
+    Route::get('single-category/{id}', [CategoryController::class, 'showSingleCategory']);
+    Route::get('show-category', [CategoryController::class, 'showCategory']);
+
     // user
     Route::post('/saveRating', [UserController::class, 'saveRating']);
     Route::post('/updateRating/{id}', [UserController::class, 'updateServiceRating']);
@@ -208,8 +223,6 @@ Route::middleware(['user'])->group(function () {
 Route::get('appointment-list', [GetController::class, 'getAppointmentList']);
 
 Route::get('/search/category', [HomeController::class, 'searchCategory']);
-
-Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
 
 // ========================= PYMENT METHOD ROUTE =======================//
 

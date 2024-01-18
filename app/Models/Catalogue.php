@@ -27,4 +27,9 @@ class Catalogue extends Model
     {
         return $this->hasMany(ServiceRating::class);
     }
+
+    public function salonDetails()
+    {
+        return $this->belongsTo(Service::class);
+    }
 }

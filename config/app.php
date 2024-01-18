@@ -155,6 +155,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+        Geocoder\Laravel\Providers\GeocoderService::class,
     ])->toArray(),
 
     /*
@@ -169,5 +170,6 @@ return [
      */
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'Carbon' => Illuminate\Support\Carbon::class,
     ])->toArray(),
 ];

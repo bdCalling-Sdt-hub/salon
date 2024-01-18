@@ -17,11 +17,6 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
-        'image',
-        'phone_number',
-        'address',
-        'user_type',
-        'google_id',
     ];
 
     protected $hidden = [
@@ -43,8 +38,8 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function login_activities()
-    {
-        return $this->hasMany(LoginActivity::class, 'user_id');
-    }
+    // public function login_activities()
+    // {
+    //     return $this->hasMany(LoginActivity::class, 'user_id');
+    // }
 }

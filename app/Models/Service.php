@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\CatCatalogue;
 use App\Models\Provider;
 use App\Models\ServiceRating;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +32,6 @@ class Service extends Model
 
     public function salonDetails()
     {
-        return $this->belongsTo(Provider::class);
+        return $this->hasMany(Catalogue::class);
     }
 }
