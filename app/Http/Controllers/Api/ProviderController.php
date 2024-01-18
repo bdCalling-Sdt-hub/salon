@@ -35,7 +35,6 @@ class ProviderController extends Controller
         $cover_photo = time() . '.' . $request->coverPhoto->extension();
         $request->coverPhoto->move(public_path('images'), $cover_photo);
         $address = $request->address;
-
         $post_provider = new Provider();
         $post_provider->user_id = $auth_user;
         $post_provider->category_id = $request->catId;

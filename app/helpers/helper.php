@@ -10,7 +10,7 @@ function ResponseMethod($status, $message)
     ], 200);
 }
 
-function ResponseErrorMessage($status, $message)
+function ResponseErroMethod($status, $message)
 {
     return response()->json([
         'status' => $status,
@@ -32,3 +32,18 @@ function sendNotification($message, $data)
 }
 
 // ======================TOKENT=============//
+function sendNotification($message, $data=null, $payment = null)
+    {
+        try {
+            event(new SendNotification($message, $data));
+
+            return response()->json([
+                'success' => true,
+                'msg' => 'Notification Added',
+                'data' => $data,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+        }
+    }
+?>

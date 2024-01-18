@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\Provider;
+use App\Models\ServiceRating;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class GetController extends Controller
 {
@@ -97,34 +101,169 @@ class GetController extends Controller
         }
         return ResponseMessage('User is empty');
     }
-    //search provider request
-    public function searchProviderRequest($name=null,$id = null){
 
-        $query = User::where('user_type', 'provider');
+    //block user
+    public function deleteUser($id){
+
+        $user=  User::find($id);
+        $user ->delete();
+        if(!is_null($user)){
+            return ResponseMessage('User deleted Successfully');
+        }
+        return ResponseMessage('User does not exist');
+    }
+
+    //search provider request
+    public function searchProviderRequest($name){
+        $query = User::where('user_type', 'provider')->where('user_status',0);
 
         if ($name) {
             $query->where('name', 'like', '%' . $name . '%');
         }
-        if ($id) {
-            $query->Where('id', $id);
+        $users = $query->get();
+        return ResponseMethod('provider Request list', $users);
+    }
+
+    //search provider block
+    public function searchProviderBlock($name=null){
+        if (!is_null($name)){
+            $block_provider = User::where('user_type', 'provider');
+            if (!is_null($block_provider)){
+                $block_provider->where('name', 'like', '%' . $name . '%');
+                return ResponseMethod('Block Provider data', $block_provider);
+            }
+            return ResponseMessage('block provider not found');
+        }
+        return ResponseMessage('write name which one you want to find');
+    }
+
+    //search provider
+    public function searchProvider($name){
+        if (!is_null($name)){
+
+        }
+        $query = Provider::where('user_type', 'provider');
+        if ($name) {
+            $query->where('name', 'like', '%' . $name . '%');
         }
         $users = $query->get();
-
         return ResponseMethod('provider data', $users);
     }
 
+    //search user
+    public function searchUser($name=null){
+        if (!is_null($name)){
+            $user = User::where('user_type', 'user')->where('name', 'like', '%' . $name . '%')->get();
+
+            if ($user->count() > 0){
+                return ResponseMethod('user data', $user);
+            }
+            return ResponseMessage('user not found');
+        }
+        return ResponseMessage('provide name for search');
+    }
+
+    //search salon
+
+    public function searchSalon($name=null){
+
+        if (!is_null($name)) {
+            $users = Provider::where('business_name', 'like', '%' . $name . '%')->get();
+
+            if ($users->count() > 0) {
+                return ResponseMethod('salon data', $users);
+            }
+            return ResponseMessage('salon not found');
+        }
+        return ResponseMessage('provide name for searching');
+    }
+
+
+
     public function getAppointmentList(){
-       //
-
-//        $data = Country::join('state', 'state.country_id', '=', 'country.country_id')
-//            ->join('city', 'city.state_id', '=', 'state.state_id')
-//            ->get(['country.country_name', 'state.state_name', 'city.city_name']);
-
         $booking = Booking::select('bookings.*', 'users.name as client_name','providers.business_name as name')
             ->join('users', 'bookings.user_id', '=', 'users.id')
             ->join('providers','bookings.provider_id', '=', 'providers.id')
             ->first();
-        return $booking;
+        if ($booking){
+            return response()->json([
+                'status'=>200,
+                'message' => 'booking list',
+                'data' => $booking,
+            ]);
+        }else{
+            return response()->json([
+                'status' => 404,
+                'message' => 'Data Not found',
+                'data' => 'Not found',
+            ]);
+        }
+    }
 
+    public function getReviews(){
+//        $review = ServiceRating::select('service_ratings.*','users.name as provider_name')
+//            ->join('users','service_ratings.user_id','=','users.id')
+//            ->join('services','service_ratings.service_id','=','services.id')
+//            ->join('providers','services.provider_id', '=', 'providers.id')
+//            ->join('users','providers.provider_id', '=' , 'users.id')
+//            ->get();
+//        return $review;
+        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
+            ->join('services', 'service_ratings.service_id', '=', 'services.id')
+            ->join('providers', 'services.provider_id', '=', 'providers.id')
+            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
+            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
+            ->get();
+        return $reviews;
+    }
+
+    public function getReviewsByProviderId($providerId){
+        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
+            ->join('services', 'service_ratings.service_id', '=', 'services.id')
+            ->join('providers', 'services.provider_id', '=', 'providers.id')
+            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
+            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
+            ->where('provider.id', '=', $providerId) // Filter by provider ID
+            ->get();
+        return $reviews;
+    }
+
+    //review average rating
+
+    public function averageReviewRating($providerId){
+        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
+            ->join('services', 'service_ratings.service_id', '=', 'services.id')
+            ->join('providers', 'services.provider_id', '=', 'providers.id')
+            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
+            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
+            ->where('provider.id', '=', $providerId) // Filter by provider ID
+            ->get();
+        return $reviews;
+    }
+            public function test($latitude,$longitude){
+
+                $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
+            * cos( radians( latitude ) )
+            * cos( radians( longitude ) - radians('$longitude') )
+            + sin( radians('$latitude') )
+            * sin( radians( latitude ) ) ) ) AS distance"))->havingRaw('distance < 300')->orderBy('distance')
+                    ->get();
+                return ResponseMethod('Nearest Salon Data',$salon);
+            }
+
+    public function bookingHistory(){
+        $booking_history = Payment::all();
+        if ($booking_history){
+            return response()->json([
+                'status' => 'success',
+                'data' => $booking_history,
+            ]);
+        }
+        else{
+            return response()->json([
+                'status' => 'false',
+                'message' => 'Booking history is empty'
+            ]);
+        }
     }
 }

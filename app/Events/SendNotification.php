@@ -16,11 +16,7 @@ class SendNotification implements ShouldBroadcast
 
     public $message,$userId;
 
-    /**
-     * Create a new event instance.
-     *
-     * @return void
-     */
+
     public function __construct($message,$userId)
     {
         //
@@ -28,11 +24,7 @@ class SendNotification implements ShouldBroadcast
         $this->userId = $userId;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
-     */
+
     public function broadcastOn()
     {
         // return new PrivateChannel('channel-name');

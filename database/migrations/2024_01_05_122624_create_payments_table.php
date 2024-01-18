@@ -4,27 +4,30 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('service_ratings', function (Blueprint $table) {
+        Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
-            $table->integer('service_id');
-            $table->integer('provider_id');
-            $table->integer('catalogue_id')->nullable();
-            $table->text('review');
-            $table->double('rating', 5, 1);
-            $table->integer('status')->default(0);
+            $table->text('payment_type');
+            $table->string('amount');
+            $table->string('email');
+            $table->string('name');
+            $table->text('currency');
+            $table->text('tx_ref');
+            $table->string('status');
             $table->timestamps();
         });
     }
+
     public function down(): void
     {
-        Schema::dropIfExists('service_ratings');
+        Schema::dropIfExists('payments');
     }
 };
