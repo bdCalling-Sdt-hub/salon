@@ -16,12 +16,12 @@ return new class extends Migration {
             $table->integer('provider_id');
             $table->text('service_name');
             $table->text('service_description');
-            $table->string('gallary_photo');
+            $table->json('gallary_photo');
             $table->text('service_duration');
             $table->text('salon_service_charge');
             $table->text('home_service_charge');
             $table->string('set_booking_mony');
-            $table->text('available_service_our');
+            $table->json('available_service_our');
             $table->timestamps();
         });
     }

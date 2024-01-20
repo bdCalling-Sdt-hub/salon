@@ -308,13 +308,23 @@ class HomeController extends Controller
         $topProvider = ServiceRating::orderBy('rating', 'desc')->limit(1)->first();
         $reviewProviderId = $topProvider->provider_id;
         $provider = Provider::where('id', $reviewProviderId)->with('providerRating')->first();
+        $provider = Provider::where('id', $reviewProviderId)->with('providerRating')->first();
+        $decodedData = [];
+
+        if ($provider) {
+            $provider['available_service_our'] = json_decode($provider['available_service_our'], true);
+            $provider['gallary_photo'] = json_decode($provider['gallary_photo'], true);
+
+            $decodedData[] = $provider;
+        }
+
         $ProviderId = $provider->id;
         $totlaReview = ServiceRating::where('provider_id', $ProviderId)->count();
         $sumRating = ServiceRating::where('provider_id', $ProviderId)->sum('rating');
         $avgRating = $sumRating / $totlaReview;
         return response()->json([
             'status' => 'success',
-            'provider' => $provider,
+            'provider' => $decodedData,
             'review' => $totlaReview,
             'average rating' => $avgRating
         ], 200);
