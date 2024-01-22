@@ -16,7 +16,6 @@ use App\Http\Controllers\WebsitePagesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -47,11 +46,18 @@ Route::group(['middleware' => 'api'], function ($routes) {
     // Route::post('/send-notification', [UserController::class, 'sendNotification']);
 });
 
+// website pages
+Route::get('show-website-pages', [WebsitePagesController::class, 'showWebsitePages']);
+Route::get('show-single-pages/{id}', [WebsitePagesController::class, 'showSinglePages']);
+Route::post('add-website-pages', [WebsitePagesController::class, 'addWebsitePage']);
+Route::post('update-website-pages/{id}', [WebsitePagesController::class, 'updateWebsitePage']);
+Route::get('delete-website-pages/{id}', [WebsitePagesController::class, 'deleteWebsitePage']);
+
 Route::middleware(['admin'])->group(function () {
     // category
 
     Route::get('single-category/{id}', [CategoryController::class, 'showSingleCategory']);
-    Route::post('add-category', [CategoryController::class, 'addCategory']);
+    //  Route::post('add-category', [CategoryController::class, 'addCategory']);
     Route::post('update-category/{id}', [CategoryController::class, 'updateCategory']);
     Route::get('delete-category/{id}', [CategoryController::class, 'deleteCategory']);
 
@@ -61,13 +67,6 @@ Route::middleware(['admin'])->group(function () {
     Route::post('add-package', [PackageController::class, 'addPackage']);
     Route::post('update-package/{id}', [PackageController::class, 'updatePackage']);
     Route::get('delete-package/{id}', [PackageController::class, 'deletePackage']);
-
-    // website pages
-    Route::get('show-website-pages', [WebsitePagesController::class, 'showWebsitePages']);
-    Route::get('show-single-pages/{id}', [WebsitePagesController::class, 'showSinglePages']);
-    Route::post('add-website-pages', [WebsitePagesController::class, 'addWebsitePage']);
-    Route::post('update-website-pages/{id}', [WebsitePagesController::class, 'updateWebsitePage']);
-    Route::get('delete-website-pages/{id}', [WebsitePagesController::class, 'deleteWebsitePage']);
 
     // Onboard pages
     Route::post('add-onboard', [OnboardController::class, 'addOnboard']);
@@ -119,7 +118,7 @@ Route::middleware(['admin'])->group(function () {
 
 Route::middleware(['provider'])->group(function () {
     // ======================Provider =======================//
-    Route::get('show-category', [CategoryController::class, 'showCategory']);
+    // Route::get('show-category', [CategoryController::class, 'showCategory']);
     Route::post('/post/provider', [ProviderController::class, 'postProvider']);
     Route::get('/get/provider', [ProviderController::class, 'getProvider']);
     Route::get('/edit/provider/{id}', [ProviderController::class, 'editProvider']);
@@ -171,18 +170,17 @@ Route::middleware(['provider'])->group(function () {
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
     Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
 });
-
+Route::get('show-category', [CategoryController::class, 'showCategory']);
 Route::middleware(['user'])->group(function () {
     // category route
     Route::get('single-category/{id}', [CategoryController::class, 'showSingleCategory']);
-    Route::get('show-category', [CategoryController::class, 'showCategory']);
 
     // user
     Route::post('/saveRating', [UserController::class, 'saveRating']);
     Route::post('/updateRating/{id}', [UserController::class, 'updateServiceRating']);
 
     // find Nearest Location
-    Route::get('/find-nearest-location', [DistanceController::class, 'findNearestLocation']);
+    Route::get('/find-nearest-location/{lat}/{long}', [DistanceController::class, 'findNearestLocation']);
 
     // ==================== USER HOME PAGE   ============================//
 
@@ -206,6 +204,9 @@ Route::middleware(['user'])->group(function () {
     Route::post('/re-schdule', [HomeController::class, 'reSchedule']);
     Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
     Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
+
+    // website pages
+    Route::get('show-website-pages', [WebsitePagesController::class, 'showWebsitePages']);
 });
 
 // ====================Appointment from dashboard ==============================//

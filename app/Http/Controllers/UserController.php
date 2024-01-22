@@ -115,7 +115,7 @@ class UserController extends Controller
             'access_token' => $token,
             'user_type' => auth()->user()->user_type,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 600000
+            'expires_in' => auth()->factory()->getTTL() * 3600000000000
         ], 200);
     }
 
@@ -191,7 +191,7 @@ class UserController extends Controller
         $currentTime = time();
         $time = $otpData->created_at;
 
-        if ($currentTime >= $time && $time >= $currentTime - (180 + 5)) {
+        if ($currentTime >= $time && $time >= $currentTime - (60 + 5)) {
             return response()->json(['success' => false, 'msg' => 'Please try after some time'], 429);
         } else {
             $this->Otp($user);
@@ -202,6 +202,12 @@ class UserController extends Controller
     public function resetPassword(request $request)
     {
         $check_user = auth()->user()->id;
+        if (!$check_user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'user is not authenticated',
+            ], 404);
+        }
         $request->validate([
             'password' => 'required|string|min:6|confirmed'
         ]);
@@ -238,35 +244,48 @@ class UserController extends Controller
         if (auth()->user()) {
             $check_user = auth()->user()->id;
             $validator = Validator::make($request->all(), [
-                'name' => 'string',
-                'email' => 'email|string',
-                //  'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
+                'name' => 'required|string',
+                'email' => 'required|email|string',
+                'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
             ]);
+
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 400);
             }
 
             $user = User::find($check_user);
-            $user->id = $check_user;
+
+            if (!$user) {
+                return response()->json(['status' => false, 'message' => 'User not found']);
+            }
+
             $user->name = $request->name;
             $user->email = $request->email;
             $user->address = $request->address;
+
+            if ($request->phone_number == '') {
+                $request->phone_number = $user->phone_number;
+            }
+
             $user->phone_number = $request->phone_number;
 
-            if ($request->file('image')) {
-                unlink($user->image);
+            if ($request->file('UserImage')) {
+                // Check if the old image file exists before attempting to unlink it
+                if (file_exists($user->image)) {
+                    // unlink($user->image);
+                }
                 $user->image = $this->saveImage($request);
             }
             $user->update();
-            return response()->json(['status' => true, 'message' => 'user is updated', 'Data' => $user]);
+            return response()->json(['status' => true, 'message' => 'User is updated', 'Data' => $user]);
         } else {
-            return response()->json(['status' => false, 'message' => 'User is not Authenticated']);
+            return response()->json(['status' => false, 'message' => 'User is not authenticated']);
         }
     }
 
     protected function saveImage($request)
     {
-        $image = $request->file('image');
+        $image = $request->file('UserImage');
         $imageName = rand() . '.' . $image->getClientOriginalExtension();
         $directory = 'Asset/user-image/';
         $imgUrl = $directory . $imageName;

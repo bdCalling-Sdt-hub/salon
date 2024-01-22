@@ -42,14 +42,14 @@ class ProviderController extends Controller
         $post_provider->address = $request->address;
         $post_provider->business_name = $request->businessName;
         $post_provider->description = $request->description;
-        $post_provider->available_service_our = json_encode($request->serviceOur);
+        $post_provider->available_service_our = $request->serviceOur;
         $post_provider->cover_photo = $cover_photo;
-        $post_provider->gallary_photo = json_encode($image);  // implode('|', $image);
+        $post_provider->gallary_photo = json_encode($image);
         $post_provider->latitude = $this->findLatitude($address);
         $post_provider->longitude = $this->findLongitude($address);
         $post_provider->save();
         if ($post_provider) {
-            return ResponseMethod('success', json_decode($post_provider));
+            return ResponseMethod('success', $post_provider);
         } else {
             return ResponseErrorMessage('Add information faile');
         }
@@ -57,32 +57,45 @@ class ProviderController extends Controller
 
     public function getProvider()
     {
-        {
-            $user_id = auth()->user()->id;
-            $getProvideer = Provider::where('user_id', $user_id)->with('salonDetails')->get();
-
-            $decodedData = [];
-            foreach ($getProvideer->toArray() as $item) {
-                $item['available_service_our'] = json_decode($item['available_service_our'], true);
-                $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
-                // Loop through salon_details and decode available_service_our for each item
-                foreach ($item['salon_details'] as &$salonDetail) {
-                    $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
-                    $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
-                }
-
-                $decodedData[] = $item;  // Add the updated item to the new array
-            }
-
-            if ($getProvideer) {
-                return response()->json([
-                    'status' => 'success',
-                    'provider' => $decodedData,
-                ], 200);
-            } else {
-                return ResponseErrorMessage('error', 'Data not found');
-            }
+        $user_id = auth()->user()->id;
+        $getProvider = Provider::where('user_id', $user_id)->with('salonDetails')->get();
+        // $all_provider_data = Provider::where('user_id', $user_id)->get();
+        $decodedData = [];
+        foreach ($getProvider as $item) {
+            $item['available_service_our'] = json_decode($item['available_service_our'], true);  // Decode only the 'module_class' field
+            $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
+            $decodedData[] = $item;  // Add the updated item to the new array
         }
+
+        if ($getProvider) {
+            return response()->json([
+                'status' => 'success',
+                'provider' => $decodedData,
+            ], 200);
+        } else {
+            return ResponseErrorMessage('error', 'Data not found');
+        }
+
+        // {
+        //     $user_id = auth()->user()->id;
+        //     $getProvider = Provider::where('user_id', $user_id)->with('salonDetails')->get();
+
+        //     // Use map to transform the collection
+        //     $i = 0;
+        //     foreach ($getProvider as &$item) {
+        //         echo $i++ . $item;
+        //         $item['available_service_our'] = json_decode($item['available_service_our'], true);
+        //     }
+
+        //     if ($getProvider) {
+        //         return response()->json([
+        //             'status' => 'success',
+        //             'provider' => $getProvider,
+        //         ], 200);
+        //     } else {
+        //         return ResponseErrorMessage('error', 'Data not found');
+        //     }
+        // }
     }
 
     public function editProvider($id)
@@ -216,7 +229,7 @@ class ProviderController extends Controller
             'salon_service_charge' => $request->input('serviceCharge'),
             'home_service_charge' => $request->input('homServiceCharge'),
             'set_booking_mony' => $request->input('bookingMony'),
-            'available_service_our' => json_encode($request->input('serviceHour')),
+            'available_service_our' => $request->input('serviceHour'),
         ]);
 
         if ($post_service) {
