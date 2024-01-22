@@ -12,9 +12,9 @@ use App\Models\Provider;
 use App\Models\Service;
 use App\Models\ServiceRating;
 use App\Notifications\UserNotification;
+use Geocoder\Laravel\Facades\Geocoder;
 use Illuminate\Http\Request;
 use DB;
-use Geocoder\Laravel\Facades\Geocoder;
 
 class ProviderController extends Controller
 {
@@ -22,13 +22,7 @@ class ProviderController extends Controller
 
     public function postProvider(ProviderRequest $request)
     {
-
-
-//         $cover_photo = time() . '.' . $request->coverPhoto->extension();
-//         $request->coverPhoto->move(public_path('images'), $cover_photo);
-
         $auth_user = auth()->user()->id;
-
 
         $image = array();
         if ($files = $request->file('photoGellary')) {
@@ -42,22 +36,6 @@ class ProviderController extends Controller
         $cover_photo = time() . '.' . $request->coverPhoto->extension();
         $request->coverPhoto->move(public_path('images'), $cover_photo);
         $address = $request->address;
-
-//         $image_decode = json_encode($image);
-//         $service_hour = $request->serviceOur;
-//         $decode = json_decode($service_hour, true);
-//         $post_provider = Provider::create([
-//             'category_id' => $request->input('catId'),
-//             'business_name' => $request->input('businessName'),
-//             'address' => $request->input('address'),
-//             'description' => $request->input('description'),
-//             'available_service_our' => $decode,
-//             'cover_photo' => $cover_photo,
-//             'gallary_photo' => $image_decode,
-//             'latitude' => $this->findLatitude($address),
-//             'longitude' => $this->findLongitude($address),
-//             'provider_id' => auth()->user()->id,
-//         ]);
         $post_provider = new Provider();
         $post_provider->user_id = $auth_user;
         $post_provider->category_id = $request->catId;
@@ -66,7 +44,7 @@ class ProviderController extends Controller
         $post_provider->description = $request->description;
         $post_provider->available_service_our = $request->serviceOur;
         $post_provider->cover_photo = $cover_photo;
-        $post_provider->gallary_photo = implode('|', $image);
+        $post_provider->gallary_photo = json_encode($image);
         $post_provider->latitude = $this->findLatitude($address);
         $post_provider->longitude = $this->findLongitude($address);
         $post_provider->save();
@@ -79,47 +57,30 @@ class ProviderController extends Controller
 
     public function getProvider()
     {
-        {
-            $user_id = auth()->user()->id;
-            $service_catalouge = Provider::where('user_id', $user_id)->with('salonDetails')->get();
+        $user_id = auth()->user()->id;
 
-            $decodedData = [];
-            foreach ($service_catalouge as $item) {
-                // $item['available_service_our'] = json_decode($item['available_service_our'], true);  // Decode only the 'module_class' field
-                $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
-                $decodedData[] = $item;  // Add the updated item to the new array
+        $getProvider = Provider::where('user_id', $user_id)->with('salonDetails')->get();
+        $decodedData = [];
+        foreach ($getProvider->toArray() as $item) {
+            $item['available_service_our'] = json_decode($item['available_service_our'], true);
+            $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
+
+            // Loop through salon_details and decode available_service_our for each item
+            foreach ($item['salon_details'] as &$salonDetail) {
+                $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
+                $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
             }
 
-            if ($service_catalouge) {
-                return response()->json([
-                    'status' => 'success',
-                    'provider' => $decodedData,
-                ], 200);
-            } else {
-                return ResponseErrorMessage('error', 'Data not found');
-            }
-
-            if ($single_catalouge) {
-                return response()->json([
-                    'status' => 'success',
-                    'Catalouge' => $single_catalouge
-                ], 200);
-            } else {
-                return ResponseErrorMessage('error', 'Catalouge not found');
-            }
+            $decodedData[] = $item;  // Add the updated item to the new array
         }
-    }
 
-    public function editProvider($id)
-    {
-        $editProvider = Provider::where('id', $id)->first();
-        if ($editProvider) {
+        if ($getProvider) {
             return response()->json([
                 'status' => 'success',
-                'provider' => $editProvider
+                'provider' => $decodedData,
             ], 200);
         } else {
-            return ResponseErrorMethod('error', 'Data not found');
+            return ResponseErrorMessage('error', 'Data not found');
         }
     }
 
@@ -130,7 +91,7 @@ class ProviderController extends Controller
         $updateProvider->business_name = $request->businessName;
         $updateProvider->address = $request->address;
         $updateProvider->description = $request->description;
-        $updateProvider->available_service_our = $request->serviceOur;
+        $updateProvider->available_service_our = json_encode($request->serviceOur);
         $updateProvider->save();
         if ($updateProvider) {
             return ResponseMethod('success', 'provider update success');
@@ -183,7 +144,7 @@ class ProviderController extends Controller
         }
 
         $updateProviderCoverImg = Provider::find($request->id);
-        $updateProviderCoverImg->gallary_photo = $image;
+        $updateProviderCoverImg->gallary_photo = json_encode($image);
         $updateProviderCoverImg->save();
 
         if ($updateProviderCoverImg) {
@@ -236,7 +197,7 @@ class ProviderController extends Controller
             'provider_id' => $request->providerid,
             'service_name' => $request->input('serviceName'),
             'service_description' => $request->input('description'),
-            'gallary_photo' => implode('|', $image),
+            'gallary_photo' => json_encode($image),
             'service_duration' => $request->input('serviceOur'),
             'salon_service_charge' => $request->input('serviceCharge'),
             'home_service_charge' => $request->input('homServiceCharge'),
@@ -290,7 +251,7 @@ class ProviderController extends Controller
         $updateService->salon_service_charge = $request->serviceCharge;
         $updateService->home_service_charge = $request->homServiceCharge;
         $updateService->set_booking_mony = $request->bookingMony;
-        $updateService->available_service_our = $request->serviceHour;
+        $updateService->available_service_our = json_encode($request->serviceHour);
         $updateService->save();
         if ($updateService) {
             return ResponseMethod('success', 'update service success');
@@ -311,7 +272,7 @@ class ProviderController extends Controller
         }
         $updateServiceImg = Service::find($request->id);
         $updateServiceImg->id = $request->id;
-        $updateServiceImg->gallary_photo = implode('|', $image);
+        $updateServiceImg->gallary_photo = json_encode($image);
         $updateServiceImg->save();
         if ($updateServiceImg) {
             return ResponseMethod('success', 'update service image success');

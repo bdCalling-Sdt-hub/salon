@@ -28,7 +28,10 @@ class CataloguController extends Controller
         ]);
 
         if ($post_catalogu) {
-            return ResponseMethod('success', 'Catalouge add successfully');
+            return response()->json([
+                'status' => 'success',
+                'catalouge' => $post_catalogu,
+            ], 200);
         } else {
             return ResponseErrorMessage('error', 'Catalouge add faile');
         }
@@ -155,5 +158,20 @@ class CataloguController extends Controller
         } else {
             return ResponseErrorMessage('error', 'Catalouge  delete fail');
         }
+    }
+
+    public function catalougeDetails($id)
+    {
+        $totlaReview = ServiceRating::where('catalogue_id', $id)->count();
+        $sumRating = ServiceRating::where('catalogue_id', $id)->sum('rating');
+        $avgRating = $sumRating / $totlaReview;
+        $catalougeDetails = Catalogue::where('id', $id)->with('catalouges')->get();
+
+        return response()->json([
+            'message' => 'success',
+            'review' => $totlaReview,
+            'rating' => $avgRating,
+            'cataloug_details' => $catalougeDetails
+        ], 200);
     }
 }
