@@ -89,32 +89,65 @@ class UserController extends Controller
         }
     }
 
+    // public function login(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'email' => 'required|string|email',
+    //         'password' => 'required|string|min:6'
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 400);
+    //     }
+    //     $this->loginActivity($request->email, $request->password);
+
+    //     if (!$token = auth()->attempt($validator->validated())) {
+    //         return response()->json(['error' => 'Unauthorized'], 401);
+    //     }
+
+    //     return $this->responseWithToken($token);
+    // }
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
-            'password' => 'required|string|min:6'
+            'password' => 'required|string|min:6',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
-        $this->loginActivity($request->email, $request->password);
-
-        if (!$token = auth()->attempt($validator->validated())) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['error' => 'No user found with the provided email'], 403);
         }
 
-        return $this->responseWithToken($token);
+        $credentials = $request->only('email', 'password');
+
+        if ($token = auth()->attempt($credentials)) {
+            $user = Auth::user();
+
+            if ($user->is_verified == 0) {
+                // User email is not verified
+                return response()->json(['error' => 'Your email is not verified'], 403);
+            } else {
+                // Successful login
+                return $this->responseWithToken($token);
+            }
+        }
+        // Incorrect email or password
+        return response()->json(['error' => 'Incorrect email or password'], 403);
     }
 
     protected function responseWithToken($token)
     {
+        $user = User::find(auth()->user()->id);
         return response()->json([
             'status' => true,
             'access_token' => $token,
             'user_type' => auth()->user()->user_type,
             'token_type' => 'bearer',
+            'user' => $user,
             'expires_in' => auth()->factory()->getTTL() * 3600000000000
         ], 200);
     }
@@ -191,7 +224,7 @@ class UserController extends Controller
         $currentTime = time();
         $time = $otpData->created_at;
 
-        if ($currentTime >= $time && $time >= $currentTime - (60 + 5)) {
+        if ($currentTime >= $time && $time >= $currentTime - (180 + 5)) {
             return response()->json(['success' => false, 'msg' => 'Please try after some time'], 429);
         } else {
             $this->Otp($user);
@@ -215,6 +248,31 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
         return response()->json(['Your password changes'], 200);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'current_password' => 'required|string|min:6',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (Hash::check($request->current_password, $user->password)) {
+            // Current password matches the user's actual password
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            return response()->json([
+                'message' => 'Password changed successfully'
+            ], 200);
+        }
+
+        // Current password does not match
+        return response()->json([
+            'message' => 'Current password is not correct'
+        ], 404);
     }
 
     public function logout()

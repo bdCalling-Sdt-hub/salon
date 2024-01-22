@@ -12,6 +12,7 @@ use App\Models\Provider;
 use App\Models\Service;
 use App\Models\ServiceRating;
 use App\Notifications\UserNotification;
+use Geocoder\Laravel\Facades\Geocoder;
 use Illuminate\Http\Request;
 use DB;
 
@@ -35,7 +36,6 @@ class ProviderController extends Controller
         $cover_photo = time() . '.' . $request->coverPhoto->extension();
         $request->coverPhoto->move(public_path('images'), $cover_photo);
         $address = $request->address;
-
         $post_provider = new Provider();
         $post_provider->user_id = $auth_user;
         $post_provider->category_id = $request->catId;
@@ -58,12 +58,19 @@ class ProviderController extends Controller
     public function getProvider()
     {
         $user_id = auth()->user()->id;
+
         $getProvider = Provider::where('user_id', $user_id)->with('salonDetails')->get();
-        // $all_provider_data = Provider::where('user_id', $user_id)->get();
         $decodedData = [];
-        foreach ($getProvider as $item) {
-            $item['available_service_our'] = json_decode($item['available_service_our'], true);  // Decode only the 'module_class' field
+        foreach ($getProvider->toArray() as $item) {
+            $item['available_service_our'] = json_decode($item['available_service_our'], true);
             $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
+
+            // Loop through salon_details and decode available_service_our for each item
+            foreach ($item['salon_details'] as &$salonDetail) {
+                $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
+                $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
+            }
+
             $decodedData[] = $item;  // Add the updated item to the new array
         }
 
@@ -74,40 +81,6 @@ class ProviderController extends Controller
             ], 200);
         } else {
             return ResponseErrorMessage('error', 'Data not found');
-        }
-
-        // {
-        //     $user_id = auth()->user()->id;
-        //     $getProvider = Provider::where('user_id', $user_id)->with('salonDetails')->get();
-
-        //     // Use map to transform the collection
-        //     $i = 0;
-        //     foreach ($getProvider as &$item) {
-        //         echo $i++ . $item;
-        //         $item['available_service_our'] = json_decode($item['available_service_our'], true);
-        //     }
-
-        //     if ($getProvider) {
-        //         return response()->json([
-        //             'status' => 'success',
-        //             'provider' => $getProvider,
-        //         ], 200);
-        //     } else {
-        //         return ResponseErrorMessage('error', 'Data not found');
-        //     }
-        // }
-    }
-
-    public function editProvider($id)
-    {
-        $editProvider = Provider::where('id', $id)->first();
-        if ($editProvider) {
-            return response()->json([
-                'status' => 'success',
-                'provider' => $editProvider
-            ], 200);
-        } else {
-            return ResponseErrorMethod('error', 'Data not found');
         }
     }
 
@@ -490,32 +463,4 @@ class ProviderController extends Controller
         $long = $coordinates->getLongitude();
         return $long;
     }
-
-    //    public function findLatitude($address)
-    //    {
-    //        $result = app('geocoder')->geocode($address)->get();
-    //
-    //        if (!empty($result) && $result->count() > 0) {
-    //            $coordinates = $result[0]->getCoordinates();
-    //            $lat = $coordinates->getLatitude();
-    //            return $lat;
-    //        } else {
-    //            // Handle the case where geocoding was unsuccessful
-    //            return null;
-    //        }
-    //    }
-    //
-    //    public function findLongitude($address)
-    //    {
-    //        $result = app('geocoder')->geocode($address)->get();
-    //
-    //        if (!empty($result) && $result->count() > 0) {
-    //            $coordinates = $result[0]->getCoordinates();
-    //            $long = $coordinates->getLongitude();
-    //            return $long;
-    //        } else {
-    //            // Handle the case where geocoding was unsuccessful
-    //            return null;
-    //        }
-    //    }
 }
