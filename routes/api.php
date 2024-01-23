@@ -22,6 +22,17 @@ use App\Http\Controllers\WebsitePagesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+/*
+ * |--------------------------------------------------------------------------
+ * | API Routes
+ * |--------------------------------------------------------------------------
+ * |
+ * | Here is where you can register API routes for your application. These
+ * | routes are loaded by the RouteServiceProvider and all of them will
+ * | be assigned to the "api" middleware group. Make something great!
+ * |
+ */
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -59,23 +70,26 @@ Route::post('add-website-pages', [WebsitePagesController::class, 'addWebsitePage
 Route::post('update-website-pages/{id}', [WebsitePagesController::class, 'updateWebsitePage']);
 Route::get('delete-website-pages/{id}', [WebsitePagesController::class, 'deleteWebsitePage']);
 
+
 Route::middleware(['admin'])->group(function () {
+
+
     Route::get('single-category/{id}', [CategoryController::class, 'showSingleCategory']);
-    //  Route::post('add-category', [CategoryController::class, 'addCategory']);
+    Route::post('add-category', [CategoryController::class, 'addCategory']);
     Route::post('update-category/{id}', [CategoryController::class, 'updateCategory']);
     Route::get('delete-category/{id}', [CategoryController::class, 'deleteCategory']);
 
     // ======================dashboard ==============================//
-    Route::get('booking-complete', [DashboardController::class, 'bookingComplete']);
-    Route::get('booking-cancel', [DashboardController::class, 'bookingCancel']);
-    Route::get('booking-pending', [DashboardController::class, 'bookingPending']);
+    Route::get('booking-complete',[DashboardController::class,'bookingComplete']);
+    Route::get('booking-cancel',[DashboardController::class,'bookingCancel']);
+    Route::get('booking-pending',[DashboardController::class,'bookingPending']);
 
     Route::get('appointment-list', [GetController::class, 'getAppointmentList']);
     Route::get('appointment-list/{id}', [GetController::class, 'appointmentListbyId']);
 
     // ======================Earnings ==============================//
-    Route::get('payment-history', [GetController::class, 'paymentHistory']);
-    Route::get('payment-history/{id}', [GetController::class, 'paymentHistoryById']);
+    Route::get('payment-history',[GetController::class,'paymentHistory']);
+    Route::get('payment-history/{id}',[GetController::class,'paymentHistoryById']);
 
     // ======================Package ==============================//
     Route::get('show-package', [PackageController::class, 'showPackage']);
@@ -90,6 +104,7 @@ Route::middleware(['admin'])->group(function () {
     Route::post('add-category', [CategoryController::class, 'addCategory']);
     Route::post('update-category/{id}', [CategoryController::class, 'updateCategory']);
     Route::get('delete-category/{id}', [CategoryController::class, 'deleteCategory']);
+
 
     // Onboard pages
     Route::post('add-onboard', [OnboardController::class, 'addOnboard']);
@@ -125,6 +140,10 @@ Route::middleware(['admin'])->group(function () {
     // search
     // provider request search by name and id
     Route::get('search-provider-request/{name}/{id?}', [GetController::class, 'searchProviderRequest']);
+    // provider list search name,email,phone
+    // provider block list search by name and id
+    // user list search by name email and phone
+    // salon list search by name,email and phone
 
     // booking percentage
     Route::post('booking-percentage-set', [PercentageController::class, 'percentageSet']);
@@ -133,28 +152,29 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/deleteRating/{id}', [UserController::class, 'deleteServiceRating']);
     Route::get('/showRating', [UserController::class, 'showServiceRating']);
     Route::get('/editRating/{id}', [UserController::class, 'editServiceRating']);
-    // review
-    Route::get('/deleteRating/{id}', [UserController::class, 'deleteServiceRating']);
-    Route::get('/showRating', [UserController::class, 'showServiceRating']);
-    Route::get('/editRating/{id}', [UserController::class, 'editServiceRating']);
+    //review
+    Route::get('/deleteRating/{id}',[UserController::class,'deleteServiceRating']);
+    Route::get('/showRating',[UserController::class,'showServiceRating']);
+    Route::get('/editRating/{id}',[UserController::class,'editServiceRating']);
 
-    // notification
-    Route::post('/send-admin-notification', [UserController::class, 'sendNotification']);
+    //notification
+    Route::post('/send-admin-notification',[UserController::class,'sendNotification']);
 });
 
 Route::middleware(['provider'])->group(function () {
 
 
+
     //package
     Route::get('show-package', [PackageController::class, 'showPackage']);
+    Route::get('my-plan', [PackageController::class, 'myPlan']);
 
-    Route::get('show-website-pages', [WebsitePagesController::class, 'showWebsitePages']);
     // Test
-    Route::post('add-cat', [TestController::class, 'addCat']);
-    Route::post('add-sal', [TestController::class, 'addSal']);
-    Route::post('add-ser', [TestController::class, 'addSer']);
+    Route::post('add-cat',[TestController::class,'addCat']);
+    Route::post('add-sal',[TestController::class,'addSal']);
+    Route::post('add-ser',[TestController::class,'addSer']);
     // ======================Provider =======================//
-    // Route::get('show-category', [CategoryController::class, 'showCategory']);
+    Route::get('show-category', [CategoryController::class, 'showCategory']);
     Route::post('/post/provider', [ProviderController::class, 'postProvider']);
     Route::get('/get/provider', [ProviderController::class, 'getProvider']);
     Route::get('/edit/provider/{id}', [ProviderController::class, 'editProvider']);
@@ -201,10 +221,10 @@ Route::middleware(['provider'])->group(function () {
     Route::get('/review/provider', [ProviderController::class, 'reviewProvider']);
 
     // The route that the button calls to initialize payment
-    Route::post('/pay', [SubscriptionController::class, 'Subscription'])->name('paynow');
+//    Route::post('/pay', [SubscriptionController::class, 'Subscription'])->name('paynow');
+// The callback url after a payment
 
-    // ========================== EARNING =========================//
-
+   // ========================== EARNING =========================//
 
     Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
@@ -212,17 +232,23 @@ Route::middleware(['provider'])->group(function () {
 
 
     // The route that the button calls to initialize payment
-    Route::post('/pay', [FlutterwaveController::class, 'initialize'])->name('paynow');
+    Route::post('/pay/{id}', [FlutterwaveController::class, 'initialize'])->name('paynow');
 
 
 
 
 
 });
-Route::get('show-category', [CategoryController::class, 'showCategory']);
+
 Route::middleware(['user'])->group(function () {
-    // test
-    Route::post('add-rev', [TestController::class, 'saveRev']);
+
+    //filter
+    Route::get('user-filter/{category}/{rating}/{distance}',[DistanceController::class,'filterOriginal']);
+
+    //salon search in user home
+    Route::get('salon-search-home/{salon?}',[DistanceController::class,'searchProvidersBySalon']);
+  //test
+  Route::post('add-rev',[TestController::class,'saveRev']);
     // category route
     Route::get('single-category/{id}', [CategoryController::class, 'showSingleCategory']);
     Route::get('show-category', [CategoryController::class, 'showCategory']);
@@ -231,13 +257,13 @@ Route::middleware(['user'])->group(function () {
     Route::post('/updateRating/{id}', [UserController::class, 'updateServiceRating']);
 
     // find Nearest Location
-    Route::get('/find-nearest-location/{lat}/{long}', [DistanceController::class, 'findNearestLocation']);
+    Route::get('/find-nearest-location', [DistanceController::class, 'findNearestLocation']);
 
-    // find nearest location by lat long
-    Route::get('/find-nearest-location/{lat}/{long}/', [DistanceController::class, 'findNearestLocationByLatLong']);
+    //find nearest location by lat long
+    Route::get('/find-nearest-location/{lat}/{long}/',[DistanceController::class,'findNearestLocationByLatLong']);
 
-    // filter
-    //    Route::get('/filter', [DistanceController::class, 'filter']);
+    //filter
+//    Route::get('/filter', [DistanceController::class, 'filter']);
 
     // ==================== USER HOME PAGE   ============================//
 
@@ -247,6 +273,7 @@ Route::middleware(['user'])->group(function () {
 
     Route::get('/salon/list/{id}', [HomeController::class, 'salounList']);
     Route::get('/salon/service/{id}', [HomeController::class, 'salounService']);
+    Route::get('/service/details/{id}', [HomeController::class, 'serviceDetails']);
     Route::get('/salon/details/{id}', [HomeController::class, 'selonDetails']);
     Route::get('/catalog/{id}', [HomeController::class, 'catalouge']);
     Route::get('/catalog/details/{id}', [HomeController::class, 'catalougeDetails']);
@@ -263,67 +290,69 @@ Route::middleware(['user'])->group(function () {
 
     // ========================= PAYMENT METHOD ROUTE =======================//
 
-    // The route that the button calls to initialize payment
-    Route::post('/pay', [PymentController::class, 'initialize'])->name('paynow');
-    // The callback url after a payment
+
+
 });
-
-Route::get('review', [GetController::class, 'getReview']);
-
-
 //review from admin
 
 Route::get('review',[GetController::class,'getReview']);
 
-// delete user from admin
-Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
+//delete user from admin
+Route::get('delete-user/{id}',[GetController::class,'deleteUser']);
 
 // ====================Trash from dashboard ==============================//
 
-Route::get('all-user', [TrashController::class, 'allUser']);
-Route::get('trash-user', [TrashController::class, 'trashUser']);
-Route::get('trash-restore/{id}', [TrashController::class, 'trashRestore']);
+Route::get('all-user',[TrashController::class,'allUser']);
+Route::get('trash-user',[TrashController::class,'trashUser']);
+Route::get('trash-restore/{id}',[TrashController::class,'trashRestore']);
 
-// search
-// provider request search by name and id
-Route::get('search-provider-request/{name?}', [GetController::class, 'searchProviderRequest']);
-// provider list search name,email,phone
-Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
-// provider block list search by name and id
-Route::get('provider-block-list-search/{name?}', [GetController::class, 'searchProviderBlock']);
-// user list search by name email and phone
-Route::get('search-user/{name?}', [GetController::class, 'searchUser']);
-// salon list search by name
-Route::get('salon-search/{name?}', [GetController::class, 'searchSalon']);
+
+//search
+//provider request search by name and id
+Route::get('search-provider-request/{name?}',[GetController::class,'searchProviderRequest']);
+//provider list search name,email,phone
+Route::get('search-provider/{name?}',[GetController::class,'searchProvider']);
+//provider block list search by name and id
+Route::get('provider-block-list-search/{name?}',[GetController::class,'searchProviderBlock']);
+//user list search by name email and phone
+Route::get('search-user/{name?}',[GetController::class,'searchUser']);
+//salon list search by name
+Route::get('salon-search/{name?}',[GetController::class,'searchSalon']);
 
 // Review
-Route::get('review', [GetController::class, 'getReviews']);
-Route::get('review-by-id/{id}', [GetController::class, 'getReviewsByProviderId']);
-// Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
-Route::get('review-average-rating/{id}', [GetController::class, 'test']);
+Route::get('review',[GetController::class,'getReviews']);
+Route::get('review-by-id/{id}',[GetController::class,'getReviewsByProviderId']);
+//Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
+Route::get('review-average-rating/{id}',[GetController::class,'test']);
 
-// filter from user
 
-Route::get('/filter-nearest-salon/{lat}/{long}', [DistanceController::class, 'findNearestSalon']);
 
-Route::get('earnings', [EarningsController::class, 'Earnings']);
+
+//filter from user
+
+Route::get('/filter-nearest-salon/{lat}/{long}',[DistanceController::class,'findNearestSalon']);
+
+Route::get('earnings',[EarningsController::class,'Earnings']);
 
 Route::get('/search/category', [HomeController::class, 'searchCategory']);
 
-// get booking history
-Route::get('booking-history', [GetController::class, 'bookingHistory']);
+
+//get booking history
+Route::get('booking-history',[GetController::class,'bookingHistory']);
+
+// route for user and provider
+//Route::middleware(['both'])->group(function () {
+//
+//}
+
+//filter
+Route::get('filter/{name?}',[GetController::class,'filter']);
+
+
+Route::get('relation-filter',[TestController::class,'relationFilter']);
+Route::get('get-reviews',[TestController::class,'getReviews']);
+
 
 // The callback url after a payment
 Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'callback'])->name('callback');
 
-// filter
-Route::get('filter/{name?}', [GetController::class, 'filter']);
-
-Route::get('relation-filter', [TestController::class, 'relationFilter']);
-Route::get('get-reviews', [TestController::class, 'getReviews']);
-
-
-// both is work for user and provider
-Route::middleware(['both'])->group(function () {
-    Route::get('/service/details/{id}', [HomeController::class, 'serviceDetails']);
-});

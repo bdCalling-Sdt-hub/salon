@@ -14,9 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use Jenssegers\Agent\Agent;
-use Validator;
-
 class UserController extends Controller
 {
     public function register(Request $request)
@@ -53,6 +52,11 @@ class UserController extends Controller
             $user->image = $avatar;
             $user->save();
             $this->Otp($user);
+//            return response()->json(['success' => true,
+//                'user' => $user,
+//                'msg' => 'OTP has been sent']);
+//             return sendNotification('is registered',$user,);
+
             return response()->json(['success' => true,
                 'user' => $user,
                 'msg' => 'OTP has been sent'], 200);
@@ -89,6 +93,26 @@ class UserController extends Controller
         }
     }
 
+//    public function login(Request $request)
+//    {
+//        $validator = Validator::make($request->all(), [
+//            'email' => 'required|string|email',
+//            'password' => 'required|string|min:6'
+//        ]);
+//        if ($validator->fails()) {
+//            return response()->json($validator->errors(), 400);
+//        }
+//        $credentials = $request->only('email', 'password');
+//        if ($token = auth()->attempt($credentials)) {
+//            if (Auth::user()->is_verified == 0) {
+//                return response()->json(['error' => 'Your email is not verified'], 401);
+//            } else {
+//                return $this->responseWithToken($token);
+//            }
+//        }
+//        return response()->json(['error' => 'Your credential is wrong'], 401);
+//    }
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -101,9 +125,8 @@ class UserController extends Controller
         }
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return response()->json(['error' => 'No user found with the provided email'], 403);
+            return response()->json(['error' => 'No user found with the provided email'], 401);
         }
-
         $credentials = $request->only('email', 'password');
 
         if ($token = auth()->attempt($credentials)) {
@@ -111,26 +134,24 @@ class UserController extends Controller
 
             if ($user->is_verified == 0) {
                 // User email is not verified
-                return response()->json(['error' => 'Your email is not verified'], 403);
+                return response()->json(['error' => 'Your email is not verified'], 401);
             } else {
                 // Successful login
                 return $this->responseWithToken($token);
             }
         }
         // Incorrect email or password
-        return response()->json(['error' => 'Incorrect email or password'], 403);
+        return response()->json(['error' => 'Incorrect email or password'], 401);
     }
 
     protected function responseWithToken($token)
     {
-        $user = User::find(auth()->user()->id);
         return response()->json([
             'status' => true,
             'access_token' => $token,
             'user_type' => auth()->user()->user_type,
             'token_type' => 'bearer',
-            'user' => $user,
-            'expires_in' => auth()->factory()->getTTL() * 3600000000000
+            'expires_in' => auth()->factory()->getTTL() * 6000000000000000
         ], 200);
     }
 
@@ -161,6 +182,7 @@ class UserController extends Controller
                 User::where('id', $user->id)->update([
                     'is_verified' => 1,
                 ]);
+
                 $token = auth()->login($user);
                 return response()->json([
                     'status' => 'success',
@@ -217,44 +239,16 @@ class UserController extends Controller
     public function resetPassword(request $request)
     {
         $check_user = auth()->user()->id;
-        if (!$check_user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'user is not authenticated',
-            ], 404);
-        }
         $request->validate([
             'password' => 'required|string|min:6|confirmed'
         ]);
         $user = User::find($check_user);
         $user->password = Hash::make($request->password);
         $user->save();
+
+//         PasswordReset::where('email', $user->email)->delete();
+
         return response()->json(['Your password changes'], 200);
-    }
-
-    public function changePassword(Request $request)
-    {
-        $user = auth()->user();
-
-        $request->validate([
-            'current_password' => 'required|string|min:6',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-
-        if (Hash::check($request->current_password, $user->password)) {
-            // Current password matches the user's actual password
-            $user->password = Hash::make($request->password);
-            $user->save();
-
-            return response()->json([
-                'message' => 'Password changed successfully'
-            ], 200);
-        }
-
-        // Current password does not match
-        return response()->json([
-            'message' => 'Current password is not correct'
-        ], 404);
     }
 
 //    public function changePassword(request $request)
@@ -355,10 +349,11 @@ class UserController extends Controller
             }
 
             $user->phone_number = $request->phone_number;
-            if ($request->file('UserImage')) {
+
+            if ($request->file('image')) {
                 // Check if the old image file exists before attempting to unlink it
                 if (file_exists($user->image)) {
-                    // unlink($user->image);
+                    unlink($user->image);
                 }
                 $user->image = $this->saveImage($request);
             }
@@ -372,7 +367,7 @@ class UserController extends Controller
 
     protected function saveImage($request)
     {
-        $image = $request->file('UserImage');
+        $image = $request->file('image');
         $imageName = rand() . '.' . $image->getClientOriginalExtension();
         $directory = 'Asset/user-image/';
         $imgUrl = $directory . $imageName;
@@ -440,6 +435,7 @@ class UserController extends Controller
             $agent = new Agent();
             $browser = $agent->browser();
             $device = $agent->device();
+
 
             $activity = new LoginActivity([
                 'user_id' => $admin->id,
@@ -509,14 +505,20 @@ class UserController extends Controller
         return $rating;
     }
 
-    // public function sendNotification($message, $data)
-    // {
-    //     try {
-    //         event(new SendNotification($message, $data));
-    //         \Notification::send($data, new UserNotification($data));
-    //         return response()->json(['success' => true, 'msg' => 'Notification Added']);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['success' => false, 'msg' => $e->getMessage()]);
-    //     }
-    // }
+
+
+    public function sendNotification(Request $request)
+    {
+        try {
+            event(new SendNotification($request->message, $request->name));
+
+            return response()->json([
+                'success' => true,
+                'msg' => 'Notification Added',
+//                'data' => auth()->user()->name,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+        }
+    }
 }
