@@ -219,7 +219,7 @@ Route::middleware(['provider'])->group(function () {
     Route::get('/review/provider', [ProviderController::class, 'reviewProvider']);
 
     // The route that the button calls to initialize payment
-    Route::post('/pay', [SubscriptionController::class, 'Subscription'])->name('paynow');
+//    Route::post('/pay', [SubscriptionController::class, 'Subscription'])->name('paynow');
 // The callback url after a payment
 
    // ========================== EARNING =========================//
@@ -230,7 +230,7 @@ Route::middleware(['provider'])->group(function () {
 
 
     // The route that the button calls to initialize payment
-    Route::post('/pay', [FlutterwaveController::class, 'initialize'])->name('paynow');
+    Route::post('/pay/{id}', [FlutterwaveController::class, 'initialize'])->name('paynow');
 
 
 

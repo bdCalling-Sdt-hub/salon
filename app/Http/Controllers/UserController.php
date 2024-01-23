@@ -151,7 +151,7 @@ class UserController extends Controller
             'access_token' => $token,
             'user_type' => auth()->user()->user_type,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 600000
+            'expires_in' => auth()->factory()->getTTL() * 6000000000000000
         ], 200);
     }
 

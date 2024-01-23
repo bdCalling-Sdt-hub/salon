@@ -10,18 +10,18 @@ class FlutterwaveController extends Controller
 {
     //
 
-    public function initialize()
+    public function initialize($id)
     {
         //This generates a payment reference
         $reference = Flutterwave::generateReference();
 
         // Enter the details of the payment
         $data = [
-            'payment_options' => 'card,banktransfer',
-            'amount' => 500,
+            'payment_options' => request()->payment_type,
+            'amount' => request()->amount,
             'email' => request()->email,
             'tx_ref' => $reference,
-            'currency' => "KES",
+            'currency' => request()->currency,
             'redirect_url' => route('callback'),
             'customer' => [
                 'email' => request()->email,
@@ -30,6 +30,7 @@ class FlutterwaveController extends Controller
             ],
             'meta' => [
                 'user_id' => auth()->user()->id,
+                'package_id' => $id,
             ],
 
             "customizations" => [
@@ -59,6 +60,7 @@ class FlutterwaveController extends Controller
             $data = Flutterwave::verifyTransaction($transactionID);
 
             $payment = new Payment();
+            $payment->package_id = $data['data']['meta']['package_id'];
             $payment->user_id = $data['data']['meta']['user_id'];
             $payment->tx_ref = $data['data']['tx_ref'];
             $payment->amount = $data['data']['amount'];
