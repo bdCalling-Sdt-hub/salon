@@ -164,8 +164,10 @@ Route::middleware(['admin'])->group(function () {
 Route::middleware(['provider'])->group(function () {
 
 
+
     //package
     Route::get('show-package', [PackageController::class, 'showPackage']);
+    Route::get('my-plan', [PackageController::class, 'myPlan']);
 
     // Test
     Route::post('add-cat',[TestController::class,'addCat']);

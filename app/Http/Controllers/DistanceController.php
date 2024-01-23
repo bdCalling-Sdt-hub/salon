@@ -13,6 +13,8 @@ class DistanceController extends Controller
 {
     //
 
+
+
     public function findNearestLocation(){
         $user_id = auth()->user()->id;
         $user_details = User::where('id',$user_id)->first();
