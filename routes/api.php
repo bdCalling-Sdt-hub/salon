@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DistanceController;
 use App\Http\Controllers\EarningsController;
+use App\Http\Controllers\FlutterwaveController;
 use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
@@ -142,7 +143,11 @@ Route::middleware(['admin'])->group(function () {
 });
 
 Route::middleware(['provider'])->group(function () {
-    // show website pages
+
+
+    //package
+    Route::get('show-package', [PackageController::class, 'showPackage']);
+
     Route::get('show-website-pages', [WebsitePagesController::class, 'showWebsitePages']);
     // Test
     Route::post('add-cat', [TestController::class, 'addCat']);
@@ -197,13 +202,22 @@ Route::middleware(['provider'])->group(function () {
 
     // The route that the button calls to initialize payment
     Route::post('/pay', [SubscriptionController::class, 'Subscription'])->name('paynow');
-    // The callback url after a payment
 
     // ========================== EARNING =========================//
+
 
     Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
     Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
+
+
+    // The route that the button calls to initialize payment
+    Route::post('/pay', [FlutterwaveController::class, 'initialize'])->name('paynow');
+
+
+
+
+
 });
 Route::get('show-category', [CategoryController::class, 'showCategory']);
 Route::middleware(['user'])->group(function () {
@@ -254,9 +268,12 @@ Route::middleware(['user'])->group(function () {
     // The callback url after a payment
 });
 
-// review from admin
-
 Route::get('review', [GetController::class, 'getReview']);
+
+
+//review from admin
+
+Route::get('review',[GetController::class,'getReview']);
 
 // delete user from admin
 Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
@@ -296,16 +313,15 @@ Route::get('/search/category', [HomeController::class, 'searchCategory']);
 // get booking history
 Route::get('booking-history', [GetController::class, 'bookingHistory']);
 
-// route for user and provider
-// Route::middleware(['both'])->group(function () {
-//
-// }
+// The callback url after a payment
+Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'callback'])->name('callback');
 
 // filter
 Route::get('filter/{name?}', [GetController::class, 'filter']);
 
 Route::get('relation-filter', [TestController::class, 'relationFilter']);
 Route::get('get-reviews', [TestController::class, 'getReviews']);
+
 
 // both is work for user and provider
 Route::middleware(['both'])->group(function () {

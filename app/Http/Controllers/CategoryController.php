@@ -67,7 +67,6 @@ class CategoryController extends Controller
                 unlink($category->category_image);
                 $category->category_image = $this->saveImage($request);
             }
-
             $category->update();
             return responseMethod('Category update successfully', $category);
         } else {

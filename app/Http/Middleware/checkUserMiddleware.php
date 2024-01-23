@@ -13,7 +13,6 @@ class checkUserMiddleware
         if (auth()->check() && auth()->user()->user_type == 'user') {
             return $next($request);
         }
-
         return response()->json('Unauthorized user',401);
     }
 }

@@ -18,7 +18,6 @@ use DB;
 
 class ProviderController extends Controller
 {
-    // ====================PROVIDER======================//
 
     public function postProvider(ProviderRequest $request)
     {
