@@ -241,6 +241,12 @@ Route::middleware(['provider'])->group(function () {
 });
 
 Route::middleware(['user'])->group(function () {
+
+    //filter
+    Route::get('user-filter/{category}/{rating}/{distance}',[DistanceController::class,'filterOriginal']);
+
+    //salon search in user home
+    Route::get('salon-search-home/{salon?}',[DistanceController::class,'searchProvidersBySalon']);
   //test
   Route::post('add-rev',[TestController::class,'saveRev']);
     // category route
