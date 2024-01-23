@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DistanceController;
 use App\Http\Controllers\EarningsController;
+use App\Http\Controllers\FlutterwaveController;
 use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
 use App\Http\Controllers\OnboardController;
@@ -162,6 +163,10 @@ Route::middleware(['admin'])->group(function () {
 
 Route::middleware(['provider'])->group(function () {
 
+
+    //package
+    Route::get('show-package', [PackageController::class, 'showPackage']);
+
     // Test
     Route::post('add-cat',[TestController::class,'addCat']);
     Route::post('add-sal',[TestController::class,'addSal']);
@@ -216,12 +221,21 @@ Route::middleware(['provider'])->group(function () {
     // The route that the button calls to initialize payment
     Route::post('/pay', [SubscriptionController::class, 'Subscription'])->name('paynow');
 // The callback url after a payment
-  
+
    // ========================== EARNING =========================//
 
     Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
     Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
+
+
+    // The route that the button calls to initialize payment
+    Route::post('/pay', [FlutterwaveController::class, 'initialize'])->name('paynow');
+
+
+
+
+
 });
 
 Route::middleware(['user'])->group(function () {
@@ -268,14 +282,9 @@ Route::middleware(['user'])->group(function () {
 
     // ========================= PAYMENT METHOD ROUTE =======================//
 
-// The route that the button calls to initialize payment
-    Route::post('/pay', [PymentController::class, 'initialize'])->name('paynow');
-// The callback url after a payment
+
 
 });
-
-
-
 //review from admin
 
 Route::get('review',[GetController::class,'getReview']);
@@ -336,5 +345,6 @@ Route::get('relation-filter',[TestController::class,'relationFilter']);
 Route::get('get-reviews',[TestController::class,'getReviews']);
 
 
-
+// The callback url after a payment
+Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'callback'])->name('callback');
 

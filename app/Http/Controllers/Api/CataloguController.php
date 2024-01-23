@@ -52,16 +52,6 @@ class CataloguController extends Controller
         } else {
             return ResponseErrorMessage('error', 'Data not found');
         }
-        // $get_catalouge = Catalogue::all();
-
-        // if ($get_catalouge) {
-        //     return response()->json([
-        //         'status' => 'success',
-        //         'Catalouge' => $get_catalouge
-        //     ]);
-        // } else {
-        //     return ResponseErroMethod('error', 'Catalouge not found');
-        // }
     }
 
     public function singleCataloug($id)

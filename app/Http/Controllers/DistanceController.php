@@ -49,19 +49,43 @@ class DistanceController extends Controller
 
         }
 
-        public function filter(){
+        public function filter($latitude,$longitude){
 
-        $category = Category::all();
-        $rating = ServiceRating::where();
+//            $topProvider = ServiceRating::orderBy('rating', 'desc')->limit(1)->first();
+//            $reviewProviderId = $topProvider->provider_id;
+//            $provider = Provider::where('id', $reviewProviderId)->with('providerRating')->first();
+//            $ProviderId = $provider->id;
+//            $totlaReview = ServiceRating::where('provider_id', $ProviderId)->count();
+//            $sumRating = ServiceRating::where('provider_id', $ProviderId)->sum('rating');
+//            $avgRating = $sumRating / $totlaReview;
+//            return response()->json([
+//                'status' => 'success',
+//                'provider' => $provider,
+//                'review' => $totlaReview,
+//                'average rating' => $avgRating
+//            ], 200);
 
-        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
-            ->join('services', 'service_ratings.service_id', '=', 'services.id')
-            ->join('providers', 'services.provider_id', '=', 'providers.id')
-            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
-            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
-            ->get();
+            $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
+            * cos( radians( latitude ) )
+            * cos( radians( longitude ) - radians('$longitude') )
+            + sin( radians('$latitude') )
+            * sin( radians( latitude ) ) ) ) AS distance"))->havingRaw('distance < 300')->orderBy('distance')
+                ->get();
+            return ResponseMethod('Nearest Salon Data',$salon);
 
-        return $reviews;
+
+
+//        $category = Category::all();
+//        $rating = ServiceRating::where();
+//
+//        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
+//            ->join('services', 'service_ratings.service_id', '=', 'services.id')
+//            ->join('providers', 'services.provider_id', '=', 'providers.id')
+//            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
+//            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
+//            ->get();
+//
+//        return $reviews;
 //            $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
 //            * cos( radians( latitude ) )
 //            * cos( radians( longitude ) - radians('$longitude') )

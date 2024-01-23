@@ -14,35 +14,40 @@ class PymentController extends Controller
 
     public function initialize()
     {
-        // This generates a payment reference
+        //This generates a payment reference
         $reference = Flutterwave::generateReference();
 
         // Enter the details of the payment
         $data = [
-            'id' => auth()->user()->id,
-            'payment_options' => request()->payment_type,
-            'amount' => request()->amount,
+            'payment_options' => 'card,banktransfer',
+            'amount' => 500,
             'email' => request()->email,
             'tx_ref' => $reference,
-            'currency' => request()->currency,
+            'currency' => "KES",
             'redirect_url' => route('callback'),
             'customer' => [
-                'email' => auth()->user()->email,
-                'name' => auth()->user()->name,
+                'email' => request()->email,
+                "phone_number" => request()->phone,
+                "name" => request()->name
             ],
-            'customizations' => [
-                'id' => auth()->user()->id,
-                'title' => request()->service_name,
-                'description' => request()->description,
-                'package' => request()->package,
+            'meta' => [
+              'user_id' => auth()->user()->id,
+            ],
+
+            "customizations" => [
+                "title" => 'Buy Me Coffee',
+                "description" => "Let express love of coffee"
             ]
         ];
 
         $payment = Flutterwave::initializePayment($data);
 
-        if ($payment['status'] !== 'success') {
 
+        if ($payment['status'] !== 'success') {
+            // notify something went wrong
+            return;
         }
+
         return response($payment['data']['link']);
     }
 
@@ -56,7 +61,7 @@ class PymentController extends Controller
             $data = Flutterwave::verifyTransaction($transactionID);
 
             $payment = new Payment();
-            $payment->user_id = 1;
+            $payment->user_id = $data['data']['meta']['user_id'];
             $payment->tx_ref = $data['data']['tx_ref'];
             $payment->amount = $data['data']['amount'];
             $payment->currency = $data['data']['currency'];

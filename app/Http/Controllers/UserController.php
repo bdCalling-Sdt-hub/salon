@@ -93,33 +93,57 @@ class UserController extends Controller
         }
     }
 
+//    public function login(Request $request)
+//    {
+//        $validator = Validator::make($request->all(), [
+//            'email' => 'required|string|email',
+//            'password' => 'required|string|min:6'
+//        ]);
+//        if ($validator->fails()) {
+//            return response()->json($validator->errors(), 400);
+//        }
+//        $credentials = $request->only('email', 'password');
+//        if ($token = auth()->attempt($credentials)) {
+//            if (Auth::user()->is_verified == 0) {
+//                return response()->json(['error' => 'Your email is not verified'], 401);
+//            } else {
+//                return $this->responseWithToken($token);
+//            }
+//        }
+//        return response()->json(['error' => 'Your credential is wrong'], 401);
+//    }
+
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'email' => 'required|string|email',
-            'password' => 'required|string|min:6'
+            'password' => 'required|string|min:6',
         ]);
-        if ($validator->fails()){
-            return response()->json($validator->errors(),400);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['error' => 'No user found with the provided email'], 401);
         }
         $credentials = $request->only('email', 'password');
-        if ($token = auth()->attempt($credentials)){
 
+        if ($token = auth()->attempt($credentials)) {
+            $user = Auth::user();
 
-            if(Auth::user()->is_verified==0){
+            if ($user->is_verified == 0) {
+                // User email is not verified
                 return response()->json(['error' => 'Your email is not verified'], 401);
-            }else{
+            } else {
+                // Successful login
                 return $this->responseWithToken($token);
             }
-
-
-        if (!$token = auth()->attempt($validator->validated())) {
-            return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-        return response()->json(['error' => 'Your credential is wrong'], 401);
-
+        // Incorrect email or password
+        return response()->json(['error' => 'Incorrect email or password'], 401);
     }
+
     protected function responseWithToken($token)
     {
         return response()->json([
@@ -227,6 +251,53 @@ class UserController extends Controller
         return response()->json(['Your password changes'], 200);
     }
 
+//    public function changePassword(request $request)
+//    {
+//        $check_user = auth()->user()->id;
+//        $user = User::find($check_user);
+//
+//        $request->validate([
+//            'current_password'=> 'required|string|min:6',
+//            'password' => 'required|string|min:6|confirmed',
+//        ]);
+//        $user_password = $request->current_password;
+//        if($user_password == $user->password){
+//            $user->password = Hash::make($request->password);
+//            $user->save();
+//            return response()->json([
+//                'message' => 'password change successfully'
+//            ],200);
+//        }
+//        return response()->json([
+//            'message' => 'current password is not matched'
+//        ],404);
+//
+//    }
+    public function changePassword(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'current_password' => 'required|string|min:6',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (Hash::check($request->current_password, $user->password)) {
+            // Current password matches the user's actual password
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            return response()->json([
+                'message' => 'Password changed successfully'
+            ], 200);
+        }
+
+        // Current password does not match
+        return response()->json([
+            'message' => 'Current password is not correct'
+        ], 404);
+    }
+
     public function logout()
     {
         try {
@@ -254,42 +325,44 @@ class UserController extends Controller
         if (auth()->user()) {
             $check_user = auth()->user()->id;
             $validator = Validator::make($request->all(), [
-
-                'id' => 'required',
                 'name' => 'required|string',
                 'email' => 'required|email|string',
                 'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
-
             ]);
+
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 400);
             }
 
             $user = User::find($check_user);
-            $user->id = $check_user;
+
+            if (!$user) {
+                return response()->json(['status' => false, 'message' => 'User not found']);
+            }
+
             $user->name = $request->name;
             $user->email = $request->email;
             $user->address = $request->address;
+
+            if ($request->phone_number == '') {
+                $request->phone_number = $user->phone_number;
+            }
+
             $user->phone_number = $request->phone_number;
 
-
             if ($request->file('image')) {
-                unlink($user->image);
+                // Check if the old image file exists before attempting to unlink it
+                if (file_exists($user->image)) {
+                    unlink($user->image);
+                }
                 $user->image = $this->saveImage($request);
             }
+
             $user->update();
-            return response()->json(['status' => true, 'message' => 'user is updated', 'Data' => $user]);
+            return response()->json(['status' => true, 'message' => 'User is updated', 'Data' => $user]);
         } else {
-            return response()->json(['status' => false, 'message' => 'User is not Authenticated']);
+            return response()->json(['status' => false, 'message' => 'User is not authenticated']);
         }
-    }
-    protected function saveImage($request){
-        $image = $request->file('image');
-        $imageName = rand() . '.' . $image->getClientOriginalExtension();
-        $directory = 'Asset/user-image/';
-        $imgUrl = $directory . $imageName;
-        $image->move($directory, $imageName);
-        return $imgUrl;
     }
 
     protected function saveImage($request)
@@ -301,6 +374,50 @@ class UserController extends Controller
         $image->move($directory, $imageName);
         return $imgUrl;
     }
+
+//
+//    public function profileUpdate(Request $request)
+//    {
+//        if (auth()->user()) {
+//            $check_user = auth()->user()->id;
+//            $validator = Validator::make($request->all(), [
+//                'name' => 'required|string',
+//                'email' => 'required|email|string',
+//                'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
+//
+//            ]);
+//            if ($validator->fails()) {
+//                return response()->json($validator->errors(), 400);
+//            }
+//
+//            $user = User::find($check_user);
+//            $user->id = $check_user;
+//            $user->name = $request->name;
+//            $user->email = $request->email;
+//            $user->address = $request->address;
+//            if ($request->phone_number==''){
+//                $request->phone_number = $user->phone_number;
+//            }
+//            $user->phone_number = $request->phone_number;
+//
+//            if ($request->file('image')) {
+//                unlink($user->image);
+//                $user->image = $this->saveImage($request);
+//            }
+//            $user->update();
+//            return response()->json(['status' => true, 'message' => 'user is updated', 'Data' => $user]);
+//        } else {
+//            return response()->json(['status' => false, 'message' => 'User is not Authenticated']);
+//        }
+//    }
+//    protected function saveImage($request){
+//        $image = $request->file('image');
+//        $imageName = rand() . '.' . $image->getClientOriginalExtension();
+//        $directory = 'Asset/user-image/';
+//        $imgUrl = $directory . $imageName;
+//        $image->move($directory, $imageName);
+//        return $imgUrl;
+//    }
 
     public function refreshToken()
     {

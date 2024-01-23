@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->text('salon_service_charge');
             $table->text('home_service_charge');
             $table->string('set_booking_mony');
-            $table->text('available_service_our');
+            $table->json('available_service_our');
             $table->timestamps();
         });
     }

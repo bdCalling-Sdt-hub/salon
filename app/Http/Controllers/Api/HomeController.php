@@ -145,6 +145,7 @@ class HomeController extends Controller
             'rating' => $avgRating,
             'cataloug_details' => $catalougeDetails
         ], 200);
+
     }
 
     public function bookingAppoinment($id)

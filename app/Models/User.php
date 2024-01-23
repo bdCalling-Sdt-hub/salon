@@ -45,10 +45,10 @@ class User extends Authenticatable implements JWTSubject
     //     return $this->hasMany(LoginActivity::class, 'user_id');
     // }
 
-//    public function login_activities()
-//    {
-//        return $this->hasMany(LoginActivity::class, 'user_id');
-//    }
+    public function login_activities()
+    {
+        return $this->hasMany(LoginActivity::class, 'user_id');
+    }
 
     public function payment() :HasMany
     {
