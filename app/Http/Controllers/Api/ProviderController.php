@@ -91,7 +91,7 @@ class ProviderController extends Controller
         $updateProvider->business_name = $request->businessName;
         $updateProvider->address = $request->address;
         $updateProvider->description = $request->description;
-        $updateProvider->available_service_our = json_encode($request->serviceOur);
+        $updateProvider->available_service_our = $request->serviceOur;
         $updateProvider->save();
         if ($updateProvider) {
             return ResponseMethod('success', 'provider update success');
@@ -251,7 +251,7 @@ class ProviderController extends Controller
         $updateService->salon_service_charge = $request->serviceCharge;
         $updateService->home_service_charge = $request->homServiceCharge;
         $updateService->set_booking_mony = $request->bookingMony;
-        $updateService->available_service_our = json_encode($request->serviceHour);
+        $updateService->available_service_our = $request->serviceHour;
         $updateService->save();
         if ($updateService) {
             return ResponseMethod('success', 'update service success');
@@ -438,13 +438,27 @@ class ProviderController extends Controller
     public function reviewProvider()
     {
         $authUser = auth()->user()->id;
-        if ($authUser) {
-            $allReview = ServiceRating::where('provider_id', $authUser)->get();
-            if ($allReview) {
-                return ResponseMethod('success', $allReview);
-            } else {
-                return ResponseErrorMessage('error', 'Booking data not found');
-            }
+        $provider = Provider::where('user_id', $authUser)->first();
+        $providerId = $provider->id;
+        $totalReview = ServiceRating::where('provider_id', $providerId)->count();
+        $totalRating = ServiceRating::where('provider_id', $providerId)->sum('rating');
+
+        $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $providerId)->sum('rating') / $totalReview : 0;
+
+        $serviceDetails = ServiceRating::where('provider_id', $providerId)
+            ->with(['user:id,name,image'])
+            ->get();
+
+        $allReview = ServiceRating::where('provider_id', $providerId)->get();
+        if ($allReview) {
+            return response()->json([
+                'message' => 'true',
+                'total_review' => $totalReview,
+                'average_rating' => $avgRating,
+                'service_details_with_user' => $serviceDetails,
+            ]);
+        } else {
+            return ResponseErrorMessage('error', 'Booking data not found');
         }
     }
 

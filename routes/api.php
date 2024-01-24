@@ -142,6 +142,12 @@ Route::middleware(['admin'])->group(function () {
 });
 
 Route::middleware(['provider'])->group(function () {
+    // show package
+    Route::get('show-package', [PackageController::class, 'showPackage']);
+    // The route that the button calls to initialize payment
+    Route::post('/pay', [PymentController::class, 'initialize'])->name('paynow');
+    // The callback url after a payment
+
     // show website pages
     Route::get('show-website-pages', [WebsitePagesController::class, 'showWebsitePages']);
     // Test
@@ -217,10 +223,12 @@ Route::middleware(['user'])->group(function () {
     Route::post('/updateRating/{id}', [UserController::class, 'updateServiceRating']);
 
     // find Nearest Location
-    Route::get('/find-nearest-location/{lat}/{long}', [DistanceController::class, 'findNearestLocation']);
+    // Route::get('/find-nearest-location/{lat}/{long}', [DistanceController::class, 'findNearestLocation']);
+
+    Route::get('/find-nearest-location', [HomeController::class, 'nearbyProviders']);
 
     // find nearest location by lat long
-    Route::get('/find-nearest-location/{lat}/{long}/', [DistanceController::class, 'findNearestLocationByLatLong']);
+    // Route::get('/find-nearest-location/{lat}/{long}/', [DistanceController::class, 'findNearestLocationByLatLong']);
 
     // filter
     //    Route::get('/filter', [DistanceController::class, 'filter']);
@@ -248,10 +256,6 @@ Route::middleware(['user'])->group(function () {
     Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
 
     // ========================= PAYMENT METHOD ROUTE =======================//
-
-    // The route that the button calls to initialize payment
-    Route::post('/pay', [PymentController::class, 'initialize'])->name('paynow');
-    // The callback url after a payment
 });
 
 // review from admin
@@ -286,7 +290,6 @@ Route::get('review-by-id/{id}', [GetController::class, 'getReviewsByProviderId']
 Route::get('review-average-rating/{id}', [GetController::class, 'test']);
 
 // filter from user
-
 Route::get('/filter-nearest-salon/{lat}/{long}', [DistanceController::class, 'findNearestSalon']);
 
 Route::get('earnings', [EarningsController::class, 'Earnings']);
@@ -310,4 +313,5 @@ Route::get('get-reviews', [TestController::class, 'getReviews']);
 // both is work for user and provider
 Route::middleware(['both'])->group(function () {
     Route::get('/service/details/{id}', [HomeController::class, 'serviceDetails']);
+    Route::get('show-category', [CategoryController::class, 'showCategory']);
 });

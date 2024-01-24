@@ -5,9 +5,10 @@ namespace App\Models;
 use App\Models\Catalogue;
 use App\Models\Provider;
 use App\Models\Service;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 
 class ServiceRating extends Model
 {

@@ -164,7 +164,7 @@ class CataloguController extends Controller
     {
         $totlaReview = ServiceRating::where('catalogue_id', $id)->count();
         $sumRating = ServiceRating::where('catalogue_id', $id)->sum('rating');
-        $avgRating = $sumRating / $totlaReview;
+        $avgRating = ($totalReview > 0) ? ServiceRating::where('catalogue_id', $id)->sum('rating') / $totalReview : 0;
         $catalougeDetails = Catalogue::where('id', $id)->with('catalouges')->get();
 
         return response()->json([

@@ -83,6 +83,43 @@ class HomeController extends Controller
         }
     }
 
+    // public function serviceDetails($id)
+    // {
+    //     $totalReview = ServiceRating::where('service_id', $id)->count();
+    //     $sumRating = ServiceRating::where('service_id', $id)->sum('rating');
+
+    //     $avgRating = ($totalReview > 0) ? ServiceRating::where('service_id', $id)->sum('rating') / $totalReview : 0;
+
+    //     // $serviceDetails = Service::where('id', $id)->with('ServiceRating')->get();
+    //     $serviceDetails = Service::where('id', $id)
+    //         ->with(['ServiceRating.user:id,name,image'])  // Assuming 'user' is the relationship between ServiceRating and User models
+    //         ->first();
+
+    //     foreach ($serviceDetails->toArray() as $item) {
+    //         $item['available_service_our'] = json_decode($item['available_service_our'], true);
+    //         $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
+
+    //         // Loop through salon_details and decode available_service_our for each item
+    //         // foreach ($item['salon_details'] as &$salonDetail) {
+    //         //     $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
+    //         //     $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
+    //         // }
+
+    //         $decodedData[] = $item;  // Add the updated item to the new array
+    //     }
+
+    //     if ($serviceDetails) {
+    //         return response()->json([
+    //             'message' => 'success',
+    //             'review' => $totalReview,
+    //             'rating' => $avgRating,
+    //             'service_details' => $decodedData
+    //         ], 200);
+    //     } else {
+    //         return ResponseErrorMessage('error', 'Provider service not found');
+    //     }
+    // }
+
     public function serviceDetails($id)
     {
         $totalReview = ServiceRating::where('service_id', $id)->count();
@@ -90,22 +127,39 @@ class HomeController extends Controller
 
         $avgRating = ($totalReview > 0) ? ServiceRating::where('service_id', $id)->sum('rating') / $totalReview : 0;
 
-        $serviceDetails = Service::where('id', $id)->with('ServiceRating')->get();
-
-        foreach ($serviceDetails->toArray() as $item) {
-            $item['available_service_our'] = json_decode($item['available_service_our'], true);
-            $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
-
-            // Loop through salon_details and decode available_service_our for each item
-            // foreach ($item['salon_details'] as &$salonDetail) {
-            //     $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
-            //     $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
-            // }
-
-            $decodedData[] = $item;  // Add the updated item to the new array
-        }
+        $serviceDetails = Service::where('id', $id)
+            ->with(['ServiceRating.user:id,name,image'])
+            ->first();
 
         if ($serviceDetails) {
+            $decodedData = [
+                'id' => $serviceDetails->id,
+                'category_id' => $serviceDetails->category_id,
+                'provider_id' => $serviceDetails->provider_id,
+                'service_name' => $serviceDetails->service_name,
+                'service_description' => $serviceDetails->service_description,
+                // ... (add other attributes as needed)
+                'gallary_photo' => json_decode($serviceDetails->gallary_photo, true),
+                'service_duration' => $serviceDetails->service_duration,
+                'salon_service_charge' => $serviceDetails->salon_service_charge,
+                'home_service_charge' => $serviceDetails->home_service_charge,
+                'set_booking_mony' => $serviceDetails->set_booking_mony,
+                'available_service_our' => json_decode($serviceDetails->available_service_our, true),
+                'created_at' => $serviceDetails->created_at,
+                'updated_at' => $serviceDetails->updated_at,
+                'service_rating' => $serviceDetails->ServiceRating->map(function ($rating) {
+                    $user = $rating->user;
+                    return [
+                        'id' => $rating->id,
+                        'user_id' => $user->id,
+                        'user_name' => $user->name,
+                        'user_image' => $user->image,  // Assuming the User model has an 'image' attribute
+                        'review' => $rating->review,
+                        'rating' => $rating->rating,
+                    ];
+                }),
+            ];
+
             return response()->json([
                 'message' => 'success',
                 'review' => $totalReview,
@@ -129,10 +183,17 @@ class HomeController extends Controller
 
     public function catalouge($id)
     {
-        $showCatloug = Catalogue::where('service_id', $id)->get();
+        $totlaReview = ServiceRating::where('catalogue_id', $id)->count();
+        $sumRating = ServiceRating::where('catalogue_id', $id)->sum('rating');
+        $avgRating = ($totalReview > 0) ? ServiceRating::where('catalogue_id', $id)->sum('rating') / $totalReview : 0;
+        $catalougeDetails = Catalogue::where('id', $id)->with('catalouges')->get();
 
         if ($showCatloug) {
-            return ResponseMethod('success', $showCatloug);
+            return response()->json([
+                'status' => 'success',
+                'avg_rating' => $avgRating,
+                'all_catalouge' => $showCatloug,
+            ]);
         } else {
             return ResponseErrorMessage('error', 'This service catalouge not found');
         }
@@ -142,7 +203,7 @@ class HomeController extends Controller
     {
         $totlaReview = ServiceRating::where('catalogue_id', $id)->count();
         $sumRating = ServiceRating::where('catalogue_id', $id)->sum('rating');
-        $avgRating = $sumRating / $totlaReview;
+        $avgRating = ($totalReview > 0) ? ServiceRating::where('catalogue_id', $id)->sum('rating') / $totalReview : 0;
         $catalougeDetails = Catalogue::where('id', $id)->with('catalouges')->get();
 
         return response()->json([
@@ -311,31 +372,65 @@ class HomeController extends Controller
 
     public function userHome()
     {
-        $providers = Provider::with('providerRating')
-            ->withAvg('providerRating', 'rating')
-            ->orderByDesc('provider_rating_avg_rating')
-            ->get();
+        $authUser = auth()->user()->id;
+        $user = User::where('id', $authUser)->first();
+        $latitude = $user->latitude;
+        $longitude = $user->longitude;
+        $provider = Provider::get();
+        if ($provider) {
+            $salons = Provider::select(
+                'id',
+                'user_id',
+                'category_id',
+                'business_name',
+                'address',
+                'description',
+                'cover_photo',
+                'status',
+                'created_at',
+                'updated_at',
+                'latitude',
+                'longitude',
+                DB::raw("(6371 * acos( cos( radians('$latitude') )
+            * cos( radians( latitude ) )
+            * cos( radians( longitude ) - radians('$longitude') )
+            + sin( radians('$latitude') )
+            * sin( radians( latitude ) ) ) ) AS distance"),
+                DB::raw('(SELECT AVG(rating) FROM service_ratings WHERE provider_id = providers.id) AS average_rating')
+            )
+                ->havingRaw('distance < 10000')
+                ->orderBy('average_rating', 'desc')
+                ->get();
 
-        $decodedData = [];
-        foreach ($providers->toArray() as $item) {
-            $item['available_service_our'] = json_decode($item['available_service_our'], true);
-            $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
-
-            // Loop through salon_details and decode available_service_our for each item
-            // foreach ($item['salon_details'] as &$salonDetail) {
-            //     $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
-            //     $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
-            // }
-
-            $decodedData[] = $item;  // Add the updated item to the new array
+            return ResponseMethod('Featcer provider', $salons);
+        } else {
+            return ResponseErrorMessage('error', 'Provider not found');
         }
-        $lat = auth()->user()->latitude;
-        $long = auth()->user()->longitude;
-        return response()->json([
-            'status' => 'success',
-            'message' => $decodedData,
-            'distance' => $this->findNearestLocation($lat, $long),
-        ]);
+        // $providers = Provider::with('providerRating')
+        //     ->withAvg('providerRating', 'rating')
+        //     ->orderByDesc('provider_rating_avg_rating')
+        //     ->get();
+
+        // $decodedData = [];
+        // foreach ($providers->toArray() as $item) {
+        //     $item['available_service_our'] = json_decode($item['available_service_our'], true);
+        //     $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
+
+        //     // Loop through salon_details and decode available_service_our for each item
+        //     // foreach ($item['salon_details'] as &$salonDetail) {
+        //     //     $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
+        //     //     $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
+        //     // }
+
+        //     $decodedData[] = $item;  // Add the updated item to the new array
+        // }
+        // $lat = auth()->user()->latitude;
+        // $long = auth()->user()->longitude;
+        // return response()->json([
+        //     'status' => 'success',
+        //     'message' => $decodedData,
+        //     'distance' => $this->findNearestLocation($lat, $long),
+        // ]);
 
         // $decodedData = [];
 
@@ -361,12 +456,14 @@ class HomeController extends Controller
     public function searchCategory(Request $request)
     {
         $catName = $request->categoryName;
-        $findCategory = Category::where('category_name', 'like', '%' . $catName . '%')->get();
+        $findCategory = Category::where('category_name', 'like', '%' . $catName . '%')->first();
+        $categoryId = $findCategory->id;
+        $provider = Provider::where('category_id', $categoryId)->get();
 
         if ($findCategory) {
             return response()->json([
                 'status' => 'success',
-                'searcgResult' => $findCategory
+                'searcgResult' => $provider
             ], 200);
         } else {
             return ResponseErrorMessage('error', 'Search data not found');
@@ -374,31 +471,41 @@ class HomeController extends Controller
     }
 
     //  find nearest location
-    public function findNearestLocation($latitude, $longitude)
+    public function nearbyProviders()
     {
-        $salon = Provider::select(
-            'id',
-            'user_id',
-            'category_id',
-            'business_name',
-            'address',
-            'description',
-            'cover_photo',
-            'status',
-            'created_at',
-            'updated_at',
-            'latitude',
-            'longitude',
-            DB::raw("(6371 * acos( cos( radians('$latitude') )
-                * cos( radians( latitude ) )
-                * cos( radians( longitude ) - radians('$longitude') )
-                + sin( radians('$latitude') )
-                * sin( radians( latitude ) ) ) ) AS distance")
-        )
-            ->havingRaw('distance < 10000')
-            ->orderBy('distance')
-            ->get();
+        $authUser = auth()->user()->id;
+        $user = User::where('id', $authUser)->first();
+        $latitude = $user->latitude;
+        $longitude = $user->longitude;
+        $provider = Provider::get();
+        if ($provider) {
+            $salons = Provider::select(
+                'id',
+                'user_id',
+                'category_id',
+                'business_name',
+                'address',
+                'description',
+                'cover_photo',
+                'status',
+                'created_at',
+                'updated_at',
+                'latitude',
+                'longitude',
+                DB::raw("(6371 * acos( cos( radians('$latitude') )
+            * cos( radians( latitude ) )
+            * cos( radians( longitude ) - radians('$longitude') )
+            + sin( radians('$latitude') )
+            * sin( radians( latitude ) ) ) ) AS distance"),
+                DB::raw('(SELECT AVG(rating) FROM service_ratings WHERE provider_id = providers.id) AS average_rating')
+            )
+                ->havingRaw('distance < 10000')
+                ->orderBy('distance')
+                ->get();
 
-        return ResponseMethod('Nearest Salon Data', $salon);
+            return ResponseMethod('Nearest Salon Data', $salons);
+        } else {
+            return ResponseErrorMessage('error', 'Provider not found');
+        }
     }
 }
