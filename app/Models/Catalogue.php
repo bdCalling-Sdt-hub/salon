@@ -23,7 +23,7 @@ class Catalogue extends Model
         'service_hour',
     ];
 
-    public function catalouges()
+    public function serviceRating()
     {
         return $this->hasMany(ServiceRating::class);
     }
@@ -32,6 +32,7 @@ class Catalogue extends Model
     {
         return $this->belongsTo(Service::class);
     }
+
     public function provider()
     {
         return $this->belongsTo(Provider::class);
@@ -46,5 +47,4 @@ class Catalogue extends Model
     {
         return $this->hasMany(Catalogue::class);
     }
-
 }

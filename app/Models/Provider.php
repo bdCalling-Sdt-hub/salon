@@ -31,13 +31,18 @@ class Provider extends Model
         return $this->hasMany(Service::class);
     }
 
+    public function Catalouge()
+    {
+        return $this->hasMany(Catalogue::class);
+    }
+
     public function providerRating()
     {
         return $this->hasMany(ServiceRating::class);
     }
 
-    public function catalouge()
+    public function service()
     {
-        return $this->hasMany(Catalogue::class);
+        return $this->hasMany(Service::class);
     }
 }

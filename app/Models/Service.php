@@ -34,4 +34,16 @@ class Service extends Model
     {
         return $this->hasMany(Catalogue::class);
     }
+
+    // jusef
+    // public function catalouge(): hasMany
+    // {
+    //     return $this->hasMany(Catalogue::class);
+    // }
+
+    // jusef
+    public function provider()
+    {
+        return $this->belongsTo(Provider::class);
+    }
 }
