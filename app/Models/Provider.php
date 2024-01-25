@@ -41,7 +41,6 @@ class Provider extends Model
         return $this->hasMany(ServiceRating::class);
     }
 
-    // jusef
     public function service()
     {
         return $this->hasMany(Service::class);

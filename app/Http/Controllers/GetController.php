@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
+use App\Models\Catalogue;
 use App\Models\Category;
 use App\Models\Payment;
 use App\Models\Provider;
 use App\Models\ServiceRating;
 use App\Models\User;
+use App\Models\UserPayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -223,21 +225,164 @@ class GetController extends Controller
         }
     }
 
-    public function getReviews(){
-//        $review = ServiceRating::select('service_ratings.*','users.name as provider_name')
-//            ->join('users','service_ratings.user_id','=','users.id')
-//            ->join('services','service_ratings.service_id','=','services.id')
-//            ->join('providers','services.provider_id', '=', 'providers.id')
-//            ->join('users','providers.provider_id', '=' , 'users.id')
+    public function getReviews($id){
+
+//        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
+//            ->join('services', 'service_ratings.service_id', '=', 'services.id')
+//            ->join('providers', 'services.provider_id', '=', 'providers.id')
+//            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
+//            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
 //            ->get();
-//        return $review;
-        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
-            ->join('services', 'service_ratings.service_id', '=', 'services.id')
-            ->join('providers', 'services.provider_id', '=', 'providers.id')
-            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
-            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
-            ->get();
-        return $reviews;
+//        return $reviews;
+
+//        return $totalReview = Provider::with('providerRating')->get();
+//        $sumRating = ServiceRating::where('service_id', $id)->sum('rating');
+//
+//        $avgRating = ($totalReview > 0) ? ServiceRating::where('service_id', $id)->sum('rating') / $totalReview : 0;
+//
+//        $serviceDetails = Service::where('id', $id)->with('ServiceRating')->get();
+//
+//        foreach ($serviceDetails->toArray() as $item) {
+//            $item['available_service_our'] = json_decode($item['available_service_our'], true);
+//            $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
+//
+//            // Loop through salon_details and decode available_service_our for each item
+//            // foreach ($item['salon_details'] as &$salonDetail) {
+//            //     $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
+//            //     $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
+//            // }
+//
+//            $decodedData[] = $item;  // Add the updated item to the new array
+//        }
+//
+//        if ($serviceDetails) {
+//            return response()->json([
+//                'message' => 'success',
+//                'review' => $totalReview,
+//                'rating' => $avgRating,
+//                'service_details' => $decodedData
+//            ], 200);
+//        } else {
+//            return ResponseErrorMessage('error', 'Provider service not found');
+//        }
+        // Assuming you have a Provider model with a relationship named 'providerRating'
+//        $providers = ServiceRating::with('salon','user')->get();
+//
+//        foreach ($providers as $provider) {
+//            // Get the provider details
+//            $providerName = $provider->business_name; // Replace 'name' with the actual attribute name
+//
+//            // Get the total number of reviews for the current provider
+//            $totalReviews = $provider->providerRating->count();
+//
+//            echo "Provider: $providerName | Total Reviews: $totalReviews\n";
+//
+//            // Loop through the reviews and display reviewer details
+//            foreach ($provider->providerRating as $review) {
+//                $reviewerName = $review->user->name; // Assuming 'user' is the relationship to the User model
+//                $reviewText = $review->review_text; // Replace 'review_text' with the actual attribute name
+//
+//                echo "  Reviewer: $reviewerName | Review: $reviewText\n";
+//            }
+//
+//            echo "\n";
+//        }
+//        $providers = Provider::get();
+//        $allReview = [];
+//        $avgRating = [];
+//        $userDetails = [];
+//        foreach ($providers as $provider) {
+//            $providerId = $provider->id;
+//            $totalReview = ServiceRating::count();
+//            $totalRating = ServiceRating::sum('rating');
+//
+//            $avgRating = ($totalReview > 0) ? $totalRating / $totalReview : 0;
+//
+//            $serviceDetails = ServiceRating::with(['user:id,name,image'])
+//                ->get();
+//            $allReview = ServiceRating::where('provider_id', $providerId)->get();
+//            $totalReview[] = $allReview;
+//            $avgRating[] = $avgRating;
+//            $userDetails[] = $serviceDetails;
+//
+//            }
+//            if ($allReview) {
+//                return response()->json([
+//                    'message' => 'true',
+//                    'total_review' => $totalReview,
+//                    'average_rating' => $avgRating,
+//                    'service_details_with_user' => $userDetails,
+//                ]);
+//            }
+//            else {
+//                return ResponseMessage('error', 'Booking data not found');
+//            }
+        ///*************************************************//////
+//        $providers = Provider::get();
+//        $allReviews = [];
+//        $avgRatings = [];
+//        $userDetailsArray = [];
+//
+//        foreach ($providers as $provider) {
+//            $providerId = $provider->id;
+//            $totalReview = ServiceRating::where('provider_id', $providerId)->count();
+//            $totalRating = ServiceRating::where('provider_id', $providerId)->sum('rating');
+//
+//            $avgRating = ($totalReview > 0) ? $totalRating / $totalReview : 0;
+//
+//            $serviceDetails = ServiceRating::where('provider_id', $providerId)
+//                ->with(['user:id,name,image'])
+//                ->get();
+//
+//            $allReview = ServiceRating::where('provider_id', $providerId)->get();
+//
+//            $allReviews[] = $allReview;
+//            $avgRatings[] = $avgRating;
+//            $userDetailsArray[] = $serviceDetails;
+//        }
+//
+//        return response()->json([
+//            'message' => 'true',
+//            'total_review' => $allReviews,
+//            'average_rating' => $avgRatings,
+//            'service_details_with_user' => $userDetailsArray,
+//        ]);
+        ///*************************************************//////
+        ///
+//        return $catalouge = Catalogue::with('provider','service')->get();
+
+        $catalogues = Catalogue::with('provider', 'service')->where('provider_id',$id)->get();
+
+        $providerData = [];
+
+        foreach ($catalogues as $catalogue) {
+            $providerId = $catalogue->provider->id;
+
+            // If the provider is not already in the array, initialize it
+            if (!isset($providerData[$providerId])) {
+                $providerData[$providerId] = [
+                    'provider' => $catalogue->provider,
+                    'services' => [],
+                    'catalogs' => [],
+                ];
+            }
+
+            // Add the service to the provider's services array
+            $providerData[$providerId]['services'][] = $catalogue->service;
+
+            // Add the catalog to the provider's catalogs array
+            $providerData[$providerId]['catalogs'][] = $catalogue;
+        }
+
+// Convert the associative array to a numerical array (if needed)
+        $providerData = array_values($providerData);
+
+// Return the result
+        return response()->json([
+            'message' => 'true',
+            'provider_data' => $providerData,
+        ]);
+
     }
 
     public function getReviewsByProviderId($providerId){
@@ -307,7 +452,7 @@ class GetController extends Controller
         }
 
         public function paymentHistory(){
-            $payment_history = Payment::paginate(9);
+            $payment_history = Payment::with('user','package')->paginate(9);
             if($payment_history){
                 return response()->json([
                     'status' => 200,
@@ -321,7 +466,7 @@ class GetController extends Controller
         }
 
     public function paymentHistoryById($id){
-        $payment_history = Payment::where('id',$id)->first();
+        $payment_history = Payment::with('user','package')->where('id',$id)->first();
         if($payment_history){
             return response()->json([
                 'status' => 200,
@@ -331,6 +476,59 @@ class GetController extends Controller
         return response()->json([
             'status' => 404,
             'message' => 'No data found'
+        ]);
+    }
+
+    public function paymentHistoryUser(){
+        $payment_history = UserPayment::with('user','booking')->paginate(9);
+        if($payment_history){
+            return response()->json([
+                'status' => 200,
+                'data' => $payment_history,
+            ]);
+        }
+        return response()->json([
+            'status' => 404,
+            'message' => 'No data found'
+        ]);
+    }
+
+    public function paymentHistoryByIdUser($id){
+        $payment_history = UserPayment::with('user','booking')->where('id',$id)->first();
+        if($payment_history){
+            return response()->json([
+                'status' => 200,
+                'data' => $payment_history,
+            ]);
+        }
+        return response()->json([
+            'status' => 404,
+            'message' => 'No data found'
+        ]);
+    }
+
+    //appointment booking
+    public function appointmentBooking($id){
+        $catalogues = Catalogue::with('provider', 'service')->where('provider_id',$id)->get();
+        $providerData = [];
+        foreach ($catalogues as $catalogue) {
+            $providerId = $catalogue->provider->id;
+            if (!isset($providerData[$providerId])) {
+                $providerData[$providerId] = [
+                    'provider' => $catalogue->provider,
+                    'services' => [],
+                    'catalogs' => [],
+                ];
+            }
+            $providerData[$providerId]['services'][] = $catalogue->service;
+            $providerData[$providerId]['catalogs'][] = $catalogue;
+        }
+
+        $providerData = array_values($providerData);
+
+        return response()->json([
+            'message' => 'true',
+            'provider_data' => $providerData,
         ]);
     }
 }

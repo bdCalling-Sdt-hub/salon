@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->id();
             $table->integer('user_id');
             $table->integer('category_id');
-            $table->integer('provider_id');
             $table->text('business_name');
             $table->text('address');
             $table->text('description');

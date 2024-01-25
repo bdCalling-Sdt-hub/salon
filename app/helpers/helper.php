@@ -18,6 +18,13 @@ function ResponseErroMethod($status, $message)
     ]);
 }
 
+function ResponseMessage($message)
+{
+    return response()->json([
+        'message' => $message,
+    ]);
+}
+
 // =====================NOTIFICATION==================//
 
 // function sendNotification($message, $data)

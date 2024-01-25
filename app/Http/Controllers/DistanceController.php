@@ -13,8 +13,8 @@ class DistanceController extends Controller
 {
     //
 
-    public function findNearestLocation($latitude, $longitude)
-    {
+    public function findNearestLocation($latitude,$longitude){
+
         $user_id = auth()->user()->id;
         $user_details = User::where('id', $user_id)->first();
         $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
@@ -27,6 +27,7 @@ class DistanceController extends Controller
             ->get();
             return ResponseMethod('Nearest Salon Data',$salon);
         }
+
     public function findNearestLocationByLatLong($latitude,$longitude){
         $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
             * cos( radians( latitude ) )
@@ -49,25 +50,105 @@ class DistanceController extends Controller
 
         }
 
-        public function filter(){
+    public function filterOriginal($category, $rating, $distance)
+    {
+        $authUser = auth()->user()->id;
+        $user = User::where('id', $authUser)->first();
+        $latitude = $user->latitude;
+        $longitude = $user->longitude;
 
-        $category = Category::all();
-        $rating = ServiceRating::where();
+        $query = Provider::select(
+            'id',
+            'user_id',
+            'category_id',
+            'business_name',
+            'address',
+            'description',
+            'cover_photo',
+            'status',
+            'created_at',
+            'updated_at',
+            'latitude',
+            'longitude',
+            DB::raw("(6371 * acos( cos( radians('$latitude') )
+        * cos( radians( latitude ) )
+        * cos( radians( longitude ) - radians('$longitude') )
+        + sin( radians('$latitude') )
+        * sin( radians( latitude ) ) ) ) AS distance"),
+            DB::raw('(SELECT AVG(rating) FROM service_ratings WHERE provider_id = providers.id) AS average_rating')
+        );
 
-        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
-            ->join('services', 'service_ratings.service_id', '=', 'services.id')
-            ->join('providers', 'services.provider_id', '=', 'providers.id')
-            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id') // Join for client name
-            ->join('users as provider', 'providers.provider_id', '=', 'provider.id') // Join for provider name
+//        return response()->json([
+//            'message' => $query
+//        ]);
+
+        // Filter by category
+        if ($category) {
+            $query->where('category_id', $category);
+        }
+
+        // Filter by rating
+        if ($rating) {
+            $query->havingRaw('average_rating >= ?', [$rating]);
+        }
+
+        // Filter by distance
+        if ($distance) {
+            $query->havingRaw('distance <= ?', [$distance]);
+        }
+
+        $salons = $query->orderBy('average_rating', 'desc')->get();
+
+        if ($salons->count() > 0) {
+            return ResponseMethod('Filter Providers', $salons);
+        } else {
+            return response()->json([
+                'message' => 'No providers found with the given criteria'
+            ]);
+        }
+    }
+
+    public function searchProvidersBySalon($salon_name = null)
+    {
+        $authUser = auth()->user()->id;
+        $user = User::where('id', $authUser)->first();
+        $latitude = $user->latitude;
+        $longitude = $user->longitude;
+
+        $providers = Provider::select(
+            'id',
+            'user_id',
+            'category_id',
+            'business_name',
+            'address',
+            'description',
+            'cover_photo',
+            'status',
+            'created_at',
+            'updated_at',
+            'latitude',
+            'longitude',
+            DB::raw("(6371 * acos( cos( radians('$latitude') )
+            * cos( radians( latitude ) )
+            * cos( radians( longitude ) - radians('$longitude') )
+            + sin( radians('$latitude') )
+            * sin( radians( latitude ) ) ) ) AS distance"),
+            DB::raw('(SELECT AVG(rating) FROM service_ratings WHERE provider_id = providers.id) AS average_rating')
+        )
+            ->where('business_name', 'like', '%' . $salon_name . '%')
+            ->orderBy('average_rating', 'desc')
             ->get();
 
-        return $reviews;
-//            $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
-//            * cos( radians( latitude ) )
-//            * cos( radians( longitude ) - radians('$longitude') )
-//            + sin( radians('$latitude') )
-//            * sin( radians( latitude ) ) ) ) AS distance"))->havingRaw('distance < $range')->orderBy('distance')
-//                ->get();
-//            return ResponseMethod('Nearest Salon Data',$salon);
+        if ($providers->count() > 0) {
+            return response()->json([
+                'status' => 'Feature provider',
+                'message' => $providers,
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'No providers found with the given business name',
+            ]);
         }
+
+    }
 }

@@ -11,6 +11,14 @@ class CataloguController extends Controller
 {
     public function postCataloug(CatalougeRequest $request)
     {
+
+        $cataloug_photo = time() . '.' . $request->catalougPhoto->extension();
+        $image_path = 'images/' . $cataloug_photo; // Full path including directory
+
+        $request->catalougPhoto->move(public_path('images'), $cataloug_photo);
+
+// Now you can store $image_path in your database instead of just $cataloug_photo
+
         $auth_user = auth()->user()->id;
         $image = array();
         if ($files = $request->file('catalougPhoto')) {
@@ -63,16 +71,6 @@ class CataloguController extends Controller
         } else {
             return ResponseErrorMessage('error', 'Data not found');
         }
-        // $get_catalouge = Catalogue::all();
-
-        // if ($get_catalouge) {
-        //     return response()->json([
-        //         'status' => 'success',
-        //         'Catalouge' => $get_catalouge
-        //     ]);
-        // } else {
-        //     return ResponseErroMethod('error', 'Catalouge not found');
-        // }
     }
 
     public function singleCataloug($id)
