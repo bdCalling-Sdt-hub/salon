@@ -93,26 +93,6 @@ class UserController extends Controller
         }
     }
 
-//    public function login(Request $request)
-//    {
-//        $validator = Validator::make($request->all(), [
-//            'email' => 'required|string|email',
-//            'password' => 'required|string|min:6'
-//        ]);
-//        if ($validator->fails()) {
-//            return response()->json($validator->errors(), 400);
-//        }
-//        $credentials = $request->only('email', 'password');
-//        if ($token = auth()->attempt($credentials)) {
-//            if (Auth::user()->is_verified == 0) {
-//                return response()->json(['error' => 'Your email is not verified'], 401);
-//            } else {
-//                return $this->responseWithToken($token);
-//            }
-//        }
-//        return response()->json(['error' => 'Your credential is wrong'], 401);
-//    }
-
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -250,29 +230,6 @@ class UserController extends Controller
 
         return response()->json(['Your password changes'], 200);
     }
-
-//    public function changePassword(request $request)
-//    {
-//        $check_user = auth()->user()->id;
-//        $user = User::find($check_user);
-//
-//        $request->validate([
-//            'current_password'=> 'required|string|min:6',
-//            'password' => 'required|string|min:6|confirmed',
-//        ]);
-//        $user_password = $request->current_password;
-//        if($user_password == $user->password){
-//            $user->password = Hash::make($request->password);
-//            $user->save();
-//            return response()->json([
-//                'message' => 'password change successfully'
-//            ],200);
-//        }
-//        return response()->json([
-//            'message' => 'current password is not matched'
-//        ],404);
-//
-//    }
     public function changePassword(Request $request)
     {
         $user = auth()->user();

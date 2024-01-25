@@ -11,6 +11,14 @@ class CataloguController extends Controller
 {
     public function postCataloug(CatalougeRequest $request)
     {
+
+        $cataloug_photo = time() . '.' . $request->catalougPhoto->extension();
+        $image_path = 'images/' . $cataloug_photo; // Full path including directory
+
+        $request->catalougPhoto->move(public_path('images'), $cataloug_photo);
+
+// Now you can store $image_path in your database instead of just $cataloug_photo
+
         $auth_user = auth()->user()->id;
         $cataloug_photo = time() . '.' . $request->catalougPhoto->extension();
         $request->catalougPhoto->move(public_path('images'), $cataloug_photo);

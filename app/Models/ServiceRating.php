@@ -39,4 +39,8 @@ class ServiceRating extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function salon(): BelongsTo
+    {
+        return $this->belongsTo(Provider::class);
+    }
 }
