@@ -12,14 +12,22 @@ class CataloguController extends Controller
     public function postCataloug(CatalougeRequest $request)
     {
         $auth_user = auth()->user()->id;
-        $cataloug_photo = time() . '.' . $request->catalougPhoto->extension();
-        $request->catalougPhoto->move(public_path('images'), $cataloug_photo);
+        $image = array();
+        if ($files = $request->file('catalougPhoto')) {
+            foreach ($files as $file) {
+                $gellery_photo = time() . '.' . $file->getClientOriginalName();
+                $image_path = 'images/' . $gellery_photo;
+                $path = $file->move(public_path('images'), $gellery_photo);
+                $image[] = $image_path;
+            }
+        }
+
         $post_catalogu = Catalogue::create([
             'provider_id' => $auth_user,
             'service_id' => $request->input('serviceId'),
             'catalog_name' => $request->input('catalougName'),
             'catalog_description' => $request->input('description'),
-            'image' => $cataloug_photo,
+            'image' => json_encode($image),
             'service_duration' => $request->input('serviceDuration'),
             'salon_service_charge' => $request->input('serviceCharge'),
             'home_service_charge' => $request->input('homeServiceCharge'),
