@@ -63,6 +63,8 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\checkAdminMiddleware::class,
         'provider' => \App\Http\Middleware\checkProviderMiddleware::class,
         'user' => \App\Http\Middleware\checkUserMiddleware::class,
-        'both' => \App\Http\Middleware\CombineMiddleware::class,
+        'user.provider' => \App\Http\Middleware\CombineMiddleware::class,
+        'admin.provider' => \App\Http\Middleware\AdminProviderMiddleware::class,
+        'user.admin.provider' => \App\Http\Middleware\AllUserMiddleware::class,
     ];
 }

@@ -32,4 +32,19 @@ class Catalogue extends Model
     {
         return $this->belongsTo(Service::class);
     }
+    public function provider()
+    {
+        return $this->belongsTo(Provider::class);
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
+
+    public function catalouge()
+    {
+        return $this->hasMany(Catalogue::class);
+    }
+
 }
