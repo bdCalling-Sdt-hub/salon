@@ -35,8 +35,14 @@ class Service extends Model
         return $this->hasMany(Catalogue::class);
     }
 
+
     public function postbooking()
     {
         return $this->hasMany(PostBooking::class);
+
+
+    public function provider()
+    {
+        return $this->belongsTo(Provider::class);
     }
 }

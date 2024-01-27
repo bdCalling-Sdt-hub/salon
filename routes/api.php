@@ -166,11 +166,9 @@ Route::middleware(['admin'])->group(function () {
 });
 
 Route::middleware(['provider'])->group(function () {
-
     //package
     Route::get('show-package', [PackageController::class, 'showPackage']);
     Route::get('my-plan', [PackageController::class, 'myPlan']);
-
     // Test
     Route::post('add-cat',[TestController::class,'addCat']);
     Route::post('add-sal',[TestController::class,'addSal']);
@@ -254,7 +252,6 @@ Route::middleware(['user'])->group(function () {
     Route::post('/saveRating', [UserController::class, 'saveRating']);
     Route::post('/updateRating/{id}', [UserController::class, 'updateServiceRating']);
 
-    // find Nearest Location
     Route::get('/find-nearest-location', [DistanceController::class, 'findNearestLocation']);
 
     //find nearest location by lat long
@@ -311,11 +308,6 @@ Route::get('salon-search/{name?}',[GetController::class,'searchSalon']);
 
 
 
-
-
-
-//filter from user
-
 Route::get('/filter-nearest-salon/{lat}/{long}',[DistanceController::class,'findNearestSalon']);
 
 Route::get('earnings',[EarningsController::class,'Earnings']);
@@ -334,7 +326,9 @@ Route::get('booking-history',[GetController::class,'bookingHistory']);
 //filter
 Route::get('filter/{name?}',[GetController::class,'filter']);
 
-
+// both is work for user and provider
+Route::middleware(['both'])->group(function () {
+Route::get('/service/details/{id}', [HomeController::class, 'serviceDetails']);
 Route::get('relation-filter',[TestController::class,'relationFilter']);
 Route::get('get-reviews',[TestController::class,'getReviews']);
 
@@ -359,7 +353,6 @@ Route::middleware(['admin.provider'])->group(function () {
 });
 
 Route::middleware(['user.provider'])->group(function () {
-
 });
 
 
