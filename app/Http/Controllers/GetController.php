@@ -7,7 +7,9 @@ use App\Models\Booking;
 use App\Models\Catalogue;
 use App\Models\Category;
 use App\Models\Payment;
+use App\Models\PostBooking;
 use App\Models\Provider;
+use App\Models\Service;
 use App\Models\ServiceRating;
 use App\Models\User;
 use App\Models\UserPayment;
@@ -422,12 +424,14 @@ class GetController extends Controller
 
             // For each catalog, include the available_service_our field as a JSON string
             $catalog = $catalogue->toArray();
-//            $catalog['provider']['available_service_our'] = json_decode($catalog['provider']['available_service_our'], true);
+
             $catalog['service']['available_service_our'] = json_encode($catalog['service']['available_service_our'], true);
+            $catalog['provider']['available_service_our'] = json_encode($catalog['provider']['available_service_our'], true);
 
             // Convert available_service_our back to JSON format
             $catalog['provider']['available_service_our'] = json_decode($catalog['provider']['available_service_our']);
             $catalog['service']['available_service_our'] = json_decode($catalog['service']['available_service_our']);
+
 
             $providerData[$providerId]['catalogs'][] = $catalog;
         }
@@ -439,5 +443,101 @@ class GetController extends Controller
             'provider_data' => $providerData,
         ]);
     }
+
+
+    public function postBooking(Request $request){
+        $validator = Validator::make($request->all(), [
+            'category_id' => 'integer',
+            'salon_id' => 'integer',
+            'service' => 'required',
+            'time' => 'required',
+            'date' => 'required',
+            'price' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $service = json_decode($request->service, true); // Decode JSON as an associative array
+        $post_booking = new PostBooking();
+        $post_booking->category_id = $request->category_id;
+        $post_booking->salon_id = $request->salon_id;
+        $post_booking->service = json_encode($service);
+        $post_booking->time = $request->time;
+        $post_booking->date = $request->date;
+        $post_booking->price = $request->price;
+        $post_booking->service_type = $request->service_type;
+        $post_booking->save();
+        return ResponseMethod('Booking add successfully', $post_booking);
+    }
+
+    public function getBooking(Request $request)
+    {
+        try {
+            $check_user = auth()->user();
+            $booking_history = PostBooking::first();
+
+            if (!$booking_history) {
+                throw new \Exception("No booking history found.");
+            }
+
+            $provider_id = $booking_history->salon_id;
+            $salon = null;
+
+            if ($provider_id) {
+                $salon = Provider::find($provider_id);
+            }
+
+            $services = json_decode($booking_history->service);
+            $catalog_details = [];
+            $service_details = [];
+
+            if (!$services) {
+                throw new \Exception("No services found in the booking.");
+            }
+
+            foreach ($services as $service) {
+                $catalogIds = $service->catalouge_id; // Assuming this is the correct key in your data
+                $serviceIds = (array) $service->service_id; // Ensure $serviceIds is always an array
+
+                if (!$catalogIds || !$serviceIds) {
+                    continue; // Skip this iteration if either catalogIds or serviceIds is empty
+                }
+
+                foreach ($catalogIds as $catalogId) {
+                    // Retrieve catalog details for each catalog ID
+                    $catalog_info = Catalogue::find($catalogId);
+                    if ($catalog_info) {
+                        $catalog_details[] = $catalog_info;
+                    }
+                }
+                foreach ($serviceIds as $serviceId) {
+                    // Retrieve service details for each service ID
+                    $service_info = Service::find($serviceId);
+                    if ($service_info) {
+                        $service_details[] = $service_info;
+                    }
+                }
+            }
+
+            return response()->json([
+                'service' => $service_details,
+                'catalogue' => $catalog_details,
+                'user' => $check_user,
+                'provider' => $salon,
+            ]);
+        } catch (\Exception $e) {
+            // Handle the exception
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+
+
+
+
 
 }
