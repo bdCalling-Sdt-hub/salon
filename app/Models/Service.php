@@ -35,13 +35,12 @@ class Service extends Model
         return $this->hasMany(Catalogue::class);
     }
 
-    // jusef
-    // public function catalouge(): hasMany
-    // {
-    //     return $this->hasMany(Catalogue::class);
-    // }
 
-    // jusef
+    public function postbooking()
+    {
+        return $this->hasMany(PostBooking::class);
+
+
     public function provider()
     {
         return $this->belongsTo(Provider::class);

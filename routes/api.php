@@ -231,6 +231,11 @@ Route::middleware(['provider'])->group(function () {
 
 Route::middleware(['user'])->group(function () {
 
+    // booking provider
+
+    Route::post('post-booking',[GetController::class,'postBooking']);
+    Route::get('get-booking',[GetController::class,'getBooking']);
+
     //user booking - payment
     Route::post('/pay-user/{id}', [FlutterwaveController::class, 'userPayment'])->name('paynowuser');
 
@@ -349,3 +354,5 @@ Route::middleware(['admin.provider'])->group(function () {
 
 Route::middleware(['user.provider'])->group(function () {
 });
+
+
