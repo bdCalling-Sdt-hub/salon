@@ -15,7 +15,9 @@ return new class extends Migration {
             $table->integer('user_id');
             $table->integer('provider_id');
             $table->integer('service_id');
-            $table->text('service');
+            $table->integer('catalouge_id')->nullable();
+            $table->text('service_type');
+            $table->text('service_duration');
             $table->text('price');
             $table->string('date');
             $table->string('time');

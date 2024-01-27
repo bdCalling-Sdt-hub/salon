@@ -18,7 +18,6 @@ use DB;
 
 class ProviderController extends Controller
 {
-
     public function postProvider(ProviderRequest $request)
     {
         $auth_user = auth()->user()->id;
@@ -85,12 +84,27 @@ class ProviderController extends Controller
 
     public function updateProvider(Request $request)
     {
+        $image = array();
+        if ($files = $request->file('photoGellary')) {
+            foreach ($files as $file) {
+                $gellery_photo = time() . '.' . $file->getClientOriginalName();
+                $file->move(public_path('images'), $gellery_photo);
+                $image[] = $gellery_photo;
+            }
+        }
+
+        $cover_photo = time() . '.' . $request->coverPhoto->extension();
+        $request->coverPhoto->move(public_path('images'), $cover_photo);
+
         $updateProvider = Provider::find($request->id);
+        $updateProvider->id = $request->id;
         $updateProvider->category_id = $request->catId;
         $updateProvider->business_name = $request->businessName;
         $updateProvider->address = $request->address;
         $updateProvider->description = $request->description;
         $updateProvider->available_service_our = $request->serviceOur;
+        $updateProvider->cover_photo = $cover_photo;
+        $updateProvider->gallary_photo = json_encode($image);
         $updateProvider->save();
         if ($updateProvider) {
             return ResponseMethod('success', 'provider update success');
@@ -240,6 +254,15 @@ class ProviderController extends Controller
 
     public function updateService(Request $request)
     {
+        $image = array();
+        if ($files = $request->file('servicePhotoGellary')) {
+            foreach ($files as $file) {
+                $service_gellery_photo = time() . '.' . $file->getClientOriginalName();
+                $file->move(public_path('images'), $service_gellery_photo);
+                $image[] = $service_gellery_photo;
+            }
+        }
+
         $updateService = Service::find($request->id);
         $updateService->id = $request->id;
         $updateService->category_id = $request->catId;
@@ -250,6 +273,7 @@ class ProviderController extends Controller
         $updateService->salon_service_charge = $request->serviceCharge;
         $updateService->home_service_charge = $request->homServiceCharge;
         $updateService->set_booking_mony = $request->bookingMony;
+        $updateService->gallary_photo = json_encode($image);
         $updateService->available_service_our = $request->serviceHour;
         $updateService->save();
         if ($updateService) {
@@ -333,7 +357,10 @@ class ProviderController extends Controller
     public function bookingRequest()
     {
         $authUser = auth()->user()->id;
-        $getBooking = Booking::where('provider_id', $authUser)->where('status', '0')->get();
+        $provider = Provider::where('user_id', $authUser)->first();
+        $providerId = $provider->id;
+        $getBooking = Booking::where('provider_id', $providerId)->where('status', '0')->get();
+        // $userId = $getBooking->user_id;
 
         if ($getBooking) {
             return ResponseMethod('success', $getBooking);

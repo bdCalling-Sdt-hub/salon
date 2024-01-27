@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Catalogue;
+use App\Models\Provider;
+use App\Models\Users;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class Booking extends Model
 {
@@ -21,14 +24,24 @@ class Booking extends Model
         'date',
         'time',
         'status',
+        'service_type',
+        'service_duration',
+        'catalogue_id'
     ];
 
     public function bookingPercentage(): HasOne
     {
         return $this->hasOne(BookingPercentage::class);
     }
-    public function userPayment():BelongsTo
+
+    public function userPayment(): BelongsTo
     {
         return $this->belongsTo(UserPayment::class);
     }
+
+    public function Provider(): BelongsTo
+    {
+        return $this->belongsTo(provider::class);
+    }
+
 }
