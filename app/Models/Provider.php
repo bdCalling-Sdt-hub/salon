@@ -45,4 +45,16 @@ class Provider extends Model
     {
         return $this->hasMany(Service::class);
     }
+
+    // Thre table connect database //
+
+    public function serviceCatelouge()
+    {
+        return $this->hasManyThrough(Catalogue::class, Service::class);
+    }
+
+    public function services()
+    {
+        return $this->hasMany(Service::class);
+    }
 }

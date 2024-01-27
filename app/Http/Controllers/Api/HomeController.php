@@ -401,7 +401,7 @@ class HomeController extends Controller
         $sumRating = ServiceRating::where('provider_id', $id)->sum('rating');
         $avgRating = ($totalReview > 0) ? $sumRating / $totalReview : 0;
 
-        $appoinmentsData = Provider::where('id', $id)->with('salonDetails')->get();
+        $appoinmentsData = Provider::where('id', $id)->with('service', 'serviceCatelouge')->get();
         $decodedData = [];
 
         foreach ($appoinmentsData as $item) {
@@ -410,19 +410,14 @@ class HomeController extends Controller
             $decodedItem['available_service_our'] = json_decode($item['available_service_our'], true);
             $decodedItem['gallary_photo'] = json_decode($item['gallary_photo'], true);
 
-            foreach ($decodedItem['salon_details'] as &$salonDetail) {
-                $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
-                $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
-            }
-
             $decodedData[] = $decodedItem;
         }
 
         return response()->json([
             'status' => 'success',
-            'appoinments' => $decodedData,
             'rating' => $totalReview,
-            'average_rating' => $avgRating
+            'average_rating' => $avgRating,
+            'appoinments' => $decodedData,
         ]);
     }
 
@@ -458,6 +453,9 @@ class HomeController extends Controller
                 'user_id' => $authId,
                 'provider_id' => $request->input('providerId'),
                 'service_id' => $request->input('serviceId'),
+                'catalogue_id' => $request->input('catalougeId'),
+                'service_duration' => $request->input('serviceDuration'),
+                'service_type' => $request->input('serviceType'),
                 'service' => $request->input('service'),
                 'price' => $request->input('price'),
                 'date' => $request->input('date'),
@@ -468,40 +466,63 @@ class HomeController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Booking success',
-                    'Notification' => sendNotification('Send your booking request', $updateBooking),
-                ], 200)(
-                    'success',
-                );
+                    'Notification' => sendNotification('Send your booking request', $post_booking),
+                ], 200);
             } else {
                 return ResponseErrorMessage('error', 'Booking faile');
             }
         }
     }
 
+    // public function providerApproval()
+    // {
+    //     $authUser = auth()->user()->id;
+    //     $bookingDetails = Booking::where('user_id', $authUser)->with('Provider')->orderBy('id', 'desc')->first();
+    //     $service = $bookingDetails->catalogue_id;
+
+    //     $catalougeId = [];
+
+    //     foreach ($service as $services) {
+    //         $findId['calalouge_id'] = json_decode($services['catalouge_id'], true);
+    //         $catalougeId[] = $findId;
+    //     }
+    //     $catalouge = Catalogue::where('id', $service)->get();
+
+    //     return response()->json([
+    //         'Provider' => $bookingDetails,
+    //         'service' => $catalouge,
+    //         'ss' => $catalougeId
+    //     ], 200);
+    // }
+
     public function providerApproval()
     {
         $authUser = auth()->user()->id;
-        if ($authUser) {
-            $bookingDetails = Booking::where('user_id', $authUser)->first();
-            $providerId = $bookingDetails->provider_id;
-            $bookingStatus = $bookingDetails->status;
-            if ($bookingStatus == 0) {
-                return response()->json([
-                    'status' => 'pending',
-                    'message' => 'pending your request'
-                ], 202);
-            } else {
-                $providerInfo = Provider::where('id', $providerId)->first();
-                $userInfo = $bookingDetails->user_id;
-                $userDetails = User::where('id', $userInfo)->first();
-                return response()->json([
-                    'status' => 'success',
-                    'provider' => $providerInfo,
-                    'userDetails' => $userDetails,
-                    'bookingHistory' => $bookingDetails
-                ], 200);
-            }
+
+        // Retrieve the latest booking details for the authenticated user
+        $bookingDetails = Booking::select('service', 'price', 'date', 'time', 'service_type', 'service_duration', 'provider_id')->where('user_id', $authUser)->orderBy('id', 'desc')->first();
+        $providerId = $bookingDetails->provider_id;
+        $provider = Provider::select('business_name', 'address')->where('id', $providerId)->first();
+        $user = User::select('phone_number')->where('id', $authUser)->first();
+
+        $service = json_decode($bookingDetails->service);
+
+        $catalougeId = [];
+        $serviceId = [];
+
+        foreach ($service as $item) {
+            $cataLougeName = $item->catalouge_id;
+            $serviceName = $item->service_id;
+            $newItem['catalouge_id'] = json_decode($item['catalouge_id']);
+            $items[] = $newItem;
         }
+
+        return $items;
+
+        return response()->json([
+            'bookingDetails' => $bookingDetails,
+            'catalogues' => $catalogues,
+        ], 200);
     }
 
     public function appoinments($id)

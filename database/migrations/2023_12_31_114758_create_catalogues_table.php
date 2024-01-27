@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->integer('provider_id');
             $table->integer('service_id');
+            $table->integer('booking_id');
             $table->string('catalog_name');
             $table->text('catalog_description');
             $table->json('image');

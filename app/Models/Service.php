@@ -39,7 +39,7 @@ class Service extends Model
     public function postbooking()
     {
         return $this->hasMany(PostBooking::class);
-
+    }
 
     public function provider()
     {
