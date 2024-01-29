@@ -25,7 +25,6 @@ class CatalougeRequest extends FormRequest
             'serviceId' => ['required'],
             'catalougName' => ['required'],
             'description' => ['required'],
-            'catalougPhoto' => ['required'],
             'serviceDuration' => ['required'],
             'serviceCharge' => ['required'],
             'homeServiceCharge' => ['required'],
