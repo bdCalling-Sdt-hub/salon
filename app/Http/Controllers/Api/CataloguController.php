@@ -11,13 +11,12 @@ class CataloguController extends Controller
 {
     public function postCataloug(CatalougeRequest $request)
     {
+        // $cataloug_photo = time() . '.' . $request->catalougPhoto->extension();
+        // $image_path = 'images/' . $cataloug_photo; // Full path including directory
 
-        $cataloug_photo = time() . '.' . $request->catalougPhoto->extension();
-        $image_path = 'images/' . $cataloug_photo; // Full path including directory
+        // $request->catalougPhoto->move(public_path('images'), $cataloug_photo);
 
-        $request->catalougPhoto->move(public_path('images'), $cataloug_photo);
-
-// Now you can store $image_path in your database instead of just $cataloug_photo
+        // Now you can store $image_path in your database instead of just $cataloug_photo
 
         $auth_user = auth()->user()->id;
         $image = array();
@@ -104,6 +103,15 @@ class CataloguController extends Controller
 
     public function updateCatalouge(CatalougeRequest $request)
     {
+        $image = array();
+        if ($files = $request->file('catalougPhoto')) {
+            foreach ($files as $file) {
+                $gellery_photo = time() . '.' . $file->getClientOriginalName();
+                $image_path = 'images/' . $gellery_photo;
+                $path = $file->move(public_path('images'), $gellery_photo);
+                $image[] = $image_path;
+            }
+        }
         $auth_user = auth()->user()->id;
         $update_catalouge = Catalogue::find($request->id);
         $update_catalouge->id = $request->id;
@@ -116,6 +124,9 @@ class CataloguController extends Controller
         $update_catalouge->home_service_charge = $request->homeServiceCharge;
         $update_catalouge->booking_money = $request->bookingMoney;
         $update_catalouge->service_hour = $request->serviceHoure;
+        if (!empty($image)) {
+            $update_catalouge->image = json_encode($image);
+        }
         $update_catalouge->save();
         if ($update_catalouge) {
             return ResponseMethod('success', 'update catalog success');
@@ -126,9 +137,6 @@ class CataloguController extends Controller
 
     public function updateCatalougeImg(Request $request)
     {
-        $cataloug_photo = time() . '.' . $request->catalougPhoto->extension();
-        $request->catalougPhoto->move(public_path('images'), $cataloug_photo);
-
         $update_catalouge_img = Catalogue::find($request->id);
         $update_catalouge_img->id = $request->id;
         $update_catalouge_img->image = $cataloug_photo;

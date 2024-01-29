@@ -25,7 +25,6 @@ class ServiceRequest extends FormRequest
             'catId' => ['required'],
             'serviceName' => ['required'],
             'description' => ['required'],
-            'servicePhotoGellary' => ['required'],
             'serviceOur' => ['required'],
             'serviceCharge' => ['required'],
             'homServiceCharge' => ['required'],

@@ -82,34 +82,90 @@ class ProviderController extends Controller
         }
     }
 
+    // public function updateProvider(Request $request)
+    // {
+    //     $image = array();
+    //     if ($request->hasFile('photoGellary')) {
+    //         $files = $request->file('photoGellary');
+    //         foreach ($files as $file) {
+    //             $gallery_photo = time() . '.' . $file->getClientOriginalName();
+    //             $file->move(public_path('images'), $gallery_photo);
+    //             $image[] = $gallery_photo;
+    //         }
+    //     }
+
+    //     if ($request->file('coverPhoto')) {
+    //         // Check if the old image file exists before attempting to unlink it
+    //         if (file_exists($updateProvider->image)) {
+    //             $cover_photo = time() . '.' . $request->coverPhoto->extension();
+    //             $request->coverPhoto->move(public_path('images'), $cover_photo);
+    //             // unlink($user->image);
+    //         }
+    //         $updateProvider->cover_photo = $cover_photo;
+    //     }
+    //     $updateProvider->id = $request->id;
+    //     $updateProvider->category_id = $request->catId;
+    //     $updateProvider->business_name = $request->businessName;
+    //     $updateProvider->address = $request->address;
+    //     $updateProvider->description = $request->description;
+    //     $updateProvider->available_service_our = $request->serviceOur;
+    //     // $updateProvider->cover_photo = $updateProvider->cover_photo;
+    //     $updateProvider->gallary_photo = json_encode($image);
+    //     $updateProvider->save();
+    //     if ($updateProvider) {
+    //         return ResponseMethod('success', 'provider update success');
+    //     } else {
+    //         return ResponseErrorMessage('error', 'provider update fail');
+    //     }
+    // }
+
     public function updateProvider(Request $request)
     {
         $image = array();
+
+        // Handle gallery photos
         if ($files = $request->file('photoGellary')) {
             foreach ($files as $file) {
-                $gellery_photo = time() . '.' . $file->getClientOriginalName();
-                $file->move(public_path('images'), $gellery_photo);
-                $image[] = $gellery_photo;
+                $gallary_photo = time() . '.' . $file->getClientOriginalName();
+                $file->move(public_path('images'), $gallary_photo);
+                $image[] = $gallary_photo;
             }
         }
 
-        $cover_photo = time() . '.' . $request->coverPhoto->extension();
-        $request->coverPhoto->move(public_path('images'), $cover_photo);
-
         $updateProvider = Provider::find($request->id);
+
+        // Handle cover photo
+        if ($request->file('coverPhoto')) {
+            // Check if the old cover photo file exists before attempting to unlink it
+            if (file_exists(public_path('images') . '/' . $updateProvider->cover_photo)) {
+                unlink(public_path('images') . '/' . $updateProvider->cover_photo);
+            }
+
+            $cover_photo = time() . '.' . $request->file('coverPhoto')->getClientOriginalName();
+            $request->file('coverPhoto')->move(public_path('images'), $cover_photo);
+            $updateProvider->cover_photo = $cover_photo;
+        }
+
         $updateProvider->id = $request->id;
         $updateProvider->category_id = $request->catId;
         $updateProvider->business_name = $request->businessName;
         $updateProvider->address = $request->address;
         $updateProvider->description = $request->description;
         $updateProvider->available_service_our = $request->serviceOur;
-        $updateProvider->cover_photo = $cover_photo;
-        $updateProvider->gallary_photo = json_encode($image);
-        $updateProvider->save();
+
+        // Check if $image is empty before updating 'gallery_photo'
+        if (!empty($image)) {
+            $updateProvider->gallary_photo = json_encode($image);
+        }
+
+        $updateProvider->update();
+
         if ($updateProvider) {
             return ResponseMethod('success', 'provider update success');
         } else {
-            return ResponseErrorMessage('error', 'provider update fail');
+            return response()->json([
+                'error' => 'update provider not found'
+            ]);
         }
     }
 
@@ -254,7 +310,8 @@ class ProviderController extends Controller
 
     public function updateService(Request $request)
     {
-        $image = array();
+        if ($request)
+            $image = array();
         if ($files = $request->file('servicePhotoGellary')) {
             foreach ($files as $file) {
                 $service_gellery_photo = time() . '.' . $file->getClientOriginalName();
@@ -273,7 +330,13 @@ class ProviderController extends Controller
         $updateService->salon_service_charge = $request->serviceCharge;
         $updateService->home_service_charge = $request->homServiceCharge;
         $updateService->set_booking_mony = $request->bookingMony;
-        $updateService->gallary_photo = json_encode($image);
+
+        // Check if $image is empty before updating 'gallery_photo'
+        if (!empty($image)) {
+            $updateService->gallary_photo = json_encode($image);
+        }
+        // $updateService->gallary_photo = json_encode($image);
+
         $updateService->available_service_our = $request->serviceHour;
         $updateService->save();
         if ($updateService) {
@@ -360,7 +423,6 @@ class ProviderController extends Controller
         $provider = Provider::where('user_id', $authUser)->first();
         $providerId = $provider->id;
         $getBooking = Booking::where('provider_id', $providerId)->where('status', '0')->get();
-        // $userId = $getBooking->user_id;
 
         if ($getBooking) {
             return ResponseMethod('success', $getBooking);

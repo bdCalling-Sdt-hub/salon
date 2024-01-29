@@ -238,7 +238,8 @@ class GetController extends Controller
         }
     }
 
-    public function getReviews(){
+    public function getReviews()
+    {
         $providers = Provider::get();
         $allReviews = [];
         $avgRatings = [];
@@ -386,9 +387,10 @@ class GetController extends Controller
         ]);
     }
 
-    public function paymentHistoryByIdUser($id){
-        $payment_history = UserPayment::with('user','booking')->where('id',$id)->first();
-        if($payment_history){
+    public function paymentHistoryByIdUser($id)
+    {
+        $payment_history = UserPayment::with('user', 'booking')->where('id', $id)->first();
+        if ($payment_history) {
             return response()->json([
                 'status' => 200,
                 'data' => $payment_history,
@@ -399,29 +401,31 @@ class GetController extends Controller
             'message' => 'No data found'
         ]);
     }
-    //appointment booking
-    public function appointmentBooking($id){
-//        $catalogues = Catalogue::with('provider', 'service')->where('provider_id',$id)->get();
-//        $providerData = [];
-//        foreach ($catalogues as $catalogue) {
-//            $providerId = $catalogue->provider->id;
-//            if (!isset($providerData[$providerId])) {
-//                $providerData[$providerId] = [
-//                    'provider' => $catalogue->provider,
-//                    'services' => [],
-//                    'catalogs' => [],
-//                ];
-//            }
-//            $providerData[$providerId]['services'][] = $catalogue->service;
-//            $providerData[$providerId]['catalogs'][] = $catalogue;
-//        }
-//
-//        $providerData = array_values($providerData);
-//
-//        return response()->json([
-//            'message' => 'true',
-//            'provider_data' => $providerData,
-//        ]);
+
+    // appointment booking
+    public function appointmentBooking($id)
+    {
+        //        $catalogues = Catalogue::with('provider', 'service')->where('provider_id',$id)->get();
+        //        $providerData = [];
+        //        foreach ($catalogues as $catalogue) {
+        //            $providerId = $catalogue->provider->id;
+        //            if (!isset($providerData[$providerId])) {
+        //                $providerData[$providerId] = [
+        //                    'provider' => $catalogue->provider,
+        //                    'services' => [],
+        //                    'catalogs' => [],
+        //                ];
+        //            }
+        //            $providerData[$providerId]['services'][] = $catalogue->service;
+        //            $providerData[$providerId]['catalogs'][] = $catalogue;
+        //        }
+        //
+        //        $providerData = array_values($providerData);
+        //
+        //        return response()->json([
+        //            'message' => 'true',
+        //            'provider_data' => $providerData,
+        //        ]);
         $catalogues = Catalogue::with('provider', 'service')->where('provider_id', $id)->get();
         $providerData = [];
 
@@ -452,7 +456,6 @@ class GetController extends Controller
             $catalog['provider']['available_service_our'] = json_decode($catalog['provider']['available_service_our']);
             $catalog['service']['available_service_our'] = json_decode($catalog['service']['available_service_our']);
 
-
             $providerData[$providerId]['catalogs'][] = $catalog;
         }
 
@@ -464,42 +467,14 @@ class GetController extends Controller
         ]);
     }
 
-
-    public function postBooking(Request $request){
-        $validator = Validator::make($request->all(), [
-            'category_id' => 'integer',
-            'salon_id' => 'integer',
-            'service' => 'required',
-            'time' => 'required',
-            'date' => 'required',
-            'price' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
-
-        $service = json_decode($request->service, true); // Decode JSON as an associative array
-        $post_booking = new PostBooking();
-        $post_booking->category_id = $request->category_id;
-        $post_booking->salon_id = $request->salon_id;
-        $post_booking->service = json_encode($service);
-        $post_booking->time = $request->time;
-        $post_booking->date = $request->date;
-        $post_booking->price = $request->price;
-        $post_booking->service_type = $request->service_type;
-        $post_booking->save();
-        return ResponseMethod('Booking add successfully', $post_booking);
-    }
-
     public function getBooking(Request $request)
     {
         try {
             $check_user = auth()->user();
-            $booking_history = PostBooking::first();
+            $booking_history = Booking::first();
 
             if (!$booking_history) {
-                throw new \Exception("No booking history found.");
+                throw new \Exception('No booking history found.');
             }
 
             $provider_id = $booking_history->salon_id;
@@ -514,15 +489,15 @@ class GetController extends Controller
             $service_details = [];
 
             if (!$services) {
-                throw new \Exception("No services found in the booking.");
+                throw new \Exception('No services found in the booking.');
             }
 
             foreach ($services as $service) {
-                $catalogIds = $service->catalouge_id; // Assuming this is the correct key in your data
-                $serviceIds = (array) $service->service_id; // Ensure $serviceIds is always an array
+                $catalogIds = $service->catalouge_id;  // Assuming this is the correct key in your data
+                $serviceIds = (array) $service->service_id;  // Ensure $serviceIds is always an array
 
                 if (!$catalogIds || !$serviceIds) {
-                    continue; // Skip this iteration if either catalogIds or serviceIds is empty
+                    continue;  // Skip this iteration if either catalogIds or serviceIds is empty
                 }
 
                 foreach ($catalogIds as $catalogId) {
@@ -552,12 +527,4 @@ class GetController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
-
-
-
-
-
-
-
 }

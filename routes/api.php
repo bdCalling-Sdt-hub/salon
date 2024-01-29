@@ -69,7 +69,6 @@ Route::post('update-website-pages/{id}', [WebsitePagesController::class, 'update
 Route::get('delete-website-pages/{id}', [WebsitePagesController::class, 'deleteWebsitePage']);
 
 Route::middleware(['admin'])->group(function () {
-    Route::get('single-category/{id}', [CategoryController::class, 'showSingleCategory']);
     Route::post('add-category', [CategoryController::class, 'addCategory']);
     Route::post('update-category/{id}', [CategoryController::class, 'updateCategory']);
     Route::get('delete-category/{id}', [CategoryController::class, 'deleteCategory']);
@@ -214,7 +213,7 @@ Route::middleware(['provider'])->group(function () {
     Route::get('/booking/delete/{id}', [ProviderController::class, 'decline']);
     Route::get('/approved/booking', [ProviderController::class, 'approvedBooking']);
     Route::get('/booking/history', [ProviderController::class, 'bookingHistory']);
-    Route::get('/review/provider', [ProviderController::class, 'reviewProvider']);
+    Route::get('/provider/review', [ProviderController::class, 'reviewProvider']);
 
     // ========================== EARNING =========================//
 
@@ -227,14 +226,12 @@ Route::middleware(['provider'])->group(function () {
 });
 
 Route::middleware(['user'])->group(function () {
-
-
     // booking provider
 
-    Route::post('post-booking',[GetController::class,'postBooking']);
-    Route::get('get-booking',[GetController::class,'getBooking']);
+    Route::post('post-booking', [GetController::class, 'postBooking']);
+    Route::get('get-booking', [GetController::class, 'getBooking']);
 
-    //user booking - payment
+    // user booking - payment
     Route::post('/pay-user/{id}', [FlutterwaveController::class, 'userPayment'])->name('paynowuser');
 
     // filter
@@ -333,6 +330,7 @@ Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'callback'])->name('
 Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
 
 Route::middleware(['user.admin.provider'])->group(function () {
+    Route::get('category-search/{name?}', [CategoryController::class, 'categorySearch']);
     // category
     Route::get('show-category', [CategoryController::class, 'showCategory']);
     // website pages
@@ -341,6 +339,8 @@ Route::middleware(['user.admin.provider'])->group(function () {
 });
 
 Route::middleware(['admin.provider'])->group(function () {
+    // single-catagory
+    Route::get('single-category/{id}', [CategoryController::class, 'showSingleCategory']);
     // package
     Route::get('show-package', [PackageController::class, 'showPackage']);
     Route::get('single-package/{id}', [PackageController::class, 'showSinglePackage']);

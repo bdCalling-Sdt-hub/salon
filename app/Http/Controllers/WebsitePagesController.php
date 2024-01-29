@@ -45,7 +45,7 @@ class WebsitePagesController extends Controller
         $website_page = WebsitePage::where('id', $id)->first();
         if ($website_page) {
             $validator = Validator::make($request->all(), [
-                'page_title' => 'required|unique:website_pages|max:20',
+                'page_title' => 'required|max:20',
                 'page_description' => 'required',
             ]);
             if ($validator->fails()) {
