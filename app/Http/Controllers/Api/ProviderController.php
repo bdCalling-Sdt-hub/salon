@@ -7,6 +7,7 @@ use App\Http\Requests\BookingRequest;
 use App\Http\Requests\ProviderRequest;
 use App\Http\Requests\ServiceRequest;
 use App\Models\Booking;
+use App\Models\Catalogue;
 use App\Models\Category;
 use App\Models\Provider;
 use App\Models\Service;
@@ -81,43 +82,6 @@ class ProviderController extends Controller
             return ResponseErrorMessage('error', 'Data not found');
         }
     }
-
-    // public function updateProvider(Request $request)
-    // {
-    //     $image = array();
-    //     if ($request->hasFile('photoGellary')) {
-    //         $files = $request->file('photoGellary');
-    //         foreach ($files as $file) {
-    //             $gallery_photo = time() . '.' . $file->getClientOriginalName();
-    //             $file->move(public_path('images'), $gallery_photo);
-    //             $image[] = $gallery_photo;
-    //         }
-    //     }
-
-    //     if ($request->file('coverPhoto')) {
-    //         // Check if the old image file exists before attempting to unlink it
-    //         if (file_exists($updateProvider->image)) {
-    //             $cover_photo = time() . '.' . $request->coverPhoto->extension();
-    //             $request->coverPhoto->move(public_path('images'), $cover_photo);
-    //             // unlink($user->image);
-    //         }
-    //         $updateProvider->cover_photo = $cover_photo;
-    //     }
-    //     $updateProvider->id = $request->id;
-    //     $updateProvider->category_id = $request->catId;
-    //     $updateProvider->business_name = $request->businessName;
-    //     $updateProvider->address = $request->address;
-    //     $updateProvider->description = $request->description;
-    //     $updateProvider->available_service_our = $request->serviceOur;
-    //     // $updateProvider->cover_photo = $updateProvider->cover_photo;
-    //     $updateProvider->gallary_photo = json_encode($image);
-    //     $updateProvider->save();
-    //     if ($updateProvider) {
-    //         return ResponseMethod('success', 'provider update success');
-    //     } else {
-    //         return ResponseErrorMessage('error', 'provider update fail');
-    //     }
-    // }
 
     public function updateProvider(Request $request)
     {
@@ -417,17 +381,76 @@ class ProviderController extends Controller
         }
     }
 
+    // public function bookingRequest()
+    // {
+    //     $authUser = auth()->user()->id;
+    //     $provider = Provider::where('user_id', $authUser)->first();
+    //     $providerId = $provider->id;
+    //     $getBooking = Booking::where('provider_id', $providerId)->where('status', '0')->with('user')->get();
+
+    //     $decodeBooking = [];
+
+    //     foreach ($getBooking as $booking) {
+    //         $book['service'] = json_decode($booking['service']);
+    //         $decodeBooking[] = $book;
+    //     }
+
+    //     response()->json([
+    //         'service' => $getBooking,
+    //     ]);
+    // }
     public function bookingRequest()
     {
-        $authUser = auth()->user()->id;
-        $provider = Provider::where('user_id', $authUser)->first();
-        $providerId = $provider->id;
-        $getBooking = Booking::where('provider_id', $providerId)->where('status', '0')->get();
+        try {
+            $authUser = auth()->user()->id;
+            $provider = Provider::where('user_id', $authUser)->first();
 
-        if ($getBooking) {
-            return ResponseMethod('success', $getBooking);
-        } else {
-            return ResponseErrorMessage('error', 'Booking data not found');
+            if (!$provider) {
+                throw new \Exception('Provider not found.');
+            }
+
+            $providerId = $provider->id;
+            $getBooking = Booking::where('provider_id', $providerId)->where('status', '0')->with('user')->get();
+
+            if ($getBooking->isEmpty()) {
+                throw new \Exception('No booking history found.');
+            }
+
+            $decodedBookings = [];
+
+            foreach ($getBooking as $booking) {
+                $decodedServices = json_decode($booking->service, true);
+
+                if (!is_array($decodedServices)) {
+                    throw new \Exception('Error decoding the service JSON.');
+                }
+
+                foreach ($decodedServices as $service) {
+                    $catalogIds = explode(',', $service['catalouge_id']);
+                    $catalogDetails = [];
+
+                    foreach ($catalogIds as $catalogId) {
+                        $catalog = Catalogue::find($catalogId);
+
+                        if ($catalog) {
+                            $catalogDetails[] = $catalog;
+                        }
+                    }
+
+                    $decodedBookings[] = [
+                        'booking' => $booking,
+                        'service' => $service,
+                        'catalog_details' => $catalogDetails,
+                    ];
+                }
+            }
+
+            return response()->json([
+                'decoded_bookings' => $decodedBookings,
+            ]);
+        } catch (\Exception $e) {
+            // Handle the exception
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

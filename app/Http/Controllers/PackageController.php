@@ -9,11 +9,18 @@ use Illuminate\Support\Facades\Validator;
 
 class PackageController extends Controller
 {
-    //
     public function showPackage()
     {
-        $packages = Package::all();
-        return ResponseMethod('Package list', $packages);
+        $packages = Package::get();
+        $dataDecode = [];
+        foreach ($packages as &$package) {
+            $package['package_features'] = json_decode($package['package_features'], true);
+            $dataDecode[] = $package;
+        }
+        return response()->json([
+            'message' => 'Package list',
+            'data' => $dataDecode
+        ]);
     }
 
     public function showSinglePackage($id)
@@ -24,12 +31,10 @@ class PackageController extends Controller
         } else {
             return ResponseMessage('Package Not Exist');
         }
-
     }
 
     public function addPackage(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'package_name' => 'required|string|min:2|max:15|unique:packages',
             'package_duration' => 'string',
@@ -98,6 +103,5 @@ class PackageController extends Controller
             'message' => 'success',
             'data' => $subscription_user,
         ]);
-
     }
 }
