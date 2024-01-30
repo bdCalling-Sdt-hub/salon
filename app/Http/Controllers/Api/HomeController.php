@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
+use App\Models\BookingPercentage;
 use App\Models\Catalogue;
 use App\Models\Category;
 use App\Models\Provider;
@@ -400,6 +401,7 @@ class HomeController extends Controller
         $totalReview = ServiceRating::where('provider_id', $id)->count();
         $sumRating = ServiceRating::where('provider_id', $id)->sum('rating');
         $avgRating = ($totalReview > 0) ? $sumRating / $totalReview : 0;
+        $percentage = BookingPercentage::first();
 
         $appoinmentsData = Provider::where('id', $id)->with('service', 'serviceCatelouge')->get();
         $decodedData = [];
@@ -415,6 +417,7 @@ class HomeController extends Controller
 
         return response()->json([
             'status' => 'success',
+            'percentage' => $percentage,
             'rating' => $totalReview,
             'average_rating' => $avgRating,
             'appoinments' => $decodedData,
