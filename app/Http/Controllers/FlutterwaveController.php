@@ -14,7 +14,7 @@ class FlutterwaveController extends Controller
 
     public function initialize($id)
     {
-        //This generates a payment reference
+        // This generates a payment reference
         $reference = Flutterwave::generateReference();
 
         // Enter the details of the payment
@@ -27,29 +27,30 @@ class FlutterwaveController extends Controller
             'redirect_url' => route('callback'),
             'customer' => [
                 'email' => request()->email,
-                "phone_number" => request()->phone,
-                "name" => request()->name
+                'phone_number' => request()->phone,
+                'name' => request()->name
             ],
             'meta' => [
                 'user_id' => auth()->user()->id,
                 'package_id' => $id,
             ],
-
-            "customizations" => [
-                "title" => 'Buy Me Coffee',
-                "description" => "Let express love of coffee"
+            'customizations' => [
+                'title' => 'Buy Me Coffee',
+                'description' => 'Let express love of coffee'
             ]
         ];
 
         $payment = Flutterwave::initializePayment($data);
-
 
         if ($payment['status'] !== 'success') {
             // notify something went wrong
             return;
         }
 
-        return response($payment['data']['link']);
+        return response()->json([
+            'status' => 'success',
+            'gateway_link' => $payment['data']['link'],
+        ]);
     }
 
     public function callback()
@@ -83,7 +84,7 @@ class FlutterwaveController extends Controller
                     'status' => 'success',
                     'message' => 'Payment complete',
                     'data' => $payment,
-                ],200);
+                ], 200);
             }
         } elseif ($status == 'cancelled') {
             return response()->json([
@@ -97,13 +98,11 @@ class FlutterwaveController extends Controller
         }
     }
 
-
-
-    //payment for user
+    // payment for user
 
     public function userPayment($id)
     {
-        //This generates a payment reference
+        // This generates a payment reference
         $reference = Flutterwave::generateReference();
 
         // Enter the details of the payment
@@ -116,22 +115,20 @@ class FlutterwaveController extends Controller
             'redirect_url' => route('user.callback'),
             'customer' => [
                 'email' => request()->email,
-                "phone_number" => request()->phone,
-                "name" => request()->name
+                'phone_number' => request()->phone,
+                'name' => request()->name
             ],
             'meta' => [
                 'user_id' => auth()->user()->id,
                 'booking_id' => $id,
             ],
-
-            "customizations" => [
-                "title" => 'Buy Me Coffee',
-                "description" => "Let express love of coffee"
+            'customizations' => [
+                'title' => 'Buy Me Coffee',
+                'description' => 'Let express love of coffee'
             ]
         ];
 
         $payment = Flutterwave::initializePayment($data);
-
 
         if ($payment['status'] !== 'success') {
             // notify something went wrong
@@ -167,7 +164,7 @@ class FlutterwaveController extends Controller
                     'status' => 'success',
                     'message' => 'Payment complete',
                     'data' => $payment,
-                ],200);
+                ], 200);
             }
         } elseif ($status == 'cancelled') {
             return response()->json([
@@ -180,5 +177,4 @@ class FlutterwaveController extends Controller
             // Put desired action/code after transaction has failed here
         }
     }
-
 }

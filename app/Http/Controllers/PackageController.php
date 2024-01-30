@@ -102,6 +102,5 @@ class PackageController extends Controller
             'message' => 'success',
             'data' => $subscription_user,
         ]);
-
     }
 }

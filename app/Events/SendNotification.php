@@ -14,16 +14,14 @@ class SendNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message,$userId;
+    public $message, $userId;
 
-
-    public function __construct($message,$userId)
+    public function __construct($message, $userId)
     {
         //
         $this->message = $message;
         $this->userId = $userId;
     }
-
 
     public function broadcastOn()
     {
