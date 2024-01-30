@@ -13,10 +13,10 @@ class PackageController extends Controller
     {
         $packages = Package::get();
         $package_features = [];
-        foreach ($packages as &$package){
+        foreach ($packages as &$package) {
             $package['package_features'] = json_decode($package['package_features']);
             $package_features[] = $package;
-            }
+        }
         return response()->json([
             'message' => 'Package List',
             'data' => $package_features
@@ -90,13 +90,42 @@ class PackageController extends Controller
     public function myPlan()
     {
         $auth_user = auth()->user()->id;
-        $packages = Payment::where('user_id', $auth_user)->with('package')->first();
-        $package_features = [];
-        $package['package_features'] = json_decode($packages['package']['package_features']);
-        $package_features[] = $package;
+
+        if (!$auth_user) {
+            return response()->json([
+                'message' => 'User is not authenticated'
+            ], 401);
+        }
+
+        $subscriptions = Payment::where('user_id', $auth_user)->with('package')->get();
+
+        $result = [];
+
+        foreach ($subscriptions as $subscription) {
+            // Check if the 'package_features' key exists before decoding
+            $packageFeatures = isset($subscription->package->package_features)
+                ? json_decode($subscription->package->package_features, true)
+                : null;
+
+            $result[] = [
+                'subscription_id' => $subscription->id,
+                'user_id' => $subscription->user_id,
+                'other_subscription_data' => $subscription->other_fields,
+                'package' => [
+                    'package_id' => $subscription->package->id,
+                    'package_name' => $subscription->package->package_name,
+                    'package_duration' => $subscription->package->package_duration,
+                    'package_features' => $packageFeatures,
+                    'price' => $subscription->package->price,
+                    'created_at' => $subscription->package->created_at,
+                    'updated_at' => $subscription->package->updated_at,
+                ],
+            ];
+        }
+
         return response()->json([
-            'message' => 'Package List',
-            'data' => $package_features
+            'message' => 'success',
+            'data' => $result,
         ]);
     }
 }
