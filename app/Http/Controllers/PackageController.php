@@ -90,16 +90,13 @@ class PackageController extends Controller
     public function myPlan()
     {
         $auth_user = auth()->user()->id;
-
-        if (!$auth_user) {
-            return response()->json([
-                'message' => 'User is not authenticated'
-            ], 401);
-        }
-        $subscription_user = Payment::where('user_id', $auth_user)->with('package')->get();
+        $packages = Payment::where('user_id', $auth_user)->with('package')->first();
+        $package_features = [];
+        $package['package_features'] = json_decode($packages['package']['package_features']);
+        $package_features[] = $package;
         return response()->json([
-            'message' => 'success',
-            'data' => $subscription_user,
+            'message' => 'Package List',
+            'data' => $package_features
         ]);
     }
 }
