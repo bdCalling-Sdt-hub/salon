@@ -13,8 +13,6 @@ return new class extends Migration
     {
         Schema::create('booking_percentages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('appointment_id');
-            $table->foreign('appointment_id')->references('id')->on('bookings');
             $table->integer('percentage');
             $table->timestamps();
         });

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LoginActivity extends Model
 {
@@ -18,7 +19,7 @@ class LoginActivity extends Model
         'status',
     ];
 
-     public function users()
+     public function users():BelongsTo
      {
          return $this->belongsTo(User::class,'user_id');
      }

@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'user.provider' => \App\Http\Middleware\CombineMiddleware::class,
         'admin.provider' => \App\Http\Middleware\AdminProviderMiddleware::class,
         'user.admin.provider' => \App\Http\Middleware\AllUserMiddleware::class,
+        'payment.auth' => \App\Http\Middleware\CheckPaymentMiddleware::class,
     ];
 }

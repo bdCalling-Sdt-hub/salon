@@ -11,15 +11,16 @@ class PackageController extends Controller
 {
     public function showPackage()
     {
+
         $packages = Package::get();
-        $dataDecode = [];
-        foreach ($packages as &$package) {
-            $package['package_features'] = json_decode($package['package_features'], true);
-            $dataDecode[] = $package;
-        }
+        $package_features = [];
+        foreach ($packages as &$package){
+            $package['package_features'] = json_decode($package['package_features']);
+            $package_features[] = $package;
+            }
         return response()->json([
-            'message' => 'Package list',
-            'data' => $dataDecode
+            'message' => 'Package List',
+            'data' => $package_features
         ]);
     }
 
@@ -38,7 +39,7 @@ class PackageController extends Controller
         $validator = Validator::make($request->all(), [
             'package_name' => 'required|string|min:2|max:15|unique:packages',
             'package_duration' => 'string',
-            'package_features' => 'string',
+            'package_features' => 'required',
             'price' => 'integer',
         ]);
         if ($validator->fails()) {
@@ -50,7 +51,6 @@ class PackageController extends Controller
         $package->package_features = $request->package_features;
         $package->price = $request->price;
         $package->save();
-
         return ResponseMethod('Package add successfully', $package);
     }
 
@@ -97,7 +97,6 @@ class PackageController extends Controller
                 'message' => 'User is not authenticated'
             ], 401);
         }
-
         $subscription_user = Payment::where('user_id', $auth_user)->with('package')->get();
         return response()->json([
             'message' => 'success',

@@ -15,7 +15,6 @@ class checkAdminMiddleware
     {
 
         if (auth()->check() && auth()->user()->user_type == 'admin') {
-
             return $next($request);
         }
         return response()->json('Unauthorized user');
