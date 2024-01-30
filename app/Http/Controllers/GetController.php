@@ -181,19 +181,20 @@ class GetController extends Controller
     }
 
     // search salon
-
     public function searchSalon($name = null)
     {
+        $barbar = Provider::get();
         if (!is_null($name)) {
-            $users = Provider::where('business_name', 'like', '%' . $name . '%')->get();
+            $salons = Provider::where('business_name', 'like', '%' . $name . '%')->get();
 
-            if ($users->count() > 0) {
-                return ResponseMethod('salon data', $users);
+            if ($salons->count() > 0) {
+                return ResponseMethod('salon data', $salons);
             }
             return ResponseMessage('salon not found');
         }
-        return ResponseMessage('provide name for searching');
+        return response()->json(['message' => 'Salon data', 'salons' => $barbar], 200);
     }
+
 
     public function getAppointmentList()
     {
@@ -263,7 +264,6 @@ class GetController extends Controller
             $userDetailsArray[] = $serviceDetails;
         }
         return response()->json([
-            'message' => 'true',
             'total_review' => $allReviews,
             'average_rating' => $avgRatings,
             'service_details_with_user' => $userDetailsArray,
@@ -272,14 +272,26 @@ class GetController extends Controller
 
     public function getReviewsByProviderId($providerId)
     {
-        $reviews = ServiceRating::select('service_ratings.*', 'clients.name as client_name', 'provider.name as provider_name')
-            ->join('services', 'service_ratings.service_id', '=', 'services.id')
-            ->join('providers', 'services.provider_id', '=', 'providers.id')
-            ->join('users as clients', 'service_ratings.user_id', '=', 'clients.id')  // Join for client name
-            ->join('users as provider', 'providers.provider_id', '=', 'provider.id')  // Join for provider name
-            ->where('provider.id', '=', $providerId)  // Filter by provider ID
+        $totalReview = ServiceRating::where('provider_id', $providerId)->count();
+        $totalRating = ServiceRating::where('provider_id', $providerId)->sum('rating');
+
+        $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $providerId)->sum('rating') / $totalReview : 0;
+
+        $serviceDetails = ServiceRating::where('provider_id', $providerId)
+            ->with(['user:id,name,image'])
             ->get();
-        return $reviews;
+
+        $allReview = ServiceRating::where('provider_id', $providerId)->get();
+        if ($allReview) {
+            return response()->json([
+                'message' => 'true',
+                'total_review' => $totalReview,
+                'average_rating' => $avgRating,
+                'service_details_with_user' => $serviceDetails,
+            ]);
+        } else {
+            return response()->json(['message' => 'booking data not found']);
+        }
     }
 
     // review average rating

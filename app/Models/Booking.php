@@ -29,11 +29,6 @@ class Booking extends Model
         'catalogue_id'
     ];
 
-    public function bookingPercentage(): HasOne
-    {
-        return $this->hasOne(BookingPercentage::class);
-    }
-
     public function userPayment(): BelongsTo
     {
         return $this->belongsTo(UserPayment::class);

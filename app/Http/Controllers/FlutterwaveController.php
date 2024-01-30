@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\User;
 use App\Models\UserPayment;
 use EdwardMuss\Rave\Facades\Rave as Flutterwave;
 use Illuminate\Http\Request;
@@ -73,6 +74,11 @@ class FlutterwaveController extends Controller
             $payment->save();
 
             if ($payment) {
+                $user = User::find($payment->user_id);
+                if ($user) {
+                    $user->user_status = 1;
+                    $user->save();
+                }
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Payment complete',

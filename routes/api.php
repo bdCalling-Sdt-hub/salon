@@ -137,10 +137,13 @@ Route::middleware(['admin'])->group(function () {
     // provider list search name,email,phone
     // provider block list search by name and id
     // user list search by name email and phone
-    // salon list search by name,email and phone
+    // salon list search by name
+    Route::get('salon-search/{name?}', [GetController::class, 'searchSalon']);
 
     // booking percentage
     Route::post('booking-percentage-set', [PercentageController::class, 'percentageSet']);
+    Route::get('booking-percentage-set', [PercentageController::class, 'percentageGet']);
+    Route::post('booking-percentage-update', [PercentageController::class, 'percentageUpdate']);
 
     // review
     Route::get('/deleteRating/{id}', [UserController::class, 'deleteServiceRating']);
@@ -155,20 +158,17 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/send-admin-notification', [UserController::class, 'sendNotification']);
 
     // Review
-    Route::get('review/{id}', [GetController::class, 'getReviews']);
+    Route::get('review', [GetController::class, 'getReviews']);
     Route::get('review-by-id/{id}', [GetController::class, 'getReviewsByProviderId']);
     // Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
     Route::get('review-average-rating/{id}', [GetController::class, 'test']);
 });
 
-Route::middleware(['provider'])->group(function () {
+Route::middleware(['payment.auth'])->group(function () {
     // package
     Route::get('show-package', [PackageController::class, 'showPackage']);
     Route::get('my-plan', [PackageController::class, 'myPlan']);
-    // Test
-    Route::post('add-cat', [TestController::class, 'addCat']);
-    Route::post('add-sal', [TestController::class, 'addSal']);
-    Route::post('add-ser', [TestController::class, 'addSer']);
+
     // ======================Provider =======================//
     Route::post('/post/provider', [ProviderController::class, 'postProvider']);
     Route::get('/get/provider', [ProviderController::class, 'getProvider']);
@@ -221,6 +221,10 @@ Route::middleware(['provider'])->group(function () {
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
     Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
 
+
+});
+
+Route::middleware(['provider'])->group(function () {
     // The route that the button calls to initialize payment
     Route::post('/pay/{id}', [FlutterwaveController::class, 'initialize'])->name('paynow');
 });
@@ -297,8 +301,7 @@ Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
 Route::get('provider-block-list-search/{name?}', [GetController::class, 'searchProviderBlock']);
 // user list search by name email and phone
 Route::get('search-user/{name?}', [GetController::class, 'searchUser']);
-// salon list search by name
-Route::get('salon-search/{name?}', [GetController::class, 'searchSalon']);
+
 
 Route::get('/filter-nearest-salon/{lat}/{long}', [DistanceController::class, 'findNearestSalon']);
 
@@ -327,7 +330,7 @@ Route::middleware(['user.provider'])->group(function () {
 // The callback url after a payment
 Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'callback'])->name('callback');
 // user callback
-Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
+//Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
 
 Route::middleware(['user.admin.provider'])->group(function () {
     Route::get('category-search/{name?}', [CategoryController::class, 'categorySearch']);

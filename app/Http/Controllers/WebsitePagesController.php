@@ -37,7 +37,8 @@ class WebsitePagesController extends Controller
         $website_page->page_title = $request->page_title;
         $website_page->page_description = $request->page_description;
         $website_page->save();
-        return ResponseMethod('Page added Successfully', $website_page);
+        return response($website_page, 200)->header('Content-Type', 'text/html');
+//        return ResponseMethod('Page added Successfully', $website_page);
     }
 
     public function updateWebsitePage(Request $request, $id)
@@ -54,7 +55,7 @@ class WebsitePagesController extends Controller
             $website_page->page_title = $request->page_title;
             $website_page->page_description = $request->page_description;
             $website_page->update();
-            return responseMethod('Website page update successfully', $website_page);
+            return response($website_page, 200)->header('Content-Type', 'text/html');
         } else {
             return responseMessage('Website page not found');
         }

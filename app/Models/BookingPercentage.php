@@ -10,8 +10,4 @@ class BookingPercentage extends Model
 {
     use HasFactory;
 
-    public function booking(): BelongsTo
-    {
-        return $this->belongsTo(Booking::class);
-    }
 }
