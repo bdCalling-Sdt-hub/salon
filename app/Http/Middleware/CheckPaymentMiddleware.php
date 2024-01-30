@@ -13,6 +13,8 @@ class CheckPaymentMiddleware
         if (auth()->check() && auth()->user()->user_type == 'provider' && auth()->user()->user_status == 1 ){
             return $next($request);
         }
-        return response()->json('Subscription is not complete');
+        return response()->json([
+            'message' => 'Subscription is not complete yet'
+        ],402);
     }
 }
