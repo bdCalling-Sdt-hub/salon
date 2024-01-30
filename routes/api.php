@@ -158,7 +158,7 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/send-admin-notification', [UserController::class, 'sendNotification']);
 
     // Review
-    Route::get('review', [GetController::class, 'getReviews']);
+    Route::get('review/{name?}', [GetController::class, 'getReviews']);
     Route::get('review-by-id/{id}', [GetController::class, 'getReviewsByProviderId']);
     // Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
     Route::get('review-average-rating/{id}', [GetController::class, 'test']);

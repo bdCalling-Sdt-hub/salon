@@ -56,10 +56,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Subscription::class, 'user_id');
     }
 
-    public function rev(): HasMany
-    {
-        return $this->hasMany(Rev::class);
-    }
 
     public function rating()
     {
@@ -69,5 +65,10 @@ class User extends Authenticatable implements JWTSubject
     public function booking(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function provider()
+    {
+        return $this->hasMany(Provider::class);
     }
 }

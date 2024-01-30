@@ -11,7 +11,6 @@ class PackageController extends Controller
 {
     public function showPackage()
     {
-
         $packages = Package::get();
         $package_features = [];
         foreach ($packages as &$package){

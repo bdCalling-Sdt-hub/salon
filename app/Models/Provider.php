@@ -57,4 +57,9 @@ class Provider extends Model
     {
         return $this->hasMany(Service::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

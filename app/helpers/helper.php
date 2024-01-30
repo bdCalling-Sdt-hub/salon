@@ -1,6 +1,7 @@
 <?php
 use App\Events\SendNotification;
 use App\Notifications\UserNotification;
+use Illuminate\Support\Facades\Notification;
 
 function ResponseMethod($status, $message)
 {
@@ -25,24 +26,11 @@ function ResponseMessage($message)
     ]);
 }
 
-// =====================NOTIFICATION==================//
-
-// function sendNotification($message, $data)
-// {
-//     try {
-//         event(new SendNotification($message, $data));
-//         \Notification::send($data, new UserNotification($data));
-//         return response()->json(['success' => true, 'msg' => 'Notification Added'], 200);
-//     } catch (\Exception $e) {
-//         return response()->json(['success' => false, 'msg' => $e->getMessage()]);
-//     }
-// }
-
 function sendNotification($message, $data = null, $payment = null)
 {
     try {
         event(new SendNotification($message, $data));
-
+        Notification::send($data, new UserNotification($data));
         return response()->json([
             'success' => true,
             'msg' => 'Notification Added',
