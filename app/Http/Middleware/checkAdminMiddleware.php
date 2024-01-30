@@ -20,7 +20,5 @@ class checkAdminMiddleware
         return response()->json('Unauthorized user');
 
     }
-    public function getLocation(){
-        return "Dhaka Bangladesh";
-    }
+
 }

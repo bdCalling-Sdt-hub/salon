@@ -463,18 +463,18 @@ class UserController extends Controller
         return $rating;
     }
 
-    public function sendNotification(Request $request)
-    {
-        try {
-            event(new SendNotification($request->message, $request->name));
-
-            return response()->json([
-                'success' => true,
-                'msg' => 'Notification Added',
-                //                'data' => auth()->user()->name,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
-        }
-    }
+//    public function sendNotification(Request $request)
+//    {
+//        try {
+//            event(new SendNotification($request->message, $request->name));
+//
+//            return response()->json([
+//                'success' => true,
+//                'msg' => 'Notification Added',
+//                //                'data' => auth()->user()->name,
+//            ]);
+//        } catch (\Exception $e) {
+//            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+//        }
+//    }
 }

@@ -238,43 +238,57 @@ class GetController extends Controller
             ]);
         }
     }
-
-    public function getReviews()
+    public function getReviews($providerName = null)
     {
-        $providers = Provider::get();
-        $allReviews = [];
-        $avgRatings = [];
-        $userDetailsArray = [];
+        // Query providers based on the given name if provided
+        $providersQuery = $providerName ? Provider::where('business_name', 'like', '%' . $providerName . '%') : Provider::query();
 
+        // Retrieve providers
+        $providers = $providersQuery->get();
+
+        // Array to store results for all providers
+        $allProviderData = [];
+
+        // Iterate over each provider
         foreach ($providers as $provider) {
             $providerId = $provider->id;
-            $totalReview = ServiceRating::where('provider_id', $providerId)->count();
-            $totalRating = ServiceRating::where('provider_id', $providerId)->sum('rating');
 
-            $avgRating = ($totalReview > 0) ? $totalRating / $totalReview : 0;
+            // Retrieve review data for the current provider
+            $totalReview = ServiceRating::where('provider_id', $providerId)->count();
+            $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $providerId)->sum('rating') / $totalReview : 0;
 
             $serviceDetails = ServiceRating::where('provider_id', $providerId)
                 ->with(['user:id,name,image'])
                 ->get();
 
-            $allReview = ServiceRating::where('provider_id', $providerId)->get();
+            // Store data for the current provider
+            $providerData = [
+                'salon' => $provider,
+                'total_review' => $totalReview,
+                'average_rating' => $avgRating,
+                'service_details_with_user' => $serviceDetails,
+            ];
 
-            $allReviews[] = $allReview;
-            $avgRatings[] = $avgRating;
-            $userDetailsArray[] = $serviceDetails;
+            // Add data to the array
+            $allProviderData[] = $providerData;
         }
-        return response()->json([
-            'total_review' => $allReviews,
-            'average_rating' => $avgRatings,
-            'service_details_with_user' => $userDetailsArray,
-        ]);
-    }
 
+        // Check if any data was found for any provider
+        if (!empty($allProviderData)) {
+            return response()->json([
+                'message' => 'true',
+                'providers_data' => $allProviderData,
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'No provider data found'
+            ], 404);
+        }
+    }
     public function getReviewsByProviderId($providerId)
     {
+        $provider = Provider::where('id', $providerId)->first();
         $totalReview = ServiceRating::where('provider_id', $providerId)->count();
-        $totalRating = ServiceRating::where('provider_id', $providerId)->sum('rating');
-
         $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $providerId)->sum('rating') / $totalReview : 0;
 
         $serviceDetails = ServiceRating::where('provider_id', $providerId)
@@ -285,12 +299,15 @@ class GetController extends Controller
         if ($allReview) {
             return response()->json([
                 'message' => 'true',
+                'salon' => $provider,
                 'total_review' => $totalReview,
                 'average_rating' => $avgRating,
                 'service_details_with_user' => $serviceDetails,
             ]);
         } else {
-            return response()->json(['message' => 'booking data not found']);
+            return response()->json([
+                'message' => 'Provider data not found'
+            ],404);
         }
     }
 
