@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Jenssegers\Agent\Agent;
+
 class UserController extends Controller
 {
     public function register(Request $request)
@@ -52,10 +53,10 @@ class UserController extends Controller
             $user->image = $avatar;
             $user->save();
             $this->Otp($user);
-//            return response()->json(['success' => true,
-//                'user' => $user,
-//                'msg' => 'OTP has been sent']);
-//             return sendNotification('is registered',$user,);
+            //            return response()->json(['success' => true,
+            //                'user' => $user,
+            //                'msg' => 'OTP has been sent']);
+            //             return sendNotification('is registered',$user,);
 
             return response()->json(['success' => true,
                 'user' => $user,
@@ -226,10 +227,11 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
 
-//         PasswordReset::where('email', $user->email)->delete();
+        //         PasswordReset::where('email', $user->email)->delete();
 
         return response()->json(['Your password changes'], 200);
     }
+
     public function changePassword(Request $request)
     {
         $user = auth()->user();
@@ -332,49 +334,49 @@ class UserController extends Controller
         return $imgUrl;
     }
 
-//
-//    public function profileUpdate(Request $request)
-//    {
-//        if (auth()->user()) {
-//            $check_user = auth()->user()->id;
-//            $validator = Validator::make($request->all(), [
-//                'name' => 'required|string',
-//                'email' => 'required|email|string',
-//                'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
-//
-//            ]);
-//            if ($validator->fails()) {
-//                return response()->json($validator->errors(), 400);
-//            }
-//
-//            $user = User::find($check_user);
-//            $user->id = $check_user;
-//            $user->name = $request->name;
-//            $user->email = $request->email;
-//            $user->address = $request->address;
-//            if ($request->phone_number==''){
-//                $request->phone_number = $user->phone_number;
-//            }
-//            $user->phone_number = $request->phone_number;
-//
-//            if ($request->file('image')) {
-//                unlink($user->image);
-//                $user->image = $this->saveImage($request);
-//            }
-//            $user->update();
-//            return response()->json(['status' => true, 'message' => 'user is updated', 'Data' => $user]);
-//        } else {
-//            return response()->json(['status' => false, 'message' => 'User is not Authenticated']);
-//        }
-//    }
-//    protected function saveImage($request){
-//        $image = $request->file('image');
-//        $imageName = rand() . '.' . $image->getClientOriginalExtension();
-//        $directory = 'Asset/user-image/';
-//        $imgUrl = $directory . $imageName;
-//        $image->move($directory, $imageName);
-//        return $imgUrl;
-//    }
+    //
+    //    public function profileUpdate(Request $request)
+    //    {
+    //        if (auth()->user()) {
+    //            $check_user = auth()->user()->id;
+    //            $validator = Validator::make($request->all(), [
+    //                'name' => 'required|string',
+    //                'email' => 'required|email|string',
+    //                'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
+    //
+    //            ]);
+    //            if ($validator->fails()) {
+    //                return response()->json($validator->errors(), 400);
+    //            }
+    //
+    //            $user = User::find($check_user);
+    //            $user->id = $check_user;
+    //            $user->name = $request->name;
+    //            $user->email = $request->email;
+    //            $user->address = $request->address;
+    //            if ($request->phone_number==''){
+    //                $request->phone_number = $user->phone_number;
+    //            }
+    //            $user->phone_number = $request->phone_number;
+    //
+    //            if ($request->file('image')) {
+    //                unlink($user->image);
+    //                $user->image = $this->saveImage($request);
+    //            }
+    //            $user->update();
+    //            return response()->json(['status' => true, 'message' => 'user is updated', 'Data' => $user]);
+    //        } else {
+    //            return response()->json(['status' => false, 'message' => 'User is not Authenticated']);
+    //        }
+    //    }
+    //    protected function saveImage($request){
+    //        $image = $request->file('image');
+    //        $imageName = rand() . '.' . $image->getClientOriginalExtension();
+    //        $directory = 'Asset/user-image/';
+    //        $imgUrl = $directory . $imageName;
+    //        $image->move($directory, $imageName);
+    //        return $imgUrl;
+    //    }
 
     public function refreshToken()
     {
@@ -392,7 +394,6 @@ class UserController extends Controller
             $agent = new Agent();
             $browser = $agent->browser();
             $device = $agent->device();
-
 
             $activity = new LoginActivity([
                 'user_id' => $admin->id,
@@ -462,8 +463,6 @@ class UserController extends Controller
         return $rating;
     }
 
-
-
     public function sendNotification(Request $request)
     {
         try {
@@ -472,7 +471,7 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'msg' => 'Notification Added',
-//                'data' => auth()->user()->name,
+                //                'data' => auth()->user()->name,
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'msg' => $e->getMessage()]);

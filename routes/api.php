@@ -327,7 +327,7 @@ Route::middleware(['user.provider'])->group(function () {
 // The callback url after a payment
 Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'callback'])->name('callback');
 // user callback
-Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
+// Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
 
 Route::middleware(['user.admin.provider'])->group(function () {
     Route::get('category-search/{name?}', [CategoryController::class, 'categorySearch']);
