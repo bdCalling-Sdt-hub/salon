@@ -30,7 +30,7 @@ function sendNotification($message, $data = null, $payment = null)
 {
     try {
         event(new SendNotification($message, $data));
-        Notification::send($data, new UserNotification($data));
+        Notification::send($data, new UserNotification($message,$data));
         return response()->json([
             'success' => true,
             'msg' => 'Notification Added',

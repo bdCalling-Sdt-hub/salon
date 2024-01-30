@@ -11,6 +11,7 @@ use App\Http\Controllers\EarningsController;
 use App\Http\Controllers\FlutterwaveController;
 use App\Http\Controllers\GetController;
 use App\Http\Controllers\LoginActivityController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PercentageController;
@@ -57,10 +58,10 @@ Route::group(['middleware' => 'api'], function ($routes) {
     Route::post('/reset-password', [UserController::class, 'resetPassword']);
     Route::post('/profileUpdate', [UserController::class, 'profileUpdate']);
     Route::post('/profileUpdate/img', [UserController::class, 'updateProfileImg']);
+    // Route::post('/send-notification', [UserController::class, 'sendNotification']);
 
     Route::get('/notification', [HomeController::class, 'markRead']);
     Route::get('/read-at/notification', [HomeController::class, 'readNotification']);
-    // Route::post('/send-notification', [UserController::class, 'sendNotification']);
 });
 
 // website pages
@@ -162,6 +163,13 @@ Route::middleware(['admin'])->group(function () {
     Route::get('review-by-id/{id}', [GetController::class, 'getReviewsByProviderId']);
     // Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
     Route::get('review-average-rating/{id}', [GetController::class, 'test']);
+
+    // ====================Trash ==============================//
+
+    Route::get('all-user', [TrashController::class, 'allUser']);
+    Route::get('trash-user', [TrashController::class, 'trashUser']);
+    Route::get('trash-restore/{id}', [TrashController::class, 'trashRestore']);
+
 });
 
 Route::middleware(['payment.auth'])->group(function () {
@@ -220,11 +228,13 @@ Route::middleware(['payment.auth'])->group(function () {
     Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
     Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
+
 });
 
 Route::middleware(['provider'])->group(function () {
     // The route that the button calls to initialize payment
     Route::post('/pay/{id}', [FlutterwaveController::class, 'initialize'])->name('paynow');
+
 });
 
 Route::middleware(['user'])->group(function () {
@@ -283,11 +293,6 @@ Route::middleware(['user'])->group(function () {
 // delete user from admin
 Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
 
-// ====================Trash from dashboard ==============================//
-
-Route::get('all-user', [TrashController::class, 'allUser']);
-Route::get('trash-user', [TrashController::class, 'trashUser']);
-Route::get('trash-restore/{id}', [TrashController::class, 'trashRestore']);
 
 // search
 // provider request search by name and id

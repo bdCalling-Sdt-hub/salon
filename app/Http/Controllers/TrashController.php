@@ -6,11 +6,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TrashController extends Controller
 {
     //
 
+    public function allUser(){
+        $users= User::withTrashed()->paginate(9);
+        return response()->json(['Data'=>$users]);
+    }
 
     public function trashUser(){
         $users= User::onlyTrashed()->paginate(9);

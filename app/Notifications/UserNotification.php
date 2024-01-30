@@ -12,12 +12,14 @@ class UserNotification extends Notification
     use Queueable;
 
     protected $user;
+    protected $message;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($user)
+    public function __construct($message,$user)
     {
+        $this->message = $message;
         $this->user = $user;
     }
 
@@ -34,6 +36,7 @@ class UserNotification extends Notification
     public function toDatabase($notifiable): array
     {
         return [
+            'message' => $this->message,
             'user' => $this->user,
         ];
     }
