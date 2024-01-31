@@ -176,6 +176,7 @@ Route::middleware(['payment.auth'])->group(function () {
     // package
     Route::get('show-package', [PackageController::class, 'showPackage']);
     Route::get('my-plan', [PackageController::class, 'myPlan']);
+    Route::get('package-renew/{id}', [PackageController::class, 'packageRenew']);
 
     // ======================Provider =======================//
     Route::post('/post/provider', [ProviderController::class, 'postProvider']);

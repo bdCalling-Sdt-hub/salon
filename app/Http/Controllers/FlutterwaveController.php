@@ -14,6 +14,13 @@ class FlutterwaveController extends Controller
 
     public function initialize($id)
     {
+//        $check_user = auth()->user()->id;
+//        $provider = Payment::find('user_id',$check_user);
+//        if ($provider){
+//            return response()->json([
+//                'message' => 'You already subscribed'
+//            ]);
+//        }
         // This generates a payment reference
         $reference = Flutterwave::generateReference();
 
@@ -53,6 +60,71 @@ class FlutterwaveController extends Controller
         ]);
     }
 
+//    public function callback()
+//    {
+//        $status = request()->status;
+//
+//        // if payment is successful
+//        if ($status == 'successful') {
+//            $transactionID = Flutterwave::getTransactionIDFromCallback();
+//            $data = Flutterwave::verifyTransaction($transactionID);
+//
+//            $auth_user = $data['data']['meta']['user_id'];
+//            $provider = Payment::where('user_id',$auth_user)->first();
+//            if(!$provider){
+//                $payment = new Payment();
+//                $payment->package_id = $data['data']['meta']['package_id'];
+//                $payment->user_id = $data['data']['meta']['user_id'];
+//                $payment->tx_ref = $data['data']['tx_ref'];
+//                $payment->amount = $data['data']['amount'];
+//                $payment->currency = $data['data']['currency'];
+//                $payment->payment_type = $data['data']['payment_type'];
+//                $payment->status = $data['data']['status'];
+//                $payment->email = $data['data']['customer']['email'];
+//                $payment->name = $data['data']['customer']['name'];
+//                $payment->save();
+//                if ($payment) {
+//                    $user = User::find($auth_user);
+//                    if ($user) {
+//                        $user->user_status = 1;
+//                        $user->update();
+//                    }
+//                    return response()->json([
+//                        'status' => 'success',
+//                        'message' => 'Payment complete',
+//                        'data' => $payment,
+//                    ], 200);
+//                }
+//            }else{
+//                $provider->package_id = $data['data']['meta']['package_id'];
+//                $provider->user_id = $data['data']['meta']['user_id'];
+//                $provider->tx_ref = $data['data']['tx_ref'];
+//                $provider->amount = $data['data']['amount'];
+//                $provider->currency = $data['data']['currency'];
+//                $provider->payment_type = $data['data']['payment_type'];
+//                $provider->status = $data['data']['status'];
+//                $provider->email = $data['data']['customer']['email'];
+//                $provider->name = $data['data']['customer']['name'];
+//                $provider->update();
+//                return response()->json([
+//                    'status' => 'success',
+//                    'message' => 'Payment complete',
+//                    'data' => $provider,
+//                ], 200);
+//            }
+//
+//        } elseif ($status == 'cancelled') {
+//            return response()->json([
+//                'status' => 'cancelled',
+//                'message' => 'Cancel your payment'
+//            ]);
+//            // Put desired action/code after transaction has been cancelled here
+//        } else {
+//            // return getMessage();
+//            // Put desired action/code after transaction has failed here
+//        }
+//    }
+
     public function callback()
     {
         $status = request()->status;
@@ -62,9 +134,17 @@ class FlutterwaveController extends Controller
             $transactionID = Flutterwave::getTransactionIDFromCallback();
             $data = Flutterwave::verifyTransaction($transactionID);
 
-            $payment = new Payment();
+            $auth_user = $data['data']['meta']['user_id'];
+            $provider = Payment::where('user_id', $auth_user)->first();
+
+            if (!$provider) {
+                $payment = new Payment();
+            } else {
+                $payment = $provider;
+            }
+
             $payment->package_id = $data['data']['meta']['package_id'];
-            $payment->user_id = $data['data']['meta']['user_id'];
+            $payment->user_id = $auth_user;
             $payment->tx_ref = $data['data']['tx_ref'];
             $payment->amount = $data['data']['amount'];
             $payment->currency = $data['data']['currency'];
@@ -75,7 +155,7 @@ class FlutterwaveController extends Controller
             $payment->save();
 
             if ($payment) {
-                $user = User::find($payment->user_id);
+                $user = User::find($auth_user);
                 if ($user) {
                     $user->user_status = 1;
                     $user->save();
@@ -86,6 +166,7 @@ class FlutterwaveController extends Controller
                     'data' => $payment,
                 ], 200);
             }
+
         } elseif ($status == 'cancelled') {
             return response()->json([
                 'status' => 'cancelled',
@@ -97,6 +178,7 @@ class FlutterwaveController extends Controller
             // Put desired action/code after transaction has failed here
         }
     }
+
 
     // payment for user
 
