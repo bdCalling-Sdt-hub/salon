@@ -396,31 +396,44 @@ class HomeController extends Controller
         }
     }
 
+    // public function bookingAppoinment($id)
+    // {
+    //     $provider = Provider::where('id', $id)->with('services.catalog')->first();
+
+    //     $decodedProvider = $provider->toArray();
+
+    //     // Manually handle services to replace null catalog with an empty array
+    //     $decodedProvider['services'] = collect($provider->services)->map(function ($service) {
+    //         $serviceArray = $service->toArray();
+    //         $serviceArray['catalog'] = $service->catalog ?: [];  // Check for null and provide an empty array if null
+    //         return $serviceArray;
+    //     })->all();
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'provider' => $decodedProvider,
+    //     ]);
+    // }
+
     public function bookingAppoinment($id)
     {
-        $totalReview = ServiceRating::where('provider_id', $id)->count();
-        $sumRating = ServiceRating::where('provider_id', $id)->sum('rating');
-        $avgRating = ($totalReview > 0) ? $sumRating / $totalReview : 0;
-        $percentage = BookingPercentage::first();
+        $provider = Provider::where('id', $id)->with('services.catalog')->first();
 
-        $appoinmentsData = Provider::where('id', $id)->with('service', 'serviceCatelouge')->get();
-        $decodedData = [];
+        // Decode JSON fields in the Provider
+        $decodedProvider = $provider->toArray();
+        $decodedProvider['available_service_our'] = json_decode($provider->available_service_our, true);
+        $decodedProvider['gallary_photo'] = json_decode($provider->gallary_photo, true);
 
-        foreach ($appoinmentsData as $item) {
-            $decodedItem = $item->toArray();  // Create a new array with the item's data
-
-            $decodedItem['available_service_our'] = json_decode($item['available_service_our'], true);
-            $decodedItem['gallary_photo'] = json_decode($item['gallary_photo'], true);
-
-            $decodedData[] = $decodedItem;
-        }
+        // Manually handle services to replace null catalog with an empty array
+        $decodedProvider['services'] = collect($provider->services)->map(function ($service) {
+            $serviceArray = $service->toArray();
+            $serviceArray['catalog'] = $service->catalog ?: [];  // Check for null and provide an empty array if null
+            return $serviceArray;
+        })->all();
 
         return response()->json([
             'status' => 'success',
-            'percentage' => $percentage,
-            'rating' => $totalReview,
-            'average_rating' => $avgRating,
-            'appoinments' => $decodedData,
+            'provider' => $decodedProvider,
         ]);
     }
 

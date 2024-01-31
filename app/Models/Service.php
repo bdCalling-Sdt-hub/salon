@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\CatCatalogue;
+use App\Models\Catalogue;
 use App\Models\Provider;
 use App\Models\ServiceRating;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,7 +35,6 @@ class Service extends Model
         return $this->hasMany(Catalogue::class);
     }
 
-
     public function postbooking()
     {
         return $this->hasMany(PostBooking::class);
@@ -44,5 +43,11 @@ class Service extends Model
     public function provider()
     {
         return $this->belongsTo(Provider::class);
+    }
+
+    //
+    public function catalog()
+    {
+        return $this->belongsTo(Catalogue::class, 'id');
     }
 }

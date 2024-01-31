@@ -62,4 +62,9 @@ class Provider extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function catalog()
+    {
+        return $this->hasMany(Catalogue::class);
+    }
 }
