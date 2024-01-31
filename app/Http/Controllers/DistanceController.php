@@ -44,13 +44,7 @@ class DistanceController extends Controller
             $long = $coordinates->getLongitude();
             return $lat. ' '. $long;
         }
-
-        public function findNearestSalon($latitude ,$longitude, $category, $rating){
-            //according to distance, category and rating show data
-
-        }
-
-    public function filterOriginal($category, $rating, $distance)
+    public function filterOriginal($categoryName, $rating, $distance)
     {
         $authUser = auth()->user()->id;
         $user = User::where('id', $authUser)->first();
@@ -58,33 +52,30 @@ class DistanceController extends Controller
         $longitude = $user->longitude;
 
         $query = Provider::select(
-            'id',
-            'user_id',
-            'category_id',
-            'business_name',
-            'address',
-            'description',
-            'cover_photo',
-            'status',
-            'created_at',
-            'updated_at',
-            'latitude',
-            'longitude',
+            'providers.id',
+            'providers.user_id',
+            'providers.category_id',
+            'providers.business_name',
+            'providers.address',
+            'providers.description',
+            'providers.cover_photo',
+            'providers.status',
+            'providers.created_at',
+            'providers.updated_at',
+            'providers.latitude',
+            'providers.longitude',
             DB::raw("(6371 * acos( cos( radians('$latitude') )
-        * cos( radians( latitude ) )
-        * cos( radians( longitude ) - radians('$longitude') )
-        + sin( radians('$latitude') )
-        * sin( radians( latitude ) ) ) ) AS distance"),
+    * cos( radians( latitude ) )
+    * cos( radians( longitude ) - radians('$longitude') )
+    + sin( radians('$latitude') )
+    * sin( radians( latitude ) ) ) ) AS distance"),
             DB::raw('(SELECT AVG(rating) FROM service_ratings WHERE provider_id = providers.id) AS average_rating')
-        );
+        )
+            ->join('categories', 'providers.category_id', '=', 'categories.id');
 
-//        return response()->json([
-//            'message' => $query
-//        ]);
-
-        // Filter by category
-        if ($category) {
-            $query->where('category_id', $category);
+        // Filter by category name
+        if ($categoryName) {
+            $query->where('categories.category_name', 'LIKE', "%$categoryName%");
         }
 
         // Filter by rating
@@ -100,14 +91,17 @@ class DistanceController extends Controller
         $salons = $query->orderBy('average_rating', 'desc')->get();
 
         if ($salons->count() > 0) {
-            return ResponseMethod('Filter Providers', $salons);
+            return response()->json([
+                'message' => 'Salon list',
+                'data' => $salons
+            ]);
         } else {
             return response()->json([
-                'message' => 'No providers found with the given criteria'
+                'message' => 'No providers found with the given criteria',
+                'data' => []
             ]);
         }
     }
-
     public function searchProvidersBySalon($salon_name = null)
     {
         $authUser = auth()->user()->id;
@@ -141,13 +135,14 @@ class DistanceController extends Controller
 
         if ($providers->count() > 0) {
             return response()->json([
-                'status' => 'Feature provider',
-                'message' => $providers,
-            ]);
+                'message' => 'Feature provider',
+                'data' => $providers,
+            ],200);
         } else {
             return response()->json([
                 'message' => 'No providers found with the given business name',
-            ]);
+                'data' => [],
+            ],404);
         }
 
     }
