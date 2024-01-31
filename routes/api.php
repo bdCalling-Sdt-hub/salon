@@ -214,7 +214,7 @@ Route::middleware(['payment.auth'])->group(function () {
 
     Route::get('/booking', [ProviderController::class, 'booking']);
     Route::get('/booking/request', [ProviderController::class, 'bookingRequest']);
-    Route::get('/booking/details/{id}', [ProviderController::class, 'bookingDetails']);
+    Route::get('/booking/details/provider/{id}', [ProviderController::class, 'bookingDetails']);
     Route::post('/re/schedule/appoinment', [ProviderController::class, 're_shedule_appoinment']);
 
     Route::post('/booking/accept', [ProviderController::class, 'bookingAccept']);
@@ -228,9 +228,6 @@ Route::middleware(['payment.auth'])->group(function () {
     Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
     Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
-
-    //notification
-    Route::get('/provider-notification', [NotificationController::class, 'getNotification']);
 
 });
 
@@ -288,7 +285,6 @@ Route::middleware(['user'])->group(function () {
     Route::get('/appoinments/cancel/{id}', [HomeController::class, 'bookingCancel']);
     Route::post('/re-schdule', [HomeController::class, 'reSchedule']);
     Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
-    Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
 
     // appointment booking
     Route::get('/appointment-booking/{id}', [GetController::class, 'appointmentBooking']);
@@ -307,7 +303,6 @@ Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
 Route::get('provider-block-list-search/{name?}', [GetController::class, 'searchProviderBlock']);
 // user list search by name email and phone
 Route::get('search-user/{name?}', [GetController::class, 'searchUser']);
-
 
 Route::get('/filter-nearest-salon/{lat}/{long}', [DistanceController::class, 'findNearestSalon']);
 
@@ -337,9 +332,7 @@ Route::middleware(['user.provider'])->group(function () {
 Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'callback'])->name('callback');
 // user callback
 
-//Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
-
-
+// Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
 
 Route::middleware(['user.admin.provider'])->group(function () {
     Route::get('category-search/{name?}', [CategoryController::class, 'categorySearch']);
