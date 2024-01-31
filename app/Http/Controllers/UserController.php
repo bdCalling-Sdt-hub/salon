@@ -167,7 +167,7 @@ class UserController extends Controller
                 $token = auth()->login($user);
                 return response()->json([
                     'status' => 'success',
-                    'Notification' => sendNotification('Account Setup Successfull', $user),
+                    'Notification' => sendNotification('Account Setup Successfull','You have successfully created your account', $user),
                     'token' => $this->responseWithToken($token),
                     'Otp' => 'OTP has been verified',
                 ], 200);

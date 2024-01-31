@@ -13,21 +13,15 @@ class UserNotification extends Notification
 
     protected $user;
     protected $message;
+    protected $description;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct($message,$user)
+    public function __construct($message,$description,$user)
     {
         $this->message = $message;
+        $this->description = $description;
         $this->user = $user;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via($notifiable): array
     {
         return ['database'];
@@ -37,6 +31,7 @@ class UserNotification extends Notification
     {
         return [
             'message' => $this->message,
+            'description' => $this->description,
             'user' => $this->user,
         ];
     }

@@ -26,11 +26,11 @@ function ResponseMessage($message)
     ]);
 }
 
-function sendNotification($message, $data = null, $payment = null)
+function sendNotification($message =null, $description = null, $data = null, $payment = null)
 {
     try {
         event(new SendNotification($message, $data));
-        Notification::send($data, new UserNotification($message,$data));
+        Notification::send($data, new UserNotification($message,$description,$data));
         return response()->json([
             'success' => true,
             'msg' => 'Notification Added',
