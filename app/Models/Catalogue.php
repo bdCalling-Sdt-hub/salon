@@ -42,9 +42,4 @@ class Catalogue extends Model
     {
         return $this->belongsTo(Service::class);
     }
-
-    public function catalouge()
-    {
-        return $this->hasMany(Catalogue::class);
-    }
 }
