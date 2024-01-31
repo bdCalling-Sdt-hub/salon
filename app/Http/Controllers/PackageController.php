@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Package;
 use App\Models\Payment;
+use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -87,6 +89,42 @@ class PackageController extends Controller
         return responseMessage('Package Not Found');
     }
 
+    public function packageRenew($id){
+        return $user = User::find($id);
+//        $package_id = $id;
+//        $check_user = auth()->user()->id;
+//        $subscription = Payment::where('user_id',$check_user)->with('package')->first();
+//        $start_date = $subscription['package']['created_at'];
+//        $package_duration = $subscription['package']['package_duration'];
+//        if ($subscription){
+//            return response()->json([
+//                'message' => 'You already have subscription package',
+//                'data' => $subscription,
+//                'created_at' => $start_date,
+//                'package_duration' =>
+//            ]);
+//        }
+//        return $subscription;
+        $package = Package::find($id);
+        if(!$package){
+            return response()->json([
+                'message' => 'Package does not exist',
+                'data' => []
+            ]);
+        }
+        $subscription = new Subscription();
+        $subscription->user_id = auth()->user()->id;
+        $subscription->package_id = $package->id;
+        $subscription->package_name = $package->package_name;
+        $subscription->package_duration = $package->package_duration;
+        $subscription->package_features = $package->package_features;
+        $subscription->price = $package->price;
+        $subscription->save();
+        return ResponseMethod('Subscription add successfully', $subscription);
+
+
+    }
+
     public function myPlan()
     {
         $auth_user = auth()->user()->id;
@@ -98,9 +136,13 @@ class PackageController extends Controller
         }
 
         $subscriptions = Payment::where('user_id', $auth_user)->with('package')->get();
-
+        if(!$subscriptions){
+            return response()->json([
+                'message' => 'existing plan not found',
+                'data' => []
+            ],404);
+        }
         $result = [];
-
         foreach ($subscriptions as $subscription) {
             // Check if the 'package_features' key exists before decoding
             $packageFeatures = isset($subscription->package->package_features)
@@ -108,9 +150,17 @@ class PackageController extends Controller
                 : null;
 
             $result[] = [
-                'subscription_id' => $subscription->id,
                 'user_id' => $subscription->user_id,
-                'other_subscription_data' => $subscription->other_fields,
+                'package_id' => $subscription->package_id,
+                'payment_type' => $subscription->payment_type,
+                'amount' => $subscription->amount,
+                'email' => $subscription->email,
+                'name' => $subscription->name,
+                'currency' => $subscription->currency,
+                'tx_ref' => $subscription->tx_ref,
+                'status' => $subscription->status,
+                'created_at' => $subscription->created_at,
+                'updated_at' => $subscription->updated_at,
                 'package' => [
                     'package_id' => $subscription->package->id,
                     'package_name' => $subscription->package->package_name,

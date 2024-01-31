@@ -312,7 +312,7 @@ class UserController extends Controller
             if ($request->file('image')) {
                 // Check if the old image file exists before attempting to unlink it
                 if (file_exists($user->image)) {
-                    unlink($user->image);
+//                    unlink($user->image);
                 }
                 $user->image = $this->saveImage($request);
             }
