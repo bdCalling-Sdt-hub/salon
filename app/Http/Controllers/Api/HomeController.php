@@ -168,43 +168,6 @@ class HomeController extends Controller
         }
     }
 
-    // public function serviceDetails($id)
-    // {
-    //     $totalReview = ServiceRating::where('service_id', $id)->count();
-    //     $sumRating = ServiceRating::where('service_id', $id)->sum('rating');
-
-    //     $avgRating = ($totalReview > 0) ? ServiceRating::where('service_id', $id)->sum('rating') / $totalReview : 0;
-
-    //     // $serviceDetails = Service::where('id', $id)->with('ServiceRating')->get();
-    //     $serviceDetails = Service::where('id', $id)
-    //         ->with(['ServiceRating.user:id,name,image'])  // Assuming 'user' is the relationship between ServiceRating and User models
-    //         ->first();
-
-    //     foreach ($serviceDetails->toArray() as $item) {
-    //         $item['available_service_our'] = json_decode($item['available_service_our'], true);
-    //         $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
-
-    //         // Loop through salon_details and decode available_service_our for each item
-    //         // foreach ($item['salon_details'] as &$salonDetail) {
-    //         //     $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
-    //         //     $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
-    //         // }
-
-    //         $decodedData[] = $item;  // Add the updated item to the new array
-    //     }
-
-    //     if ($serviceDetails) {
-    //         return response()->json([
-    //             'message' => 'success',
-    //             'review' => $totalReview,
-    //             'rating' => $avgRating,
-    //             'service_details' => $decodedData
-    //         ], 200);
-    //     } else {
-    //         return ResponseErrorMessage('error', 'Provider service not found');
-    //     }
-    // }
-
     public function serviceDetails($id)
     {
         $totalReview = ServiceRating::where('service_id', $id)->count();
@@ -255,38 +218,6 @@ class HomeController extends Controller
             return ResponseErrorMessage('error', 'Provider service not found');
         }
     }
-
-    // public function selonDetails($id)
-    // {
-    //     $totalReview = ServiceRating::where('provider_id', $id)->count();
-    //     $sumRating = ServiceRating::where('provider_id', $id)->sum('rating');
-    //     $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $id)->sum('rating') / $totalReview : 0;
-
-    //     $selonDetails = Provider::where('id', $id)->with('salonDetails', 'providerRating')->get();
-
-    //     foreach ($selonDetails->toArray() as $item) {
-    //         $item['available_service_our'] = json_decode($item['available_service_our'], true);
-    //         $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
-
-    //         foreach ($item['salon_details'] as &$salonDetail) {
-    //             $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
-    //             $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
-    //         }
-
-    //         $decodedData[] = $item;  // Add the updated item to the new array
-    //     }
-
-    //     if ($selonDetails) {
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'total_review' => $totalReview,
-    //             '$avg_rating' => $avgRating,
-    //             'selon_details' => $decodedData
-    //         ]);
-    //     } else {
-    //         return ResponseErrorMessage('error', 'Provider service not found');
-    //     }
-    // }
 
     public function selonDetails($id)
     {
@@ -396,28 +327,16 @@ class HomeController extends Controller
         }
     }
 
-    // public function bookingAppoinment($id)
-    // {
-    //     $provider = Provider::where('id', $id)->with('services.catalog')->first();
-
-    //     $decodedProvider = $provider->toArray();
-
-    //     // Manually handle services to replace null catalog with an empty array
-    //     $decodedProvider['services'] = collect($provider->services)->map(function ($service) {
-    //         $serviceArray = $service->toArray();
-    //         $serviceArray['catalog'] = $service->catalog ?: [];  // Check for null and provide an empty array if null
-    //         return $serviceArray;
-    //     })->all();
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'provider' => $decodedProvider,
-    //     ]);
-    // }
-
     public function bookingAppoinment($id)
     {
         $provider = Provider::where('id', $id)->with('services.catalog')->first();
+
+        if (!$provider) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Provider not found',
+            ], 404);
+        }
 
         // Decode JSON fields in the Provider
         $decodedProvider = $provider->toArray();
@@ -427,14 +346,14 @@ class HomeController extends Controller
         // Manually handle services to replace null catalog with an empty array
         $decodedProvider['services'] = collect($provider->services)->map(function ($service) {
             $serviceArray = $service->toArray();
-            $serviceArray['catalog'] = $service->catalog ?: [];  // Check for null and provide an empty array if null
+            $serviceArray['catalog'] = $service->catalog ?? [];  // Use the null coalescing operator (??) here
             return $serviceArray;
         })->all();
 
         return response()->json([
             'status' => 'success',
             'provider' => $decodedProvider,
-        ]);
+        ], 200);
     }
 
     public function bookingSummary()
@@ -490,68 +409,150 @@ class HomeController extends Controller
         }
     }
 
-    // public function providerApproval()
-    // {
-    //     $authUser = auth()->user()->id;
-    //     $bookingDetails = Booking::where('user_id', $authUser)->with('Provider')->orderBy('id', 'desc')->first();
-    //     $service = $bookingDetails->catalogue_id;
-
-    //     $catalougeId = [];
-
-    //     foreach ($service as $services) {
-    //         $findId['calalouge_id'] = json_decode($services['catalouge_id'], true);
-    //         $catalougeId[] = $findId;
-    //     }
-    //     $catalouge = Catalogue::where('id', $service)->get();
-
-    //     return response()->json([
-    //         'Provider' => $bookingDetails,
-    //         'service' => $catalouge,
-    //         'ss' => $catalougeId
-    //     ], 200);
-    // }
-
     public function providerApproval()
     {
-        $authUser = auth()->user()->id;
+        try {
+            $authUser = auth()->user()->id;
 
-        // Retrieve the latest booking details for the authenticated user
-        $bookingDetails = Booking::select('service', 'price', 'date', 'time', 'service_type', 'service_duration', 'provider_id')->where('user_id', $authUser)->orderBy('id', 'desc')->first();
-        $providerId = $bookingDetails->provider_id;
-        $provider = Provider::select('business_name', 'address')->where('id', $providerId)->first();
-        $user = User::select('phone_number')->where('id', $authUser)->first();
+            $getBooking = Booking::where('user_id', $authUser)->with('user')->get();
 
-        $service = json_decode($bookingDetails->service);
+            if ($getBooking->isEmpty()) {
+                throw new \Exception('No booking history found.');
+            }
 
-        $catalougeId = [];
-        $serviceId = [];
+            $decodedBookings = [];
 
-        foreach ($service as $item) {
-            $cataLougeName = $item->catalouge_id;
-            $serviceName = $item->service_id;
-            $newItem['catalouge_id'] = json_decode($item['catalouge_id']);
-            $items[] = $newItem;
+            foreach ($getBooking as $booking) {
+                $decodedServices = json_decode($booking->service, true);
+
+                if (!is_array($decodedServices)) {
+                    throw new \Exception('Error decoding the service JSON.');
+                }
+
+                foreach ($decodedServices as $service) {
+                    $catalogIds = explode(',', $service['catalouge_id']);
+                    $catalogDetails = [];
+
+                    foreach ($catalogIds as $catalogId) {
+                        $catalog = Catalogue::find($catalogId);
+
+                        if ($catalog) {
+                            $catalogDetails[] = $catalog;
+                        }
+                    }
+
+                    $decodedBookings[] = [
+                        'booking' => $booking,
+                        'service' => $service,
+                        'catalog_details' => $catalogDetails,
+                    ];
+                }
+            }
+
+            return response()->json([
+                'decoded_bookings' => $decodedBookings,
+            ]);
+        } catch (\Exception $e) {
+            // Handle the exception
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return $items;
-
-        return response()->json([
-            'bookingDetails' => $bookingDetails,
-            'catalogues' => $catalogues,
-        ], 200);
     }
 
-    public function appoinments($id)
+    public function appoinments()
     {
-        $authUser = auth()->user()->id;
+        try {
+            $authUser = auth()->user()->id;
 
-        if ($authUser) {
-            $appoinments = Booking::where('provider_id', $id)->get();
-            if ($appoinments) {
-                return ResponseMethod('success', $appoinments);
-            } else {
-                return ResponseErrorMessage('error', 'You hav no record found');
+            $getBooking = Booking::where('user_id', $authUser)->with('Provider')->get();
+
+            if ($getBooking->isEmpty()) {
+                throw new \Exception('No booking history found.');
             }
+
+            $decodedBookings = [];
+
+            foreach ($getBooking as $booking) {
+                $decodedServices = json_decode($booking->service, true);
+
+                if (!is_array($decodedServices)) {
+                    throw new \Exception('Error decoding the service JSON.');
+                }
+
+                foreach ($decodedServices as $service) {
+                    $catalogIds = explode(',', $service['catalouge_id']);
+                    $catalogDetails = [];
+
+                    foreach ($catalogIds as $catalogId) {
+                        $catalog = Catalogue::find($catalogId);
+
+                        if ($catalog) {
+                            $catalogDetails[] = $catalog;
+                        }
+                    }
+
+                    $decodedBookings[] = [
+                        'booking' => $booking,
+                        'service' => $service,
+                        'catalog_details' => $catalogDetails,
+                    ];
+                }
+            }
+
+            return response()->json([
+                'decoded_bookings' => $decodedBookings,
+            ], 200);
+        } catch (\Exception $e) {
+            // Handle the exception
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function appoinmentHistory()
+    {
+        try {
+            $authUser = auth()->user()->id;
+
+            $getBooking = Booking::where('user_id', $authUser)->with('Provider')->get();
+
+            if ($getBooking->isEmpty()) {
+                throw new \Exception('No booking history found.');
+            }
+
+            $decodedBookings = [];
+
+            foreach ($getBooking as $booking) {
+                $decodedServices = json_decode($booking->service, true);
+
+                if (!is_array($decodedServices)) {
+                    throw new \Exception('Error decoding the service JSON.');
+                }
+
+                foreach ($decodedServices as $service) {
+                    $catalogIds = explode(',', $service['catalouge_id']);
+                    $catalogDetails = [];
+
+                    foreach ($catalogIds as $catalogId) {
+                        $catalog = Catalogue::find($catalogId);
+
+                        if ($catalog) {
+                            $catalogDetails[] = $catalog;
+                        }
+                    }
+
+                    $decodedBookings[] = [
+                        'booking' => $booking,
+                        'service' => $service,
+                        'catalog_details' => $catalogDetails,
+                    ];
+                }
+            }
+
+            return response()->json([
+                'decoded_bookings' => $decodedBookings,
+            ], 200);
+        } catch (\Exception $e) {
+            // Handle the exception
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -599,18 +600,48 @@ class HomeController extends Controller
 
     public function bookingDetails($id)
     {
-        $authUser = auth()->user();
-        $authId = $authUser->id;
-        if ($authUser) {
-            $bookingDetails = Booking::where('id', $id)->first();
-            if ($bookingDetails) {
-                return response()->json([
-                    'status' => 'success',
-                    'booking details' => $bookingDetails
-                ], 200);
-            } else {
-                return ResponseErrorMessage('error', 'Data not found');
+        try {
+            $authUser = auth()->user()->id;
+
+            $booking = Booking::where('user_id', $authUser)->where('id', $id)->with('user', 'Provider')->first();
+
+            if (!$booking) {
+                throw new \Exception('Booking not found.');
             }
+
+            $decodedServices = json_decode($booking->service, true);
+
+            if (!is_array($decodedServices)) {
+                throw new \Exception('Error decoding the service JSON.');
+            }
+
+            $decodedBookings = [];
+
+            foreach ($decodedServices as $service) {
+                $catalogIds = explode(',', $service['catalouge_id']);
+                $catalogDetails = [];
+
+                foreach ($catalogIds as $catalogId) {
+                    $catalog = Catalogue::find($catalogId);
+
+                    if ($catalog) {
+                        $catalogDetails[] = $catalog;
+                    }
+                }
+
+                $decodedBookings[] = [
+                    'booking' => $booking,
+                    'service' => $service,
+                    'catalog_details' => $catalogDetails,
+                ];
+            }
+
+            return response()->json([
+                'decoded_bookings' => $decodedBookings,
+            ]);
+        } catch (\Exception $e) {
+            // Handle the exception
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

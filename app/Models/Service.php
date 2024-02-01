@@ -48,6 +48,6 @@ class Service extends Model
     //
     public function catalog()
     {
-        return $this->belongsTo(Catalogue::class, 'id');
+        return $this->hasMany(Catalogue::class);
     }
 }

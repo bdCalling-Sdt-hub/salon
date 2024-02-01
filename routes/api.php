@@ -169,7 +169,6 @@ Route::middleware(['admin'])->group(function () {
     Route::get('all-user', [TrashController::class, 'allUser']);
     Route::get('trash-user', [TrashController::class, 'trashUser']);
     Route::get('trash-restore/{id}', [TrashController::class, 'trashRestore']);
-
 });
 
 Route::middleware(['payment.auth'])->group(function () {
@@ -229,13 +228,11 @@ Route::middleware(['payment.auth'])->group(function () {
     Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
     Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
-
 });
 
 Route::middleware(['provider'])->group(function () {
     // The route that the button calls to initialize payment
     Route::post('/pay/{id}', [FlutterwaveController::class, 'initialize'])->name('paynow');
-
 });
 
 Route::middleware(['user'])->group(function () {
@@ -282,10 +279,11 @@ Route::middleware(['user'])->group(function () {
     Route::post('/post/booking', [HomeController::class, 'postBooking']);
     Route::get('/booking/summary', [HomeController::class, 'bookingSummary']);
     Route::get('/provider/approval', [HomeController::class, 'providerApproval']);
-    Route::get('/appoinments/{id}', [HomeController::class, 'appoinments']);
+    Route::get('/appoinments', [HomeController::class, 'appoinments']);
     Route::get('/appoinments/cancel/{id}', [HomeController::class, 'bookingCancel']);
     Route::post('/re-schdule', [HomeController::class, 'reSchedule']);
     Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
+    Route::get('/appointment/history', [HomeController::class, 'appoinmentHistory']);
 
     // appointment booking
     Route::get('/appointment-booking/{id}', [GetController::class, 'appointmentBooking']);
@@ -293,7 +291,6 @@ Route::middleware(['user'])->group(function () {
 
 // delete user from admin
 Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
-
 
 // search
 // provider request search by name and id
