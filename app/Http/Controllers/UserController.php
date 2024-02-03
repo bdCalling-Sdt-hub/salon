@@ -53,11 +53,6 @@ class UserController extends Controller
             $user->image = $avatar;
             $user->save();
             $this->Otp($user);
-            //            return response()->json(['success' => true,
-            //                'user' => $user,
-            //                'msg' => 'OTP has been sent']);
-            //             return sendNotification('is registered',$user,);
-
             return response()->json(['success' => true,
                 'user' => $user,
                 'msg' => 'OTP has been sent'], 200);
@@ -94,6 +89,66 @@ class UserController extends Controller
         }
     }
 
+    public function socialLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|min:2',
+            'email' => 'email|required|max:100',
+            'user_type' => 'string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        // Check if a user with this email exists without Google or Facebook ID
+        $manual_user = User::where('email', $request->email)
+            ->whereNull('google_id')
+            ->whereNull('facebook_id')
+            ->first();
+
+        if ($manual_user) {
+            return response()->json([
+                'message' => 'User already exists. Sign in manually.',
+            ], 422);
+        } else {
+            // Check if a user with this email exists with Google or Facebook ID
+            $user = User::where('email', $request->email)
+                ->where(function($query) {
+                    $query->whereNotNull('google_id')
+                        ->orWhereNotNull('facebook_id');
+                })
+                ->first();
+
+            if ($user) {
+                if ($token = auth()->login($user)) {
+                    return $this->responseWithToken($token);
+                }
+                return response()->json([
+                    'message' => 'User unauthorized'
+                ],401);
+            } else {
+                $avatar = 'dummyImg/default.jpg';
+                // Create a new user
+                $user = new User();
+                $user->name = $request->name;
+                $user->email = $request->email;
+                $user->user_type = $request->user_type;
+                $user->google_id = $request->google_id ?? null;
+                $user->facebook_id = $request->facebook_id ?? null;
+                $user->is_verified = 1;
+                $user->image = $avatar;
+                $user->save();
+                // Generate token for the new user
+                if ($token = auth()->login($user)) {
+                    return $this->responseWithToken($token);
+                }
+                return response()->json([
+                    'message' => 'User unauthorized'
+                ],401);
+            }
+        }
+    }
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -111,6 +166,7 @@ class UserController extends Controller
         $credentials = $request->only('email', 'password');
 
         if ($token = auth()->attempt($credentials)) {
+            return $token;
             $user = Auth::user();
 
             if ($user->is_verified == 0) {
@@ -131,6 +187,8 @@ class UserController extends Controller
             'status' => true,
             'access_token' => $token,
             'user_type' => auth()->user()->user_type,
+            'google_id' => auth()->user()->google_id,
+            'facebook_id' => auth()->user()->facebook_id,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 6000000000000000
         ], 200);
@@ -334,50 +392,6 @@ class UserController extends Controller
         return $imgUrl;
     }
 
-    //
-    //    public function profileUpdate(Request $request)
-    //    {
-    //        if (auth()->user()) {
-    //            $check_user = auth()->user()->id;
-    //            $validator = Validator::make($request->all(), [
-    //                'name' => 'required|string',
-    //                'email' => 'required|email|string',
-    //                'UserImage' => 'image|mimes:jpg,png,jpeg,gif,svg',
-    //
-    //            ]);
-    //            if ($validator->fails()) {
-    //                return response()->json($validator->errors(), 400);
-    //            }
-    //
-    //            $user = User::find($check_user);
-    //            $user->id = $check_user;
-    //            $user->name = $request->name;
-    //            $user->email = $request->email;
-    //            $user->address = $request->address;
-    //            if ($request->phone_number==''){
-    //                $request->phone_number = $user->phone_number;
-    //            }
-    //            $user->phone_number = $request->phone_number;
-    //
-    //            if ($request->file('image')) {
-    //                unlink($user->image);
-    //                $user->image = $this->saveImage($request);
-    //            }
-    //            $user->update();
-    //            return response()->json(['status' => true, 'message' => 'user is updated', 'Data' => $user]);
-    //        } else {
-    //            return response()->json(['status' => false, 'message' => 'User is not Authenticated']);
-    //        }
-    //    }
-    //    protected function saveImage($request){
-    //        $image = $request->file('image');
-    //        $imageName = rand() . '.' . $image->getClientOriginalExtension();
-    //        $directory = 'Asset/user-image/';
-    //        $imgUrl = $directory . $imageName;
-    //        $image->move($directory, $imageName);
-    //        return $imgUrl;
-    //    }
-
     public function refreshToken()
     {
         if (auth()->user()) {
@@ -463,18 +477,4 @@ class UserController extends Controller
         return $rating;
     }
 
-//    public function sendNotification(Request $request)
-//    {
-//        try {
-//            event(new SendNotification($request->message, $request->name));
-//
-//            return response()->json([
-//                'success' => true,
-//                'msg' => 'Notification Added',
-//                //                'data' => auth()->user()->name,
-//            ]);
-//        } catch (\Exception $e) {
-//            return response()->json(['success' => false, 'msg' => $e->getMessage()]);
-//        }
-//    }
 }

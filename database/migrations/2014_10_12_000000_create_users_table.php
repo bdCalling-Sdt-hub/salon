@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->integer('is_verified')->default(0);
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->string('image', 150)->nullable();
             $table->string('latitude')->nullable();
             $table->string('longitude')->nullable();
@@ -27,6 +27,8 @@ class CreateUsersTable extends Migration
             $table->string('user_status')->default(0);
             $table->string('phone_number')->default('');
             $table->string('address')->nullable();
+            $table->bigInteger('google_id')->nullable();
+            $table->bigInteger('facebook_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
