@@ -136,6 +136,8 @@ class UserController extends Controller
                 $user->user_type = $request->user_type;
                 $user->google_id = $request->google_id ?? null;
                 $user->facebook_id = $request->facebook_id ?? null;
+                $user->latitude = $request->latitude ?? null;
+                $user->longitude = $request->latitude ?? null;
                 $user->is_verified = 1;
                 $user->image = $avatar;
                 $user->save();
@@ -166,7 +168,6 @@ class UserController extends Controller
         $credentials = $request->only('email', 'password');
 
         if ($token = auth()->attempt($credentials)) {
-            return $token;
             $user = Auth::user();
 
             if ($user->is_verified == 0) {
