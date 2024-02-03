@@ -15,6 +15,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OnboardController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PercentageController;
+use App\Http\Controllers\SocialLoginController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TrashController;
@@ -37,6 +38,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::post('social-login',[UserController::class,'socialLogin']);
 
 Route::post('/register', [UserController::class, 'register']);
 
@@ -62,6 +66,8 @@ Route::group(['middleware' => 'api'], function ($routes) {
 
     Route::get('/notification', [HomeController::class, 'markRead']);
     Route::get('/read-at/notification', [HomeController::class, 'readNotification']);
+
+    Route::get('my-plan', [PackageController::class, 'myPlan']);
 });
 
 // website pages
@@ -175,7 +181,6 @@ Route::middleware(['admin'])->group(function () {
 Route::middleware(['payment.auth'])->group(function () {
     // package
     Route::get('show-package', [PackageController::class, 'showPackage']);
-    Route::get('my-plan', [PackageController::class, 'myPlan']);
     Route::get('package-renew/{id}', [PackageController::class, 'packageRenew']);
 
     // ======================Provider =======================//
