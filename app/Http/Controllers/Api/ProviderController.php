@@ -468,7 +468,12 @@ class ProviderController extends Controller
             $getBooking = Booking::where('provider_id', $providerId)->where('status', '0')->with('user')->get();
 
             if ($getBooking->isEmpty()) {
-                throw new \Exception('No booking history found.');
+                // throw new \Exception('');
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No booking history found.',
+                    'data' => []
+                ], 500);
             }
 
             $decodedBookings = [];
@@ -502,7 +507,7 @@ class ProviderController extends Controller
 
             return response()->json([
                 'decoded_bookings' => $decodedBookings,
-            ]);
+            ], 200);
         } catch (\Exception $e) {
             // Handle the exception
             return response()->json(['error' => $e->getMessage()], 500);
@@ -523,7 +528,12 @@ class ProviderController extends Controller
             $booking = Booking::where('id', $id)->with('user')->first();
 
             if (!$booking) {
-                throw new \Exception('Booking not found.');
+                // throw new \Exception('Booking not found.');
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No booking history found.',
+                    'data' => []
+                ], 500);
             }
 
             $decodedServices = json_decode($booking->service, true);
@@ -631,7 +641,12 @@ class ProviderController extends Controller
             $getBooking = Booking::where('provider_id', $providerId)->where('status', '1')->with('user')->get();
 
             if ($getBooking->isEmpty()) {
-                throw new \Exception('No booking history found.');
+                // throw new \Exception('No booking history found.');
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No booking history found.',
+                    'data' => []
+                ], 500);
             }
 
             $decodedBookings = [];
@@ -695,7 +710,12 @@ class ProviderController extends Controller
             $getBooking = Booking::where('provider_id', $providerId)->where('status', [2, 3, 4])->with('user')->get();
 
             if ($getBooking->isEmpty()) {
-                throw new \Exception('No booking history found.');
+                // throw new \Exception('No booking history found.');
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No booking history found.',
+                    'data' => []
+                ], 500);
             }
 
             $decodedBookings = [];
