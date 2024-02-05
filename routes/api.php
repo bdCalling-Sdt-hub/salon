@@ -238,6 +238,7 @@ Route::middleware(['payment.auth'])->group(function () {
 Route::middleware(['provider'])->group(function () {
     // The route that the button calls to initialize payment
     Route::post('/pay/{id}', [FlutterwaveController::class, 'initialize'])->name('paynow');
+    Route::post('payment-success',[FlutterwaveController::class,'paymentSuccess']);
 });
 
 Route::middleware(['user'])->group(function () {
