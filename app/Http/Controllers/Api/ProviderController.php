@@ -309,7 +309,6 @@ class ProviderController extends Controller
             return ResponseErrorMessage('error', 'update service faile');
         }
     }
-
     public function updateServiceImage(Request $request)
     {
         $image = array();
@@ -371,17 +370,6 @@ class ProviderController extends Controller
 
     public function booking()
     {
-        // $authUser = auth()->user()->id;
-        // $provider = Provider::where('user_id', $authUser)->first();
-        // $providerId = $provider->id;
-        // $getBooking = Booking::where('provider_id', $providerId)->with('user')->get();
-
-        // if ($getBooking) {
-        //     return ResponseMethod('success', $getBooking);
-        // } else {
-        //     return ResponseErrorMessage('error', 'Booking data not found');
-        // }
-
         try {
             $authUser = auth()->user()->id;
             $provider = Provider::where('user_id', $authUser)->first();
@@ -394,7 +382,11 @@ class ProviderController extends Controller
             $getBooking = Booking::where('provider_id', $providerId)->with('user')->get();
 
             if ($getBooking->isEmpty()) {
-                throw new \Exception('No booking history found.');
+                //  throw new \Exception('No booking history found.');
+                return response()->json([
+                    'message' => 'No booking history found.',
+                    'data' => []
+                ]);
             }
 
             $decodedBookings = [];

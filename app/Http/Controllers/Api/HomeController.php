@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\SendNotification;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
@@ -15,6 +16,7 @@ use App\Models\User;
 use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use DB;
 
 class HomeController extends Controller
@@ -258,38 +260,23 @@ class HomeController extends Controller
 
     public function catalouge($id)
     {
-        $catalogues = Catalogue::where('service_id', $id)->get([
-            'id', 'provider_id', 'catalog_name', 'image', 'service_duration',
-            'salon_service_charge', 'home_service_charge'
-        ]);
+        $totalReview = ServiceRating::where('service_id', $id)->count();
+        $totalRating = ServiceRating::where('service_id', $id)->sum('rating');
 
-        if ($catalogues->isNotEmpty()) {
-            $catalogueRatings = [];
+        $avgRating = ($totalReview > 0) ? ServiceRating::where('service_id', $id)->sum('rating') / $totalReview : 0;
 
-            foreach ($catalogues as $catalogue) {
-                $catalogueId = $catalogue->id;
-                $totalReview = ServiceRating::where('catalogue_id', $catalogueId)->count();
-                $sumRating = ServiceRating::where('catalogue_id', $catalogueId)->sum('rating');
-
-                $avgRating = ($totalReview > 0) ? $sumRating / $totalReview : 0;
-
-                $catalogueRatings[] = [
-                    'catalogue_id' => $catalogueId,
-                    'avg_rating' => $avgRating,
-                    'catalogue_details' => $catalogue,
-                ];
-            }
-
-            return response()->json([
-                'status' => 'success',
-                'catalogue_ratings' => $catalogueRatings,
-            ]);
-        } else {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No catalogues found for this service',
-            ], 404);
+        $catalogues = Catalogue::where('service_id', $id)->get();
+        $decodeImg = [];
+        foreach ($catalogues->toArray() as $catalog) {
+            $catalog['image'] = json_decode($catalog['image']);
+            $decodeImg[] = $catalog;
         }
+
+        return response()->json([
+            'status' => 'success',
+            'avg_rating' => $avgRating,
+            'catalog' => $decodeImg,
+        ]);
     }
 
     public function catalougeDetails($id)
@@ -329,6 +316,14 @@ class HomeController extends Controller
 
     public function bookingAppoinment($id)
     {
+        // $authUser = auth()->user()->id;
+        $percentage = BookingPercentage::first();
+        $provider = Provider::where('id', $id)->first();
+        $providerId = $provider->id;
+        $totalReview = ServiceRating::where('provider_id', $providerId)->count();
+        $totalRating = ServiceRating::where('provider_id', $providerId)->sum('rating');
+
+        $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $providerId)->sum('rating') / $totalReview : 0;
         $provider = Provider::where('id', $id)->with('services.catalog')->first();
 
         if (!$provider) {
@@ -352,6 +347,9 @@ class HomeController extends Controller
 
         return response()->json([
             'status' => 'success',
+            'totalReview' => $totalReview,
+            'avg_rating' => $avgRating,
+            'parcentage' => $percentage,
             'provider' => $decodedProvider,
         ], 200);
     }
@@ -401,10 +399,12 @@ class HomeController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Booking success',
-                    'Notification' => sendNotification('Send your booking request', $post_booking),
+                    'Notification' => sendNotification('Booking Successfull', 'You have successfully booked', $post_booking),
                 ], 200);
             } else {
-                return ResponseErrorMessage('error', 'Booking faile');
+                return response()->json([
+                    'message' => 'internal server error'
+                ], 500);
             }
         }
     }
@@ -417,7 +417,11 @@ class HomeController extends Controller
             $getBooking = Booking::where('user_id', $authUser)->with('user')->get();
 
             if ($getBooking->isEmpty()) {
-                throw new \Exception('No booking history found.');
+                // throw new \Exception('No booking history found.');
+                return response()->json([
+                    'message' => 'No booking history found.',
+                    'data' => []
+                ], 402);
             }
 
             $decodedBookings = [];
@@ -466,7 +470,12 @@ class HomeController extends Controller
             $getBooking = Booking::where('user_id', $authUser)->with('Provider')->get();
 
             if ($getBooking->isEmpty()) {
-                throw new \Exception('No booking history found.');
+                // throw new \Exception('No booking history found.');
+
+                return response()->json([
+                    'message' => 'No booking history found.',
+                    'data' => []
+                ], 402);
             }
 
             $decodedBookings = [];
@@ -515,7 +524,11 @@ class HomeController extends Controller
             $getBooking = Booking::where('user_id', $authUser)->with('Provider')->get();
 
             if ($getBooking->isEmpty()) {
-                throw new \Exception('No booking history found.');
+                // throw new \Exception('No booking history found.');
+                return response()->json([
+                    'message' => 'No booking history found.',
+                    'data' => []
+                ], 402);
             }
 
             $decodedBookings = [];
