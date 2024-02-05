@@ -114,8 +114,9 @@ class UserController extends Controller
         } else {
             // Check if a user with this email exists with Google or Facebook ID
             $user = User::where('email', $request->email)
-                ->where(function($query) {
-                    $query->whereNotNull('google_id')
+                ->where(function ($query) {
+                    $query
+                        ->whereNotNull('google_id')
                         ->orWhereNotNull('facebook_id');
                 })
                 ->first();
@@ -126,7 +127,7 @@ class UserController extends Controller
                 }
                 return response()->json([
                     'message' => 'User unauthorized'
-                ],401);
+                ], 401);
             } else {
                 $avatar = 'dummyImg/default.jpg';
                 // Create a new user
@@ -145,10 +146,11 @@ class UserController extends Controller
                 }
                 return response()->json([
                     'message' => 'User unauthorized'
-                ],401);
+                ], 401);
             }
         }
     }
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -166,7 +168,6 @@ class UserController extends Controller
         $credentials = $request->only('email', 'password');
 
         if ($token = auth()->attempt($credentials)) {
-            return $token;
             $user = Auth::user();
 
             if ($user->is_verified == 0) {
@@ -225,7 +226,7 @@ class UserController extends Controller
                 $token = auth()->login($user);
                 return response()->json([
                     'status' => 'success',
-                    'Notification' => sendNotification('Account Setup Successfull','You have successfully created your account', $user),
+                    'Notification' => sendNotification('Account Setup Successfull', 'You have successfully created your account', $user),
                     'token' => $this->responseWithToken($token),
                     'Otp' => 'OTP has been verified',
                 ], 200);
@@ -370,7 +371,7 @@ class UserController extends Controller
             if ($request->file('image')) {
                 // Check if the old image file exists before attempting to unlink it
                 if (file_exists($user->image)) {
-//                    unlink($user->image);
+                    //                    unlink($user->image);
                 }
                 $user->image = $this->saveImage($request);
             }
@@ -476,5 +477,4 @@ class UserController extends Controller
         $rating = ServiceRating::all();
         return $rating;
     }
-
 }

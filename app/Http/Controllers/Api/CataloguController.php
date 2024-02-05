@@ -54,6 +54,7 @@ class CataloguController extends Controller
 
     public function getCataloug($id)
     {
+        return 'hello world';
         $all_provider_data = Catalogue::where('service_id', $id)->with('salonDetails')->get();
         $decodedData = [];
         foreach ($all_provider_data as $item) {
