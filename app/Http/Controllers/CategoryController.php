@@ -96,39 +96,6 @@ class CategoryController extends Controller
         $image->move($directory, $imageName);
         return $imgUrl;
     }
-
-    // public function categorySearch($name = null)
-    // {
-    //     $query = Category::all();
-
-    //     if ($name) {
-    //         $query->where('name', 'like', '%' . $name . '%');
-    //     }
-    //     $users = $query->get();
-    //     return ResponseMethod('provider Request list', $users);
-    // }
-    // public function categorySearch($name = null)
-    // {
-    //     $query = Category::query();
-
-    //     if ($name) {
-    //         $query->where('name', 'like', '%' . $name . '%');
-    //     }
-    //     $categories = $query->get();
-    //     return ResponseMethod('provider Request list', $categories);
-    // }
-    // public function categorySearch($name = null)
-    // {
-    //     $query = Category::query();
-
-    //     if ($name) {
-    //         $query->where('name', 'like', '%' . $name . '%');
-    //     }
-
-    //     $categories = $query->get();
-    //     return ResponseMethod('provider Request list', $categories);
-    // }
-
     public function categorySearch($name = null)
     {
         $all_category = Category::all();
@@ -138,7 +105,10 @@ class CategoryController extends Controller
             if ($category->count() > 0) {
                 return ResponseMethod('Category data', $category);
             }
-            return ResponseMessage('Category not found');
+            return response()->json([
+                'message' => 'category Not found',
+                'data' => []
+            ]);
         }
         return ResponseMethod('Category data', $all_category);
     }

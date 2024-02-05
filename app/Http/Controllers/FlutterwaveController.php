@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\UserPayment;
 use EdwardMuss\Rave\Facades\Rave as Flutterwave;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class FlutterwaveController extends Controller
 {
@@ -14,13 +15,6 @@ class FlutterwaveController extends Controller
 
     public function initialize($id)
     {
-//        $check_user = auth()->user()->id;
-//        $provider = Payment::find('user_id',$check_user);
-//        if ($provider){
-//            return response()->json([
-//                'message' => 'You already subscribed'
-//            ]);
-//        }
         // This generates a payment reference
         $reference = Flutterwave::generateReference();
 
@@ -51,7 +45,9 @@ class FlutterwaveController extends Controller
 
         if ($payment['status'] !== 'success') {
             // notify something went wrong
-            return;
+            return response()->json([
+                'message' => 'Something went wrong',
+            ],500);
         }
 
         return response()->json([
@@ -191,6 +187,60 @@ class FlutterwaveController extends Controller
         } else {
             // return getMessage();
             // Put desired action/code after transaction has failed here
+        }
+    }
+
+    public function paymentSuccess(Request $request){
+
+        $status = $request->status;
+
+        // if payment is successful
+        if ($status == 'successful') {
+
+            $auth_user = $request->user_id;
+            $provider = Payment::where('user_id', $auth_user)->first();
+
+            if (!$provider) {
+                $payment = new Payment();
+            } else {
+                $payment = $provider;
+            }
+            $payment->package_id = $request->package_id;
+            $payment->user_id = $request->user_id;
+            $payment->tx_ref = $request->tx_ref;
+            $payment->amount = $request->amount;
+            $payment->currency = $request->currency;
+            $payment->payment_type = $request->payment_type;
+            $payment->status = $request->status;
+            $payment->email = $request->email;
+            $payment->name = $request->name;
+            $payment->save();
+            if ($payment) {
+                $user = User::find($auth_user);
+                if ($user) {
+                    $user->user_status = 1;
+                    $user->save();
+                }
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Payment complete',
+                    'data' => $payment,
+                ], 200);
+            }
+
+        } elseif ($status == 'cancelled') {
+            return response()->json([
+                'status' => 'cancelled',
+                'message' => 'Your payment is canceled'
+            ]);
+            // Put desired action/code after transaction has been cancelled here
+        } else {
+            // return getMessage();
+            // Put desired action/code after transaction has failed here
+            return response()->json([
+                'status' => 'cancelled',
+                'message' => 'Your transaction has been failed'
+            ]);
         }
     }
 }
