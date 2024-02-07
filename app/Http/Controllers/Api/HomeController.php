@@ -385,14 +385,13 @@ class HomeController extends Controller
             $post_booking = Booking::create([
                 'user_id' => $authId,
                 'provider_id' => $request->input('providerId'),
-                'service_id' => $request->input('serviceId'),
-                'catalogue_id' => $request->input('catalougeId'),
                 'service_duration' => $request->input('serviceDuration'),
                 'service_type' => $request->input('serviceType'),
                 'service' => $request->input('service'),
                 'price' => $request->input('price'),
                 'date' => $request->input('date'),
                 'time' => $request->input('time'),
+                'status' => 0,
             ]);
 
             if ($post_booking) {

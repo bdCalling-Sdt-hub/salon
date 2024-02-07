@@ -18,7 +18,6 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'provider_id',
-        'service_id',
         'service',
         'price',
         'date',
@@ -26,7 +25,6 @@ class Booking extends Model
         'status',
         'service_type',
         'service_duration',
-        'catalogue_id'
     ];
 
     public function userPayment(): BelongsTo

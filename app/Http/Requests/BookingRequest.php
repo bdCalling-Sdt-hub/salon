@@ -23,7 +23,6 @@ class BookingRequest extends FormRequest
     {
         return [
             'providerId' => ['required'],
-            'serviceId' => ['required'],
             'service' => ['required'],
             'price' => ['required'],
             'date' => ['required'],
