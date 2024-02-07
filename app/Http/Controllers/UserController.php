@@ -189,6 +189,7 @@ class UserController extends Controller
         return response()->json([
             'status' => true,
             'access_token' => $token,
+            'user_id' => auth()->user()->id,
             'user_type' => auth()->user()->user_type,
             'google_id' => auth()->user()->google_id,
             'facebook_id' => auth()->user()->facebook_id,

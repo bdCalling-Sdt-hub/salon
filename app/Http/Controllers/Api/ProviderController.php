@@ -309,6 +309,7 @@ class ProviderController extends Controller
             return ResponseErrorMessage('error', 'update service faile');
         }
     }
+
     public function updateServiceImage(Request $request)
     {
         $image = array();
@@ -428,24 +429,6 @@ class ProviderController extends Controller
         }
     }
 
-    // public function bookingRequest()
-    // {
-    //     $authUser = auth()->user()->id;
-    //     $provider = Provider::where('user_id', $authUser)->first();
-    //     $providerId = $provider->id;
-    //     $getBooking = Booking::where('provider_id', $providerId)->where('status', '0')->with('user')->get();
-
-    //     $decodeBooking = [];
-
-    //     foreach ($getBooking as $booking) {
-    //         $book['service'] = json_decode($booking['service']);
-    //         $decodeBooking[] = $book;
-    //     }
-
-    //     response()->json([
-    //         'service' => $getBooking,
-    //     ]);
-    // }
     public function bookingRequest()
     {
         try {
@@ -457,10 +440,12 @@ class ProviderController extends Controller
             }
 
             $providerId = $provider->id;
-            $getBooking = Booking::where('provider_id', $providerId)->where('status', '0')->with('user')->get();
+            $getBooking = Booking::where('provider_id', $providerId)
+                ->where('status', '0')
+                ->with('user')
+                ->get();
 
             if ($getBooking->isEmpty()) {
-                // throw new \Exception('');
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No booking history found.',
@@ -471,6 +456,8 @@ class ProviderController extends Controller
             $decodedBookings = [];
 
             foreach ($getBooking as $booking) {
+                $bookingList = [];  // Reset booking list for each booking
+
                 $decodedServices = json_decode($booking->service, true);
 
                 if (!is_array($decodedServices)) {
@@ -478,28 +465,25 @@ class ProviderController extends Controller
                 }
 
                 foreach ($decodedServices as $service) {
-                    $catalogIds = explode(',', $service['catalouge_id']);
-                    $catalogDetails = [];
+                    // Assuming each service has only one catalog_id
+                    $catalogIds = $service['catalouge_id'];
 
-                    foreach ($catalogIds as $catalogId) {
-                        $catalog = Catalogue::find($catalogId);
+                    $catalog = Catalogue::find($catalogIds);
 
-                        if ($catalog) {
-                            $catalogDetails[] = $catalog;
-                        }
+                    if ($catalog) {
+                        $bookingList[] = $catalog;
                     }
-
-                    $decodedBookings[] = [
-                        'booking' => $booking,
-                        'service' => $service,
-                        'catalog_details' => $catalogDetails,
-                    ];
                 }
+
+                $decodedBookings[] = [
+                    'booking' => $booking,
+                    'catalog_details' => $bookingList,
+                ];
             }
 
             return response()->json([
-                'decoded_bookings' => $decodedBookings,
-            ], 200);
+                'booking Request List' => $decodedBookings,
+            ]);
         } catch (\Exception $e) {
             // Handle the exception
             return response()->json(['error' => $e->getMessage()], 500);
@@ -596,15 +580,17 @@ class ProviderController extends Controller
         $bookingInfo = Booking::where('id', $request->id)->get();
         $updateStatus = Booking::find($request->id);
         $updateStatus->status = $request->status;
-        $updateStatus->save();
+        $updateStatus->update();
         if ($updateStatus) {
             return response()->json([
                 'status' => 'success',
-                'Notification' => sendNotification('Booking accepted', $updateStatus),
+                // 'Notification' => sendNotification('Booking accepted', $updateStatus),
                 'message' => 'Accept your request'
             ], 200);
         } else {
-            return ResponseErrorMessage('error', 'Booking status update faile');
+            return response()->json([
+                'message' => 'Booking status update failed'
+            ], 402);
         }
     }
 
@@ -619,6 +605,68 @@ class ProviderController extends Controller
         }
     }
 
+    // previous approvedBooking
+
+    // public function approvedBooking()
+    // {
+    //     try {
+    //         $authUser = auth()->user()->id;
+    //         $provider = Provider::where('user_id', $authUser)->first();
+
+    //         if (!$provider) {
+    //             throw new \Exception('Provider not found.');
+    //         }
+
+    //         $providerId = $provider->id;
+    //         $getBooking = Booking::where('provider_id', $providerId)->where('status', '1')->with('user')->get();
+
+    //         if ($getBooking->isEmpty()) {
+    //             // throw new \Exception('No booking history found.');
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'No booking history found.',
+    //                 'data' => []
+    //             ], 500);
+    //         }
+
+    //         $decodedBookings = [];
+
+    //         foreach ($getBooking as $booking) {
+    //             $decodedServices = json_decode($booking->service, true);
+
+    //             if (!is_array($decodedServices)) {
+    //                 throw new \Exception('Error decoding the service JSON.');
+    //             }
+
+    //             foreach ($decodedServices as $service) {
+    //                 $catalogIds = explode(',', $service['catalouge_id']);
+    //                 $catalogDetails = [];
+
+    //                 foreach ($catalogIds as $catalogId) {
+    //                     $catalog = Catalogue::find($catalogId);
+
+    //                     if ($catalog) {
+    //                         $catalogDetails[] = $catalog;
+    //                     }
+    //                 }
+
+    //                 $decodedBookings[] = [
+    //                     'booking' => $booking,
+    //                     'service' => $service,
+    //                     'catalog_details' => $catalogDetails,
+    //                 ];
+    //             }
+    //         }
+
+    //         return response()->json([
+    //             'decoded_bookings' => $decodedBookings,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         // Handle the exception
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
     public function approvedBooking()
     {
         try {
@@ -630,13 +678,15 @@ class ProviderController extends Controller
             }
 
             $providerId = $provider->id;
-            $getBooking = Booking::where('provider_id', $providerId)->where('status', '1')->with('user')->get();
+            $getBooking = Booking::where('provider_id', $providerId)
+                ->where('status', '1')
+                ->with('user')
+                ->get();
 
             if ($getBooking->isEmpty()) {
-                // throw new \Exception('No booking history found.');
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'No booking history found.',
+                    'message' => 'No Approved history found.',
                     'data' => []
                 ], 500);
             }
@@ -644,6 +694,8 @@ class ProviderController extends Controller
             $decodedBookings = [];
 
             foreach ($getBooking as $booking) {
+                $bookingList = [];  // Reset booking list for each booking
+
                 $decodedServices = json_decode($booking->service, true);
 
                 if (!is_array($decodedServices)) {
@@ -651,27 +703,24 @@ class ProviderController extends Controller
                 }
 
                 foreach ($decodedServices as $service) {
-                    $catalogIds = explode(',', $service['catalouge_id']);
-                    $catalogDetails = [];
+                    // Assuming each service has only one catalog_id
+                    $catalogIds = $service['catalouge_id'];
 
-                    foreach ($catalogIds as $catalogId) {
-                        $catalog = Catalogue::find($catalogId);
+                    $catalog = Catalogue::find($catalogIds);
 
-                        if ($catalog) {
-                            $catalogDetails[] = $catalog;
-                        }
+                    if ($catalog) {
+                        $bookingList[] = $catalog;
                     }
-
-                    $decodedBookings[] = [
-                        'booking' => $booking,
-                        'service' => $service,
-                        'catalog_details' => $catalogDetails,
-                    ];
                 }
+
+                $decodedBookings[] = [
+                    'booking' => $booking,
+                    'catalog_details' => $bookingList,
+                ];
             }
 
             return response()->json([
-                'decoded_bookings' => $decodedBookings,
+                'Approved Booking List' => $decodedBookings,
             ]);
         } catch (\Exception $e) {
             // Handle the exception
