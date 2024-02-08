@@ -39,8 +39,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-Route::post('social-login',[UserController::class,'socialLogin']);
+Route::post('social-login', [UserController::class, 'socialLogin']);
 
 Route::post('/register', [UserController::class, 'register']);
 
@@ -65,6 +64,9 @@ Route::group(['middleware' => 'api'], function ($routes) {
     // Route::post('/send-notification', [UserController::class, 'sendNotification']);
 
     Route::get('/notification', [HomeController::class, 'markRead']);
+
+    Route::get('/booking/after/notification', [HomeController::class, 'bookingAfterNotification']);
+
     Route::get('/read-at/notification', [HomeController::class, 'readNotification']);
 
     Route::get('my-plan', [PackageController::class, 'myPlan']);
@@ -238,7 +240,7 @@ Route::middleware(['payment.auth'])->group(function () {
 Route::middleware(['provider'])->group(function () {
     // The route that the button calls to initialize payment
     Route::post('/pay/{id}', [FlutterwaveController::class, 'initialize'])->name('paynow');
-    Route::post('payment-success',[FlutterwaveController::class,'paymentSuccess']);
+    Route::post('payment-success', [FlutterwaveController::class, 'paymentSuccess']);
 });
 
 Route::middleware(['user'])->group(function () {
