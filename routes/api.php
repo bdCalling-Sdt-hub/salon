@@ -248,7 +248,8 @@ Route::middleware(['user'])->group(function () {
     Route::get('get-booking', [GetController::class, 'getBooking']);
 
     // user booking - payment
-    Route::post('/pay-user/{id}', [FlutterwaveController::class, 'userPayment'])->name('paynowuser');
+    Route::post('/user-pay/{id}', [FlutterwaveController::class, 'userPayment']);
+    Route::post('user-payment-success', [FlutterwaveController::class, 'UserpaymentSuccess']);
 
     // filter
     Route::get('user-filter/{category}/{rating}/{distance}', [DistanceController::class, 'filterOriginal']);
@@ -336,7 +337,7 @@ Route::middleware(['user.provider'])->group(function () {
 Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'callback'])->name('callback');
 // user callback
 
-// Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
+ Route::get('/rave/callback', [FlutterwaveCOntroller::class, 'userCallback'])->name('user.callback');
 
 Route::middleware(['user.admin.provider'])->group(function () {
     Route::get('category-search/{name?}', [CategoryController::class, 'categorySearch']);
