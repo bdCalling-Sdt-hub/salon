@@ -21,7 +21,13 @@ use DB;
 
 class HomeController extends Controller
 {
-    public function read_at() {}
+    public function bookingAfterNotification()
+    {
+        $user = auth()->user()->id;
+        return $checkProvider = Provider::where('user_id', $user)->id;
+
+        return 'hello world';
+    }
 
     public function markRead(Request $request)
     {

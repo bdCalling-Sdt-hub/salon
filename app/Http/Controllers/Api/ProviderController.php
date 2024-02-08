@@ -482,8 +482,8 @@ class ProviderController extends Controller
             }
 
             return response()->json([
-                'booking Request List' => $decodedBookings,
-            ]);
+                'data' => $decodedBookings,
+            ], 200);
         } catch (\Exception $e) {
             // Handle the exception
             return response()->json(['error' => $e->getMessage()], 500);
@@ -556,7 +556,9 @@ class ProviderController extends Controller
             $time = $request->time;
             $scedulCheck = Booking::where('date', $date)->where('time', $time)->count();
             if ($scedulCheck) {
-                return ResponseErrorMethod('false', 'Sloat not avlable');
+                return response()->json([
+                    'message' => 'Slot Not available',
+                ], 402);
             } else {
                 $updateBooking = Booking::find($request->id);
                 $updateBooking->date = $request->date;
@@ -566,10 +568,12 @@ class ProviderController extends Controller
                 if ($updateBooking) {
                     return response()->json([
                         'status' => 'success',
-                        'Notification' => sendNotification('Booking re-shedule', $updateBooking),
+                        // 'Notification' => sendNotification('Booking re-shedule', $updateBooking),
                     ], 200);
                 } else {
-                    return ResponseErrorMessage('false', 'Booking update faile');
+                    return response()->json([
+                        'message' => 'Booking Update failed',
+                    ], 402);
                 }
             }
         }
@@ -618,7 +622,7 @@ class ProviderController extends Controller
     //         }
 
     //         $providerId = $provider->id;
-    //         $getBooking = Booking::where('provider_id', $providerId)->where('status', '1')->with('user')->get();
+    //         $getBooking = Booking::where('provider_id', $providerId)->where('status', '1')->with('user')->paginate(2);
 
     //         if ($getBooking->isEmpty()) {
     //             // throw new \Exception('No booking history found.');
@@ -678,12 +682,13 @@ class ProviderController extends Controller
             }
 
             $providerId = $provider->id;
-            $getBooking = Booking::where('provider_id', $providerId)
+            $bookings = Booking::where('provider_id', $providerId)
                 ->where('status', '1')
                 ->with('user')
-                ->get();
+                ->orderBy('id', 'DESC')  // Ordering by ID in descending order for pagination
+                ->paginate(10);  // Change 10 to the desired number of bookings per page
 
-            if ($getBooking->isEmpty()) {
+            if ($bookings->isEmpty()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No Approved history found.',
@@ -693,7 +698,7 @@ class ProviderController extends Controller
 
             $decodedBookings = [];
 
-            foreach ($getBooking as $booking) {
+            foreach ($bookings as $booking) {
                 $bookingList = [];  // Reset booking list for each booking
 
                 $decodedServices = json_decode($booking->service, true);
@@ -721,12 +726,81 @@ class ProviderController extends Controller
 
             return response()->json([
                 'Approved Booking List' => $decodedBookings,
+                'pagination' => [
+                    'total' => $bookings->total(),
+                    'per_page' => $bookings->perPage(),
+                    'current_page' => $bookings->currentPage(),
+                    'last_page' => $bookings->lastPage(),
+                    'from' => $bookings->firstItem(),
+                    'to' => $bookings->lastItem()
+                ]
             ]);
         } catch (\Exception $e) {
             // Handle the exception
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    // public function approvedBooking()
+    // {
+    //     try {
+    //         $authUser = auth()->user()->id;
+    //         $provider = Provider::where('user_id', $authUser)->first();
+
+    //         if (!$provider) {
+    //             throw new \Exception('Provider not found.');
+    //         }
+
+    //         $providerId = $provider->id;
+    //         $getBooking = Booking::where('provider_id', $providerId)
+    //             ->where('status', '1')
+    //             ->with('user')
+    //             ->paginate(10);
+
+    //         if ($getBooking->isEmpty()) {
+    //             return response()->json([
+    //                 'status' => 'error',
+    //                 'message' => 'No Approved history found.',
+    //                 'data' => []
+    //             ], 500);
+    //         }
+
+    //         $decodedBookings = [];
+
+    //         foreach ($getBooking as $booking) {
+    //             $bookingList = [];  // Reset booking list for each booking
+
+    //             $decodedServices = json_decode($booking->service, true);
+
+    //             if (!is_array($decodedServices)) {
+    //                 throw new \Exception('Error decoding the service JSON.');
+    //             }
+
+    //             foreach ($decodedServices as $service) {
+    //                 // Assuming each service has only one catalog_id
+    //                 $catalogIds = $service['catalouge_id'];
+
+    //                 $catalog = Catalogue::find($catalogIds);
+
+    //                 if ($catalog) {
+    //                     $bookingList[] = $catalog;
+    //                 }
+    //             }
+
+    //             $decodedBookings[] = [
+    //                 'booking' => $booking,
+    //                 'catalog_details' => $bookingList,
+    //             ];
+    //         }
+
+    //         return response()->json([
+    //             'data' => $decodedBookings,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         // Handle the exception
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
 
     public function bookingHistory()
     {
