@@ -15,6 +15,7 @@ use App\Models\Service;
 use App\Models\ServiceRating;
 use App\Notifications\UserNotification;
 use Geocoder\Laravel\Facades\Geocoder;
+use http\Env\Response;
 use Illuminate\Http\Request;
 use DB;
 
@@ -464,6 +465,7 @@ class ProviderController extends Controller
             $getBooking = Booking::where('provider_id', $providerId)
                 ->where('status', '0')
                 ->with('user')
+
                 ->paginate(10);
 
             if ($getBooking->isEmpty()) {
@@ -772,6 +774,7 @@ class ProviderController extends Controller
 
             $providerId = $provider->id;
             $bookings = Booking::where('provider_id', $providerId)
+
                 ->where('status', '1')
                 ->with(['user' => function ($bookings) {
                     $bookings->where('user_status', 1);

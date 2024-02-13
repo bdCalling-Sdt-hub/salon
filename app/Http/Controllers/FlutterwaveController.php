@@ -245,9 +245,8 @@ class FlutterwaveController extends Controller
         }
     }
 
-    public function UserpaymentSuccess(Request $request)
-    {
-        return $request;
+    public function UserpaymentSuccess(Request $request){
+
         $status = $request->status;
 
         // if payment is successful
@@ -256,11 +255,12 @@ class FlutterwaveController extends Controller
             $provider = UserPayment::where('user_id', $auth_user)->first();
 
             if (!$provider) {
-                $payment = new Payment();
+                $payment = new UserPayment();
             } else {
                 $payment = $provider;
             }
             $payment->booking_id = $request->booking_id;
+            $payment->provider_id = $request->provider_id;
             $payment->user_id = $request->user_id;
             $payment->tx_ref = $request->tx_ref;
             $payment->amount = $request->amount;

@@ -171,7 +171,6 @@ class UserController extends Controller
 
         if ($token = auth()->attempt($credentials)) {
             $user = Auth::user();
-
             if ($user->is_verified == 0) {
                 // User email is not verified
                 return response()->json(['error' => 'Your email is not verified'], 401);
