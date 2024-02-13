@@ -446,6 +446,7 @@ class UserController extends Controller
         $rating->service_id = $request->service_id;
         $rating->review = $request->review;
         $rating->rating = $request->rating;
+        $rating->provider_id = $request->providerId;
         $rating->save();
         return response()->json(['message' => 'Review and ratings are added.'], 200);
     }

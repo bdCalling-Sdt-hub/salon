@@ -25,6 +25,7 @@ class Booking extends Model
         'status',
         'service_type',
         'service_duration',
+        'advance_money',
     ];
 
     public function userPayment(): BelongsTo
