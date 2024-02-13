@@ -14,6 +14,7 @@ use App\Models\Service;
 use App\Models\ServiceRating;
 use App\Notifications\UserNotification;
 use Geocoder\Laravel\Facades\Geocoder;
+use http\Env\Response;
 use Illuminate\Http\Request;
 use DB;
 
@@ -361,9 +362,15 @@ class ProviderController extends Controller
     {
         $allService = Service::where('provider_id', $id)->get();
         if ($allService == true) {
-            return ResponseMethod('success', $allService);
+            //$available_service_our = json_encode($allService['available_service_our']);
+            return response()->json([
+                'message' => 'success',
+                'data' => $allService,
+            ]);
         } else {
-            return ResponseErrorMessage('error', 'Provider data not found');
+            return response()->json([
+                'message' => 'Provider Data Not Found'
+            ],404);
         }
     }
 
@@ -443,7 +450,7 @@ class ProviderController extends Controller
             $getBooking = Booking::where('provider_id', $providerId)
                 ->where('status', '0')
                 ->with('user')
-                ->get();
+                ->paginate(9);
 
             if ($getBooking->isEmpty()) {
                 return response()->json([
@@ -744,7 +751,7 @@ class ProviderController extends Controller
 
             $providerId = $provider->id;
             $bookings = Booking::where('provider_id', $providerId)
-                ->where('status', '1')
+                ->where('status', '0')
                 ->with('user')
                 ->orderBy('id', 'DESC')  // Ordering by ID in descending order for pagination
                 ->paginate(10);  // Change 10 to the desired number of bookings per page
