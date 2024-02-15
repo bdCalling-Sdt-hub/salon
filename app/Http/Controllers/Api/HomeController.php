@@ -125,9 +125,12 @@ class HomeController extends Controller
             return response()->json([
                 'status' => 'success',
                 'provider_data' => $providerData
-            ]);
+            ], 200);
         } else {
-            return ResponseErrorMessage('error', 'Provider data not found');
+            return response()->json([
+                'message' => 'data not found',
+                'data' => $providerData
+            ]);
         }
     }
 
@@ -172,7 +175,10 @@ class HomeController extends Controller
                 'services' => $serviceData
             ]);
         } else {
-            return ResponseErrorMessage('error', 'Provider services not found');
+            return response()->json([
+                'message' => 'service not found',
+                'data' => []
+            ], 200);
         }
     }
 
@@ -496,10 +502,9 @@ class HomeController extends Controller
 
             if ($getBooking->isEmpty()) {
                 return response()->json([
-                    'status' => 'error',
                     'message' => 'No booking history found.',
                     'data' => []
-                ], 500);
+                ], 200);
             }
 
             $decodedBookings = [];
@@ -621,7 +626,7 @@ class HomeController extends Controller
                 return response()->json([
                     'message' => 'No booking history found.',
                     'data' => []
-                ], 402);
+                ], 200);
             }
 
             $decodedBookings = [];
@@ -653,11 +658,11 @@ class HomeController extends Controller
             }
 
             return response()->json([
-                'decoded_bookings' => $decodedBookings,
+                'data' => $decodedBookings,
             ], 200);
         } catch (\Exception $e) {
             // Handle the exception
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -720,7 +725,7 @@ class HomeController extends Controller
                 return response()->json([
                     'message' => 'No booking history found.',
                     'data' => []
-                ], 402);
+                ], 200);
             }
 
             $decodedBookings = [];
@@ -752,7 +757,8 @@ class HomeController extends Controller
             }
 
             return response()->json([
-                'decoded_bookings' => $decodedBookings,
+                'status' => 'success',
+                'data' => $decodedBookings,
             ], 200);
         } catch (\Exception $e) {
             // Handle the exception
@@ -766,9 +772,13 @@ class HomeController extends Controller
         if ($authUser) {
             $deleteBooking = Booking::where('id', $id)->delete();
             if ($deleteBooking) {
-                return ResponseMethod('success', 'Booking delete success');
+                return response()->json([
+                    'message' => 'Booking delete Success'
+                ], 200);
             } else {
-                return ResponseErrorMessage('error', 'Booking delete fails');
+                return response()->json([
+                    'message' => 'booking delete failed',
+                ]);
             }
         }
     }
@@ -781,7 +791,9 @@ class HomeController extends Controller
             $time = $request->time;
             $scedulCheck = Booking::where('date', $date)->where('time', $time)->count();
             if ($scedulCheck) {
-                return ResponseErroMethod('false', 'Sloat not avlable');
+                return response()->json([
+                    'message' => 'slot not available',
+                ]);
             } else {
                 $updateBooking = Booking::find($request->id);
                 $updateBooking->id = $request->id;
@@ -796,7 +808,9 @@ class HomeController extends Controller
                     ], 200);
                     ResponseMethod('success', 'Booking update success');
                 } else {
-                    return ResponseErroMethod('false', 'Booking update faile');
+                    return response()->json([
+                        'message' => 'booking update failed',
+                    ]);
                 }
             }
         }
@@ -814,7 +828,7 @@ class HomeController extends Controller
                 return response()->json([
                     'status' => false,
                     'data' => [],
-                ]);
+                ], 200);
             }
 
             $decodedServices = json_decode($booking->service, true);
@@ -845,7 +859,7 @@ class HomeController extends Controller
             }
 
             return response()->json([
-                'decoded_bookings' => $decodedBookings,
+                'data' => $decodedBookings,
             ]);
         } catch (\Exception $e) {
             // Handle the exception
@@ -885,55 +899,16 @@ class HomeController extends Controller
                 ->orderBy('average_rating', 'desc')
                 ->get();
 
-            return ResponseMethod('Featcer provider', $salons);
+            return response()->json([
+                'message' => 'Nearest Salon List',
+                'data' => $salons,
+            ]);
         } else {
-            return ResponseErrorMessage('error', 'Provider not found');
+            return response()->json([
+                'message' => 'No list Found',
+                'data' => [],
+            ]);
         }
-        // $providers = Provider::with('providerRating')
-        //     ->withAvg('providerRating', 'rating')
-        //     ->orderByDesc('provider_rating_avg_rating')
-        //     ->get();
-
-        // $decodedData = [];
-        // foreach ($providers->toArray() as $item) {
-        //     $item['available_service_our'] = json_decode($item['available_service_our'], true);
-        //     $item['gallary_photo'] = json_decode($item['gallary_photo'], true);
-
-        //     // Loop through salon_details and decode available_service_our for each item
-        //     // foreach ($item['salon_details'] as &$salonDetail) {
-        //     //     $salonDetail['available_service_our'] = json_decode($salonDetail['available_service_our'], true);
-        //     //     $salonDetail['gallary_photo'] = json_decode($salonDetail['gallary_photo'], true);
-        //     // }
-
-        //     $decodedData[] = $item;  // Add the updated item to the new array
-        // }
-        // $lat = auth()->user()->latitude;
-        // $long = auth()->user()->longitude;
-        // return response()->json([
-        //     'status' => 'success',
-        //     'message' => $decodedData,
-        //     'distance' => $this->findNearestLocation($lat, $long),
-        // ]);
-
-        // $decodedData = [];
-
-        // if ($provider) {
-        //     $provider['available_service_our'] = json_decode($provider['available_service_our'], true);
-        //     $provider['gallary_photo'] = json_decode($provider['gallary_photo'], true);
-
-        //     $decodedData[] = $provider;
-        // }
-
-        // $ProviderId = $provider->id;
-        // $totlaReview = ServiceRating::where('provider_id', $ProviderId)->count();
-        // $sumRating = ServiceRating::where('provider_id', $ProviderId)->sum('rating');
-        // $avgRating = $sumRating / $totlaReview;
-        // return response()->json([
-        //     'status' => 'success',
-        //     'provider' => $decodedData,
-        //     'review' => $totlaReview,
-        //     'average rating' => $avgRating
-        // ], 200);
     }
 
     public function searchCategory(Request $request)
@@ -949,7 +924,10 @@ class HomeController extends Controller
                 'searcgResult' => $provider
             ], 200);
         } else {
-            return ResponseErrorMessage('error', 'Search data not found');
+            return response()->json([
+                'status' => false,
+                'message' => [],
+            ]);
         }
     }
 
@@ -986,9 +964,15 @@ class HomeController extends Controller
                 ->orderBy('distance')
                 ->get();
 
-            return ResponseMethod('Nearest Salon Data', $salons);
+            return response()->json([
+                'status' => 'success',
+                'data' => $salons
+            ]);
         } else {
-            return ResponseErrorMessage('error', 'Provider not found');
+            return response()->json([
+                'status' => false,
+                'data' => []
+            ]);
         }
     }
 }

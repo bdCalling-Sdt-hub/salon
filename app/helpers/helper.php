@@ -3,19 +3,19 @@ use App\Events\SendNotification;
 use App\Notifications\UserNotification;
 use Illuminate\Support\Facades\Notification;
 
-function ResponseMethod($status, $message)
+function ResponseMethod($message, $data)
 {
     return response()->json([
-        'status' => $status,
         'message' => $message,
+        'data' => $data,
     ]);
 }
 
-function ResponseErroMethod($status, $message)
+function ResponseErroMethod($message, $data)
 {
     return response()->json([
-        'status' => $status,
         'message' => $message,
+        'data' => $data,
     ]);
 }
 
@@ -26,11 +26,11 @@ function ResponseMessage($message)
     ]);
 }
 
-function sendNotification($message =null, $description = null, $data = null, $payment = null)
+function sendNotification($message = null, $description = null, $data = null, $payment = null)
 {
     try {
         event(new SendNotification($message, $data));
-        Notification::send($data, new UserNotification($message,$description,$data));
+        Notification::send($data, new UserNotification($message, $description, $data));
         return response()->json([
             'success' => true,
             'msg' => 'Notification Added',

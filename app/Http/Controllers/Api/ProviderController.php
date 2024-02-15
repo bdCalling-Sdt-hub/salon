@@ -465,7 +465,6 @@ class ProviderController extends Controller
             $getBooking = Booking::where('provider_id', $providerId)
                 ->where('status', '0')
                 ->with('user')
-
                 ->paginate(10);
 
             if ($getBooking->isEmpty()) {
@@ -774,7 +773,6 @@ class ProviderController extends Controller
 
             $providerId = $provider->id;
             $bookings = Booking::where('provider_id', $providerId)
-
                 ->where('status', '1')
                 ->with(['user' => function ($bookings) {
                     $bookings->where('user_status', 1);
@@ -990,7 +988,7 @@ class ProviderController extends Controller
 
         $serviceDetails = ServiceRating::where('provider_id', $providerId)
             ->with(['user:id,name,image'])
-            ->get();
+            ->paginate(10);
 
         $allReview = ServiceRating::where('provider_id', $providerId)->get();
         if ($allReview) {
@@ -1001,7 +999,7 @@ class ProviderController extends Controller
                 'service_details_with_user' => $serviceDetails,
             ]);
         } else {
-            return ResponseErrorMessage('error', 'Booking data not found');
+            return ResponseErrorMessage('message', 'Booking data not found');
         }
     }
 
