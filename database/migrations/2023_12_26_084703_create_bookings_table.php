@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->integer('user_id');
             $table->integer('provider_id');
-            $table->integer('service_id');
+            $table->json('service');
             $table->integer('catalouge_id')->nullable();
             $table->text('service_type');
             $table->text('service_duration');
@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->string('date');
             $table->string('time');
             $table->integer('status')->default(0);
+            $table->double('advance_money');
             $table->timestamps();
         });
     }

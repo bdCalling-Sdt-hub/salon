@@ -25,7 +25,7 @@ class FlutterwaveController extends Controller
             'email' => request()->email,
             'tx_ref' => $reference,
             'currency' => request()->currency,
-            'redirect_url' => route('callback'),
+            'redirect_url' => url('callback'),
             'customer' => [
                 'email' => request()->email,
                 'phone_number' => request()->phone,
@@ -47,7 +47,7 @@ class FlutterwaveController extends Controller
             // notify something went wrong
             return response()->json([
                 'message' => 'Something went wrong',
-            ],500);
+            ], 500);
         }
 
         return response()->json([
@@ -55,6 +55,7 @@ class FlutterwaveController extends Controller
             'gateway_link' => $payment['data']['link'],
         ]);
     }
+
     public function callback()
     {
         $status = request()->status;
@@ -96,7 +97,6 @@ class FlutterwaveController extends Controller
                     'data' => $payment,
                 ], 200);
             }
-
         } elseif ($status == 'cancelled') {
             return response()->json([
                 'status' => 'cancelled',
@@ -108,7 +108,6 @@ class FlutterwaveController extends Controller
             // Put desired action/code after transaction has failed here
         }
     }
-
 
     // payment for user
 
@@ -146,7 +145,7 @@ class FlutterwaveController extends Controller
             // notify something went wrong
             return response()->json([
                 'message' => 'Something went wrong'
-            ],402);
+            ], 402);
         }
         return response()->json([
             'message' => 'success',
@@ -194,13 +193,12 @@ class FlutterwaveController extends Controller
         }
     }
 
-    public function paymentSuccess(Request $request){
-
+    public function paymentSuccess(Request $request)
+    {
         $status = $request->status;
 
         // if payment is successful
         if ($status == 'successful') {
-
             $auth_user = $request->user_id;
             $provider = Payment::where('user_id', $auth_user)->first();
 
@@ -231,7 +229,6 @@ class FlutterwaveController extends Controller
                     'data' => $payment,
                 ], 200);
             }
-
         } elseif ($status == 'cancelled') {
             return response()->json([
                 'status' => 'cancelled',
@@ -249,11 +246,11 @@ class FlutterwaveController extends Controller
     }
 
     public function UserpaymentSuccess(Request $request){
+
         $status = $request->status;
 
         // if payment is successful
         if ($status == 'successful') {
-
             $auth_user = $request->user_id;
             $provider = UserPayment::where('user_id', $auth_user)->first();
 
@@ -285,7 +282,6 @@ class FlutterwaveController extends Controller
                     'data' => $payment,
                 ], 200);
             }
-
         } elseif ($status == 'cancelled') {
             return response()->json([
                 'status' => 'cancelled',

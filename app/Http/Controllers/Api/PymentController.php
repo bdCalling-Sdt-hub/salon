@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Provider;
 use App\Models\UserPayment;
+use Carbon\Carbon;
 use EdwardMuss\Rave\Facades\Rave as Flutterwave;
 use Illuminate\Http\Request;
-use Carbon;
 use DB;
 
 class PymentController extends Controller
@@ -16,49 +18,51 @@ class PymentController extends Controller
 
     public function earningStory()
     {
-        // IN TOTAL Income //
-
-
         $authUser = auth()->user()->id;
+        $provider = Provider::where('user_id', $authUser)->first();
+        $providerId = $provider->id;
+        $booking = Booking::where('provider_id', $provider)->first();
+        $bookingId = $booking->id;
 
-        $totalEarning = Payment::where('user_id', $authUser)->sum('amount');
+        // IN TOTAL Income //
+        // $check = UserPayment::where(use)
+
+        $totalEarning = UserPayment::where('booking_id', $bookingId)->sum('amount');
 
         // DAILY INCOME //
 
-        $dailyEarning = Payment::where('user_id', $authUser)
-            ->whereDate('created_at', Carbon::today())
-            ->select(DB::raw('SUM(amount) as totalAmount'))
+        $dailyEarning = UserPayment::whereDate('created_at', Carbon::today())
+            ->select(DB::raw('SUM(amount) as dayly_income'))
             ->get();
 
         // WEEKLY TOTAL INCOME //
 
-        $weeklyTotalSum = Payment::where('user_id', $authUser)
-            ->select(
-                DB::raw('(SUM(amount)) as total_amount')
-            )
+        $weeklyTotalSum = UserPayment::select(
+            DB::raw('(SUM(amount)) as total_amount')
+        )
             ->whereYear('created_at', date('Y'))
             ->get()
             ->sum('total_amount');
 
         // MONTHLY TOTAL INCOME //
 
-        $monthlySumAmount = Payment::where('user_id', $authUser)
+        $monthlySumAmount = UserPayment::where('user_id', $authUser)
             ->whereYear('created_at', date('Y'))
             ->whereMonth('created_at', date('n'))
             ->sum('amount');
 
         // YEARLY TOTAL INCOME //
 
-        $yearlySumAmount = Payment::where('user_id', $authUser)
+        $yearlySumAmount = UserPayment::where('user_id', $authUser)
             ->whereYear('created_at', date('Y'))
             ->sum('amount');
 
         return response()->json([
-            'total earning' => $totalEarning,
-            'daily earning' => $dailyEarning,
-            'total week earning' => $weeklyTotalSum,
-            'total month earning' => $monthlySumAmount,
-            'total yearly earning' => $yearlySumAmount,
+            'total_earning' => $totalEarning,
+            'daily_earning' => $dailyEarning,
+            'total_week_earning' => $weeklyTotalSum,
+            'total_month_earning' => $monthlySumAmount,
+            'total_yearly_earning' => $yearlySumAmount,
         ]);
     }
 
@@ -68,7 +72,7 @@ class PymentController extends Controller
 
         $authUser = auth()->user()->id;
 
-        $weeklyIncome = Payment::where('user_id', $authUser)
+        $weeklyIncome = UserPayment::where('user_id', $authUser)
             ->select(
                 DB::raw('(SUM(amount)) as total_amount'),
                 DB::raw('DAYNAME(created_at) as Dayname')
@@ -80,7 +84,7 @@ class PymentController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'week earning' => $weeklyIncome,
+            'week_earning' => $weeklyIncome,
             'data' => $this->earningStory()
         ]);
     }
@@ -100,7 +104,7 @@ class PymentController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'week earning' => $monthIncom,
+            'week_earning' => $monthIncom,
             'data' => $this->earningStory()
         ]);
     }
@@ -109,11 +113,11 @@ class PymentController extends Controller
     {
         $year = $request->year;
         $authUser = auth()->user()->id;
-        $last7YearsTotal = Payment::where('user_id', $authUser)
+        $last7YearsTotal = UserPayment::where('user_id', $authUser)
             ->where('created_at', '>=', now()->subYears($year))
             ->sum('amount');
 
-        $last7YearsIncome = Payment::where('user_id', $authUser)
+        $last7YearsIncome = UserPayment::where('user_id', $authUser)
             ->select(
                 DB::raw('(SUM(amount)) as total_amount'),
                 DB::raw('YEAR(created_at) as year')
@@ -125,7 +129,7 @@ class PymentController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'week earning' => $last7YearsIncome,
+            'week_earning' => $last7YearsIncome,
             'data' => $this->earningStory()
         ]);
     }

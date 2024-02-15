@@ -54,7 +54,6 @@ class CataloguController extends Controller
 
     public function getCataloug($id)
     {
-        return 'hello world';
         $all_provider_data = Catalogue::where('service_id', $id)->with('salonDetails')->get();
         $decodedData = [];
         foreach ($all_provider_data as $item) {
@@ -69,7 +68,10 @@ class CataloguController extends Controller
                 'provider' => $decodedData,
             ], 200);
         } else {
-            return ResponseErrorMessage('error', 'Data not found');
+            return response()->json([
+                'message' => 'data not found',
+                'data' => []
+            ]);
         }
     }
 
@@ -78,27 +80,22 @@ class CataloguController extends Controller
         $service_catalouge = Catalogue::where('service_id', $id)->get();
 
         $decodedData = [];
-        foreach ($service_catalouge as $item) {
-            $item['available_service_our'] = json_decode($item['available_service_our'], true);  // Decode only the 'module_class' field
+        foreach ($service_catalouge->toArray() as $item) {
+            $item['service_hour'] = json_decode($item['service_hour'], true);
+            $item['image'] = json_decode($item['image'], true);
             $decodedData[] = $item;  // Add the updated item to the new array
         }
 
-        if ($all_provider_data) {
+        if ($service_catalouge) {
             return response()->json([
                 'status' => 'success',
                 'provider' => $decodedData,
             ], 200);
         } else {
-            return ResponseErrorMessage('error', 'Data not found');
-        }
-
-        if ($single_catalouge) {
             return response()->json([
-                'status' => 'success',
-                'Catalouge' => $single_catalouge
-            ], 200);
-        } else {
-            return ResponseErrorMessage('error', 'Catalouge not found');
+                'message' => 'data not found',
+                'data' => []
+            ]);
         }
     }
 
