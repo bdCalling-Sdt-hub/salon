@@ -165,7 +165,7 @@ class UserController extends Controller
         }
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return response()->json(['error' => 'No user found with the provided email'], 401);
+            return response()->json(['message' => 'No user found with the provided email'], 402);
         }
         $credentials = $request->only('email', 'password');
 
@@ -173,14 +173,14 @@ class UserController extends Controller
             $user = Auth::user();
             if ($user->is_verified == 0) {
                 // User email is not verified
-                return response()->json(['error' => 'Your email is not verified'], 401);
+                return response()->json(['message' => 'Your email is not verified'], 402);
             } else {
                 // Successful login
                 return $this->responseWithToken($token);
             }
         }
         // Incorrect email or password
-        return response()->json(['error' => 'Incorrect email or password'], 401);
+        return response()->json(['message' => 'Incorrect email or password'], 402);
     }
 
     protected function responseWithToken($token)

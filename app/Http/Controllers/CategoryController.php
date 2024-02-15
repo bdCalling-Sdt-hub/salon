@@ -96,6 +96,7 @@ class CategoryController extends Controller
         $image->move($directory, $imageName);
         return $imgUrl;
     }
+
     public function categorySearch($name = null)
     {
         $all_category = Category::all();
@@ -103,12 +104,12 @@ class CategoryController extends Controller
             $category = Category::where('category_name', 'like', '%' . $name . '%')->get();
 
             if ($category->count() > 0) {
-                return ResponseMethod('Category data', $category);
+                return ResponseMethod('Category Data', $category);
             }
             return response()->json([
                 'message' => 'category Not found',
                 'data' => []
-            ]);
+            ], 200);
         }
         return ResponseMethod('Category data', $all_category);
     }

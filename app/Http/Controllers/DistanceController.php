@@ -13,8 +13,8 @@ class DistanceController extends Controller
 {
     //
 
-    public function findNearestLocation($latitude,$longitude){
-
+    public function findNearestLocation($latitude, $longitude)
+    {
         $user_id = auth()->user()->id;
         $user_details = User::where('id', $user_id)->first();
         $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
@@ -25,25 +25,37 @@ class DistanceController extends Controller
             ->havingRaw('distance < 300')
             ->orderBy('distance')
             ->get();
-            return ResponseMethod('Nearest Salon Data',$salon);
-        }
+        return response()->json([
+            'message' => 'Nearest Salon Data',
+            'data' => $salon
+        ]);
+    }
 
-    public function findNearestLocationByLatLong($latitude,$longitude){
+    public function findNearestLocationByLatLong($latitude, $longitude)
+    {
         $salon = Provider::select(DB::raw("*, ( 6371 * acos( cos( radians('$latitude') )
             * cos( radians( latitude ) )
             * cos( radians( longitude ) - radians('$longitude') )
             + sin( radians('$latitude') )
-            * sin( radians( latitude ) ) ) ) AS distance"))->havingRaw('distance < 300')->orderBy('distance')
+            * sin( radians( latitude ) ) ) ) AS distance"))
+            ->havingRaw('distance < 300')
+            ->orderBy('distance')
             ->get();
-        return ResponseMethod('Nearest Salon Data',$salon);
+        return response()->json([
+            'message' => 'Nearest Salon Data',
+            'data' => $salon
+        ]);
     }
-        public function addressToLatandLong($address){
-            $result = app('geocoder')->geocode($address)->get();
-            $coordinates = $result[0]->getCoordinates();
-            $lat = $coordinates->getLatitude();
-            $long = $coordinates->getLongitude();
-            return $lat. ' '. $long;
-        }
+
+    public function addressToLatandLong($address)
+    {
+        $result = app('geocoder')->geocode($address)->get();
+        $coordinates = $result[0]->getCoordinates();
+        $lat = $coordinates->getLatitude();
+        $long = $coordinates->getLongitude();
+        return $lat . ' ' . $long;
+    }
+
     public function filterOriginal($categoryName, $rating, $distance)
     {
         $authUser = auth()->user()->id;
@@ -102,6 +114,7 @@ class DistanceController extends Controller
             ]);
         }
     }
+
     public function searchProvidersBySalon($salon_name = null)
     {
         $authUser = auth()->user()->id;
@@ -137,13 +150,12 @@ class DistanceController extends Controller
             return response()->json([
                 'message' => 'Feature provider',
                 'data' => $providers,
-            ],200);
+            ], 200);
         } else {
             return response()->json([
                 'message' => 'No providers found with the given business name',
                 'data' => [],
-            ],404);
+            ], 200);
         }
-
     }
 }

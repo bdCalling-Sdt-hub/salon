@@ -27,8 +27,8 @@ class CreateUsersTable extends Migration
             $table->string('user_status')->default(0);
             $table->string('phone_number')->default('');
             $table->string('address')->nullable();
-            $table->bigInteger('google_id', 255)->nullable();
-            $table->bigInteger('facebook_id', 255)->nullable();
+            $table->string('google_id')->nullable();
+            $table->string('facebook_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
