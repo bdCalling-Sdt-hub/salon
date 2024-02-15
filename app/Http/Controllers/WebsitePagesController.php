@@ -11,7 +11,10 @@ class WebsitePagesController extends Controller
     public function showWebsitePages()
     {
         $website_pages = WebsitePage::all();
-        return ResponseMethod('Website pages list', $website_pages);
+        return response()->json([
+            'message' => 'Website page list',
+            'data' => $website_pages,
+        ]);
     }
 
     public function showSinglePages($id)

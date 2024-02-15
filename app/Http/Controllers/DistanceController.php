@@ -24,6 +24,7 @@ class DistanceController extends Controller
             * sin( radians( latitude ) ) ) ) AS distance"))
             ->havingRaw('distance < 300')
             ->orderBy('distance')
+            ->where('status',1)
             ->get();
             return ResponseMethod('Nearest Salon Data',$salon);
         }
@@ -70,7 +71,7 @@ class DistanceController extends Controller
     + sin( radians('$latitude') )
     * sin( radians( latitude ) ) ) ) AS distance"),
             DB::raw('(SELECT AVG(rating) FROM service_ratings WHERE provider_id = providers.id) AS average_rating')
-        )
+        )->where('status',1)
             ->join('categories', 'providers.category_id', '=', 'categories.id');
 
         // Filter by category name
