@@ -123,14 +123,13 @@ class PymentController extends Controller
         ]);
     }
 
-    public function Last7YearsIncome(Request $request)
+    public function Last7YearsIncome()
     {
-        $year = $request->year;
         $authUser = auth()->user()->id;
         $provider = Provider::where('user_id', $authUser)->first();
         $providerId = $provider->id;
         $last7YearsTotal = UserPayment::where('provider_id', $providerId)
-            ->where('created_at', '>=', now()->subYears($year))
+            ->where('created_at', '>=', now()->subYears())
             ->sum('amount');
 
         $last7YearsIncome = UserPayment::where('provider_id', $providerId)
@@ -138,7 +137,7 @@ class PymentController extends Controller
                 DB::raw('(SUM(amount)) as total_amount'),
                 DB::raw('YEAR(created_at) as year')
             )
-            ->where('created_at', '>=', now()->subYears($year))
+            ->where('created_at', '>=', now()->subYears())
             ->groupBy('year')
             ->get()
             ->toArray();

@@ -15,26 +15,46 @@ use App\Models\ServiceRating;
 use App\Models\User;
 use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use DB;
 
 class HomeController extends Controller
 {
-    public function bookingAfterNotification()
+    public function user_booking_to_send_notification_salon()
     {
-        $user = auth()->user()->id;
-        return $checkProvider = Provider::where('user_id', $user)->id;
+        $auth_user = auth()->user()->id;
+        $provider = Provider::where('user_id', $auth_user)->first();
 
-        return 'hello world';
+        $notifications = DB::table('notifications')
+            ->where('notifiable_type', Booking::class)
+            ->where('read_at', null)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $notificationsForProvider4 = [];
+
+        foreach ($notifications as $notification) {
+            $data = json_decode($notification->data);
+
+            if (isset($data->user->provider_id) && $data->user->provider_id === $provider->id) {
+                $notificationsForProvider4[] = $data;
+            }
+        }
+
+        return response()->json([
+            'notification' => $notificationsForProvider4,
+            'account_setup' => $this->markRead()
+        ]);
     }
 
-    public function markRead(Request $request)
+    public function markRead()
     {
         $user = auth()->user();
 
         if ($user) {
-            $notifications = $user->notifications()->orderBy('created_at', 'desc')->get();
+            $notifications = $user->unreadNotifications()->orderBy('created_at', 'desc')->get();
 
             return response()->json([
                 'status' => 'success',
@@ -804,7 +824,7 @@ class HomeController extends Controller
                     return response()->json([
                         'status' => 'success',
                         'message' => 'update schedule success',
-                        'Notification' => sendNotification('user booking re-shedule', $updateBooking),
+                        'Notification' => sendNotification('Re-shedule booking', 'user booking re-shedule', $updateBooking),
                     ], 200);
                     ResponseMethod('success', 'Booking update success');
                 } else {

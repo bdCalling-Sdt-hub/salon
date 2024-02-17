@@ -65,7 +65,7 @@ Route::group(['middleware' => 'api'], function ($routes) {
 
     Route::get('/notification', [HomeController::class, 'markRead']);
 
-    Route::get('/booking/after/notification', [HomeController::class, 'bookingAfterNotification']);
+    Route::get('/user/booking/notification/salon', [HomeController::class, 'user_booking_to_send_notification_salon']);
 
     Route::get('/read-at/notification', [HomeController::class, 'readNotification']);
 
@@ -219,7 +219,6 @@ Route::middleware(['payment.auth'])->group(function () {
 
     // ================== Booking ========================//
 
-    Route::get('/booking', [ProviderController::class, 'booking']);
     Route::get('/booking/request', [ProviderController::class, 'bookingRequest']);
     Route::get('/booking/details/provider/{id}', [ProviderController::class, 'bookingDetails']);
     Route::post('/re/schedule/appoinment', [ProviderController::class, 're_shedule_appoinment']);
@@ -229,18 +228,19 @@ Route::middleware(['payment.auth'])->group(function () {
     Route::get('/approved/booking', [ProviderController::class, 'approvedBooking']);
     Route::get('/booking/history', [ProviderController::class, 'bookingHistory']);
     Route::get('/provider/review', [ProviderController::class, 'reviewProvider']);
-
-    // ========================== EARNING =========================//
-
-    Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
-    Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
-    Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
 });
 
 Route::middleware(['provider'])->group(function () {
     // The route that the button calls to initialize payment
     Route::post('/pay/{id}', [FlutterwaveController::class, 'initialize'])->name('paynow');
     Route::post('payment-success', [FlutterwaveController::class, 'paymentSuccess']);
+
+    // ========================== EARNING =========================//
+
+    Route::get('/month/income', [PymentController::class, 'MonthlyIncome']);
+    Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
+    Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
+    Route::get('/booking', [ProviderController::class, 'booking']);
 });
 
 Route::middleware(['user'])->group(function () {
@@ -294,6 +294,7 @@ Route::middleware(['user'])->group(function () {
     Route::get('/booking/details/{id}', [HomeController::class, 'bookingDetails']);
     Route::get('/appointment/history', [HomeController::class, 'appoinmentHistory']);
     Route::get('/user/booking/reequest', [HomeController::class, 'userBookingRequest']);
+    Route::get('/near/by/provider', [HomeController::class, 'nearbyProviders']);
 
     // appointment booking
     Route::get('/appointment-booking/{id}', [GetController::class, 'appointmentBooking']);
