@@ -398,7 +398,11 @@ class ProviderController extends Controller
             $provider = Provider::where('user_id', $authUser)->first();
 
             if (!$provider) {
-                throw new \Exception('Provider not found.');
+                // throw new \Exception('Provider not found.');
+                return response()->json([
+                    'message' => 'No provider history found.',
+                    'data' => []
+                ]);
             }
 
             $providerId = $provider->id;
