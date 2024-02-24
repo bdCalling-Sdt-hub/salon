@@ -8,6 +8,8 @@ use App\Models\LoginActivity;
 use App\Models\PasswordReset;
 use App\Models\ServiceRating;
 use App\Models\User;
+use App\Notifications\AdminNotification;
+use App\Notifications\SalonNotification;
 use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -225,10 +227,18 @@ class UserController extends Controller
                     'is_verified' => 1,
                 ]);
 
+                if ($user->user_type === 'user') {
+                    $notification = sendNotification('Account Setup Successfull', 'You have successfully created your account', $user);
+                } elseif ($user->user_type === 'provider') {
+                    $notification = providerNotification('Account Setup Successfull', 'You have successfully created your account', $user);
+                } elseif ($user->user_type === 'admin') {
+                    $notification = adminNotification('Account Setup Successfull', 'You have successfully created your account', $user);
+                }
+
                 $token = auth()->login($user);
                 return response()->json([
                     'status' => 'success',
-                    'Notification' => sendNotification('Account Setup Successfull', 'You have successfully created your account', $user),
+                    'Notification' => $notification,
                     'token' => $this->responseWithToken($token),
                     'Otp' => 'OTP has been verified',
                 ], 200);

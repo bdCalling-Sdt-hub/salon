@@ -14,6 +14,7 @@ use App\Models\Service;
 use App\Models\ServiceRating;
 use App\Models\User;
 use App\Notifications\UserNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -22,72 +23,92 @@ use DB;
 
 class HomeController extends Controller
 {
-    public function user_booking_to_send_notification_salon()
+    // public function user_booking_accept_notification()
+    // {
+    //     $auth_user = auth()->user()->id;
+
+    //     $user_notifications = DB::table('notifications')
+    //         ->where('type', 'App\Notifications\UserNotification')
+    //         ->orwhere('notifiable_type', User::class)
+    //         ->get();
+
+    //     $decode_notifications = [];
+
+    //     foreach ($user_notifications as $notification) {
+    //         $data = json_decode($notification->data);
+
+    //         if (isset($data->user->user_id) && $data->user->user_id === $auth_user) {
+    //             $notificationData = [
+    //                 'id' => $notification->id,
+    //                 'read_at' => $notification->read_at,
+    //                 'type' => $notification->type,
+    //                 'data' => $data,
+    //             ];
+    //             $decode_notifications[] = $notificationData;
+    //         }
+    //     }
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'notification' => $decode_notifications
+    //     ]);
+    // }
+
+    public function user_booking_accept_notification()
     {
         $auth_user = auth()->user()->id;
-        $provider = Provider::where('user_id', $auth_user)->first();
 
-        $notifications = DB::table('notifications')
-            ->where('notifiable_type', Booking::class)
-            ->where('read_at', null)
+        $user_notifications = DB::table('notifications')
+            ->where('type', 'App\Notifications\UserNotification')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
+        $decode_notifications = [];
 
-        $notificationsForProvider4 = [];
-
-        foreach ($notifications as $notification) {
+        foreach ($user_notifications as $notification) {
             $data = json_decode($notification->data);
 
-            if (isset($data->user->provider_id) && $data->user->provider_id === $provider->id) {
-                $notificationsForProvider4[] = $data;
+            if (isset($data->user->user_id) && $data->user->user_id === $auth_user) {
+                $notificationData = [
+                    'id' => $notification->id,
+                    'read_at' => $notification->read_at,
+                    'type' => $notification->type,
+                    'data' => $data,
+                ];
+                $decode_notifications[] = $notificationData;
             }
-        }
 
+            $user_notification = $this->account_notification();
+            $data = [$user_notification, $decode_notifications];
+        }
         return response()->json([
-            'notification' => $notificationsForProvider4,
-            'account_setup' => $this->markRead()
+            'status' => 'success',
+            'notification' => $decode_notifications,
+            'test' => $user_notification,
+            'next_page_url' => $user_notifications->nextPageUrl()
         ]);
     }
 
-    public function markRead()
+    public function account_notification()
     {
         $user = auth()->user();
-
-        if ($user) {
-            $notifications = $user->unreadNotifications()->orderBy('created_at', 'desc')->get();
-
-            return response()->json([
-                'status' => 'success',
-                'notifications' => $notifications,
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not authenticated',
-            ], 401);
-        }
+        return $notifications = $user->notifications;
     }
 
-    public function readNotification()
+    public function readAtNotification(Request $request)
     {
-        $user = auth()->user();
-
-        if ($user) {
-            // Mark all unread notifications as read
-            $user->unreadNotifications->markAsRead();
-
-            // Retrieve and return the updated notifications
-            $notifications = $user->notifications;
-
+        $notification = DB::table('notifications')->find($request->id);
+        if ($notification) {
+            $notification->read_at = Carbon::now();
+            DB::table('notifications')->where('id', $notification->id)->update(['read_at' => $notification->read_at]);
             return response()->json([
                 'status' => 'success',
-                'notifications' => $notifications,
+                'message' => 'Notification read successfully.',
             ], 200);
         } else {
             return response()->json([
                 'status' => 'error',
-                'message' => 'User not authenticated',
-            ], 401);
+                'message' => 'Notification not found',
+            ], 404);
         }
     }
 
@@ -440,7 +461,8 @@ class HomeController extends Controller
                     return response()->json([
                         'status' => 'success',
                         'message' => 'Booking success',
-                        'Notification' => sendNotification('Booking Successfull', 'You have successfully booked', $post_booking),
+                        'notification' => providerNotification('New booking request', 'New booking request', $post_booking),
+                        'admin_notification' => adminNotification('New booking request', 'New booking request', $post_booking),
                     ], 200);
                 } else {
                     return response()->json([
@@ -508,13 +530,7 @@ class HomeController extends Controller
     {
         try {
             $authUser = auth()->user()->id;
-            // $provider = Booking::where('user_id', $authUser)->first();
 
-            // if (!$provider) {
-            //     throw new \Exception('Provider not found.');
-            // }
-
-            //  $providerId = $provider->id;
             $getBooking = Booking::where('user_id', $authUser)
                 ->whereIn('status', [0, 1])
                 ->with('user')
@@ -572,69 +588,6 @@ class HomeController extends Controller
         }
     }
 
-    // public function userBookingRequest()
-    // {
-    //     try {
-    //         $authUser = auth()->user()->id;
-
-    //         $getBooking = Booking::where('user_id', $authUser)
-    //             ->where('status', '0')
-    //             ->with('user')
-    //             ->paginate(10);  // Pagination set to 10 items per page
-
-    //         if ($getBooking->isEmpty()) {
-    //             return response()->json([
-    //                 'status' => 'error',
-    //                 'message' => 'No booking history found.',
-    //                 'data' => []
-    //             ], 404);  // Change the status code to 404 for not found
-    //         }
-
-    //         $decodedBookings = [];
-
-    //         foreach ($getBooking as $booking) {
-    //             $bookingList = [];  // Reset booking list for each booking
-
-    //             $decodedServices = json_decode($booking->service, true);
-
-    //             if (!is_array($decodedServices)) {
-    //                 throw new \Exception('Error decoding the service JSON.');
-    //             }
-
-    //             foreach ($decodedServices as $service) {
-    //                 // Check if the key 'catalog_id' exists in the $service array
-    //                 if (isset($service['catalog_id'])) {
-    //                     $catalogIds = $service['catalog_id'];
-
-    //                     $catalog = Catalogue::find($catalogIds);
-
-    //                     if ($catalog) {
-    //                         $bookingList[] = $catalog;
-    //                     }
-    //                 }
-    //             }
-
-    //             $decodedBookings[] = [
-    //                 'booking' => $booking,
-    //                 'catalog_details' => $bookingList,
-    //             ];
-    //         }
-
-    //         return response()->json([
-    //             'data' => $decodedBookings,
-    //             'pagination' => [
-    //                 'current_page' => $getBooking->currentPage(),
-    //                 'per_page' => $getBooking->perPage(),
-    //                 'total' => $getBooking->total(),
-    //                 // You can include other pagination details if needed
-    //             ]
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         // Handle the exception
-    //         return response()->json(['error' => $e->getMessage()], 500);
-    //     }
-    // }
-
     public function appoinments()
     {
         try {
@@ -688,54 +641,6 @@ class HomeController extends Controller
 
     public function appoinmentHistory()
     {
-        // try {
-        //     $authUser = auth()->user()->id;
-
-        //     $getBooking = Booking::where('user_id', $authUser)->with('Provider')->get();
-
-        //     if ($getBooking->isEmpty()) {
-        //         // throw new \Exception('No booking history found.');
-        //         return response()->json([
-        //             'message' => 'No booking history found.',
-        //             'data' => []
-        //         ], 402);
-        //     }
-
-        //     $decodedBookings = [];
-
-        //     foreach ($getBooking as $booking) {
-        //         $decodedServices = json_decode($booking->service, true);
-
-        //         if (!is_array($decodedServices)) {
-        //             throw new \Exception('Error decoding the service JSON.');
-        //         }
-
-        //         foreach ($decodedServices as $service) {
-        //             $catalogIds = $service['catalouge_id'];
-        //             $catalogDetails = [];
-
-        //             $catalog = Catalogue::find($catalogIds);
-
-        //             if ($catalog) {
-        //                 $catalogDetails[] = $catalog;
-        //             }
-
-        //             $decodedBookings[] = [
-        //                 'booking' => $booking,
-        //                 'service' => $service,
-        //                 'catalog_details' => $catalogDetails,
-        //             ];
-        //         }
-        //     }
-
-        //     return response()->json([
-        //         'decoded_bookings' => $decodedBookings,
-        //     ], 200);
-        // } catch (\Exception $e) {
-        //     // Handle the exception
-        //     return response()->json(['error' => $e->getMessage()], 500);
-        // }
-
         try {
             $authUser = auth()->user()->id;
 
@@ -824,7 +729,7 @@ class HomeController extends Controller
                     return response()->json([
                         'status' => 'success',
                         'message' => 'update schedule success',
-                        'Notification' => sendNotification('Re-shedule booking', 'user booking re-shedule', $updateBooking),
+                        'Notification' => providerNotification('Client your update booking', 'Client your update booking', $updateBooking),
                     ], 200);
                     ResponseMethod('success', 'Booking update success');
                 } else {

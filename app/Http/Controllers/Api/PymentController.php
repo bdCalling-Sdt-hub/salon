@@ -38,9 +38,10 @@ class PymentController extends Controller
 
         // WEEKLY TOTAL INCOME //
 
-        $weeklyTotalSum = UserPayment::select(
-            DB::raw('(SUM(amount)) as total_amount')
-        )
+        $weeklyTotalSum = UserPayment::where('provider_id', $providerId)
+            ->select(
+                DB::raw('(SUM(amount)) as total_amount')
+            )
             ->whereYear('created_at', date('Y'))
             ->get()
             ->sum('total_amount');

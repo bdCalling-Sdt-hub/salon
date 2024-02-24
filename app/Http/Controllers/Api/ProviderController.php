@@ -13,7 +13,8 @@ use App\Models\Category;
 use App\Models\Provider;
 use App\Models\Service;
 use App\Models\ServiceRating;
-use App\Notifications\UserNotification;
+use App\Notifications\providerNotification;
+use Carbon\Carbon;
 use Geocoder\Laravel\Facades\Geocoder;
 use http\Env\Response;
 use Illuminate\Http\Request;
@@ -21,6 +22,66 @@ use DB;
 
 class ProviderController extends Controller
 {
+    // Notification j//
+
+    public function new_booking_request()
+    {
+        $auth_user = auth()->user()->id;
+        $provider = Provider::where('user_id', $auth_user)->first();
+
+        $notifications = DB::table('notifications')
+            ->where('type', 'App\Notifications\SalonNotification')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        $notificationsForProvider4 = [];
+
+        foreach ($notifications as $notification) {
+            $data = json_decode($notification->data);
+
+            if (isset($data->user->provider_id) && $data->user->provider_id === $provider->id) {
+                $notificationData = [
+                    'id' => $notification->id,
+                    'read_at' => $notification->read_at,
+                    'type' => $notification->type,
+                    'data' => $data,
+                ];
+                $notificationsForProvider4[] = $notificationData;
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'notification' => $notificationsForProvider4,
+            'user_notification' => $this->account_notification(),
+            'next_page_url' => $notifications->nextPageUrl()
+        ]);
+    }
+
+    public function account_notification()
+    {
+        $user = auth()->user();
+        return $notifications = $user->notifications;
+    }
+
+    public function readAtNotification(Request $request)
+    {
+        $notification = DB::table('notifications')->find($request->id);
+        if ($notification) {
+            $notification->read_at = Carbon::now();
+            DB::table('notifications')->where('id', $notification->id)->update(['read_at' => $notification->read_at]);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Notification read successfully.',
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Notification not found',
+            ], 404);
+        }
+    }
+
     public function postProvider(ProviderRequest $request)
     {
         $auth_user = auth()->user()->id;
@@ -601,8 +662,7 @@ class ProviderController extends Controller
                 if ($updateBooking) {
                     return response()->json([
                         'status' => 'success',
-                        // 'Notification' => sendNotification('Booking re-shedule', $updateBooking),
-                        'Notification' => sendNotification('Booking re-shedule', 'Booking re-shedule', $updateStatus),
+                        'Notification' => sendNotification('Booking re-shedule', 'Booking re-shedule', $updateBooking),
                     ], 200);
                 } else {
                     return response()->json([
@@ -681,9 +741,16 @@ class ProviderController extends Controller
         ];
 
         if (isset($statusMessages[$request->status])) {
+            if ($request->status == 1) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => $statusMessages[$request->status],
+                    'Notification' => sendNotification('Accept your booking', 'Accept your booking', $updateStatus),
+                ], 200);
+            }
             return response()->json([
                 'status' => 'success',
-                'message' => $statusMessages[$request->status]
+                'message' => $statusMessages[$request->status],
             ], 200);
         } else {
             return response()->json([

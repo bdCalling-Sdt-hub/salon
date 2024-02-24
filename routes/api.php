@@ -24,17 +24,6 @@ use App\Http\Controllers\WebsitePagesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
- * |--------------------------------------------------------------------------
- * | API Routes
- * |--------------------------------------------------------------------------
- * |
- * | Here is where you can register API routes for your application. These
- * | routes are loaded by the RouteServiceProvider and all of them will
- * | be assigned to the "api" middleware group. Make something great!
- * |
- */
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -61,13 +50,6 @@ Route::group(['middleware' => 'api'], function ($routes) {
     Route::post('/reset-password', [UserController::class, 'resetPassword']);
     Route::post('/profileUpdate', [UserController::class, 'profileUpdate']);
     Route::post('/profileUpdate/img', [UserController::class, 'updateProfileImg']);
-    // Route::post('/send-notification', [UserController::class, 'sendNotification']);
-
-    Route::get('/notification', [HomeController::class, 'markRead']);
-
-    Route::get('/user/booking/notification/salon', [HomeController::class, 'user_booking_to_send_notification_salon']);
-
-    Route::get('/read-at/notification', [HomeController::class, 'readNotification']);
 
     Route::get('my-plan', [PackageController::class, 'myPlan']);
 });
@@ -241,6 +223,12 @@ Route::middleware(['provider'])->group(function () {
     Route::get('/week/income', [PymentController::class, 'WeeklyIncome']);
     Route::get('/year/income', [PymentController::class, 'Last7YearsIncome']);
     Route::get('/booking', [ProviderController::class, 'booking']);
+
+    // ======================= NOTIFICATION =====================//
+
+    Route::get('salon/notification', [ProviderController::class, 'markRead']);
+    Route::get('/send/booking/request/salon', [ProviderController::class, 'new_booking_request']);
+    Route::get('/read-at/notification/{id}', [ProviderController::class, 'readAtNotification']);
 });
 
 Route::middleware(['user'])->group(function () {
@@ -298,6 +286,12 @@ Route::middleware(['user'])->group(function () {
 
     // appointment booking
     Route::get('/appointment-booking/{id}', [GetController::class, 'appointmentBooking']);
+
+    // ==================================== NOTIFICATION ===============================//
+
+    Route::get('/user/notification', [HomeController::class, 'markRead']);
+    Route::get('/user/booking/accept/notification', [HomeController::class, 'user_booking_accept_notification']);
+    Route::get('/read-at/user/notification/{id}', [HomeController::class, 'readAtNotification']);
 });
 
 // delete user from admin
