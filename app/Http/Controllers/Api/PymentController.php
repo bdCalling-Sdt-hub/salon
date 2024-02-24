@@ -43,6 +43,7 @@ class PymentController extends Controller
                 DB::raw('(SUM(amount)) as total_amount')
             )
             ->whereYear('created_at', date('Y'))
+            ->where('provider_id', $providerId)
             ->get()
             ->sum('total_amount');
 
