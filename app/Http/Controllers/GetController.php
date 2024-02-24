@@ -249,7 +249,7 @@ class GetController extends Controller
     // search salon
     public function searchSalon($name = null)
     {
-        $barbar = Provider::get();
+        $barbar = Provider::paginate(9);
         if (!is_null($name)) {
             $salons = Provider::where('business_name', 'like', '%' . $name . '%')->get();
 
