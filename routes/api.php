@@ -147,6 +147,19 @@ Route::middleware(['admin'])->group(function () {
     // provider block list search by name and id
     // user list search by name email and phone
     // salon list search by name
+    // delete user from admin
+    Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
+
+// search
+// provider request search by name and id
+    Route::get('search-provider-request/{name?}', [GetController::class, 'searchProviderRequest']);
+// provider list search name,email,phone
+    Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
+// provider block list search by name and id
+    Route::get('provider-block-list-search/{name?}', [GetController::class, 'searchProviderBlock']);
+// user list search by name email and phone
+    Route::get('search-user/{name?}', [GetController::class, 'searchUser']);
+
     Route::get('salon-search/{name?}', [GetController::class, 'searchSalon']);
 
     // booking percentage
@@ -300,18 +313,7 @@ Route::middleware(['user'])->group(function () {
     Route::get('/appointment-booking/{id}', [GetController::class, 'appointmentBooking']);
 });
 
-// delete user from admin
-Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
 
-// search
-// provider request search by name and id
-Route::get('search-provider-request/{name?}', [GetController::class, 'searchProviderRequest']);
-// provider list search name,email,phone
-Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
-// provider block list search by name and id
-Route::get('provider-block-list-search/{name?}', [GetController::class, 'searchProviderBlock']);
-// user list search by name email and phone
-Route::get('search-user/{name?}', [GetController::class, 'searchUser']);
 
 Route::get('/filter-nearest-salon/{lat}/{long}', [DistanceController::class, 'findNearestSalon']);
 

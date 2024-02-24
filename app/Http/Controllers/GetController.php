@@ -169,6 +169,7 @@ class GetController extends Controller
     // search user
     public function searchUser($name = null)
     {
+        $users = User::where('user_type','user')->paginate(9);
         if (!is_null($name)) {
             $user = User::where('user_type', 'user')->where('name', 'like', '%' . $name . '%')->get();
 
@@ -177,7 +178,10 @@ class GetController extends Controller
             }
             return ResponseMessage('user not found');
         }
-        return ResponseMessage('provide name for search');
+        return response()->json([
+            'message' => 'User List',
+            'data' => $users,
+        ]);
     }
 
     // search salon
