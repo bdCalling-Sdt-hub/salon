@@ -105,6 +105,44 @@ class GetController extends Controller
         return ResponseMessage('User is empty');
     }
 
+//    public function providerList()
+//    {
+//        $user = User::where('user_type', 'provider')->select(['name', 'email', 'phone_number', 'created_at'])->paginate(9);
+//        if ($user) {
+//            return ResponseMethod('Provider list', $user);
+//        }
+//        return ResponseMessage('User is empty');
+//    }
+
+    public function providerList(Request $request)
+    {
+        $query = User::where('user_type', 'provider');
+
+        // Search by name
+        if ($request->has('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        // Search by email
+        if ($request->has('email')) {
+            $query->where('email', 'like', '%' . $request->input('email') . '%');
+        }
+
+        // Search by phone number
+        if ($request->has('phone')) {
+            $query->where('phone_number', 'like', '%' . $request->input('phone') . '%');
+        }
+
+        $providers = $query->select(['name', 'email', 'phone_number', 'created_at'])->paginate(9);
+
+        if ($providers->isEmpty()) {
+            return ResponseMessage('No providers found');
+        }
+
+        return ResponseMethod('Providers list', $providers);
+    }
+
+
     // single user details
 
     public function singleUser($id)
@@ -128,16 +166,16 @@ class GetController extends Controller
     }
 
     // search provider request
-    public function searchProviderRequest($name)
-    {
-        $query = User::where('user_type', 'provider')->where('user_status', 0);
-
-        if ($name) {
-            $query->where('name', 'like', '%' . $name . '%');
-        }
-        $users = $query->get();
-        return ResponseMethod('provider Request list', $users);
-    }
+//    public function searchProviderRequest($name)
+//    {
+//        $query = User::where('user_type', 'provider')->where('user_status', 0);
+//
+//        if ($name) {
+//            $query->where('name', 'like', '%' . $name . '%');
+//        }
+//        $users = $query->get();
+//        return ResponseMethod('provider Request list', $users);
+//    }
 
     // search provider block
     public function searchProviderBlock($name = null)
@@ -151,6 +189,30 @@ class GetController extends Controller
             return ResponseMessage('block provider not found');
         }
         return ResponseMessage('write name which one you want to find');
+    }
+
+    public function searchProviderRequest(Request $request)
+    {
+        $query = User::where('user_type', 'provider')->where('user_status', 0);
+
+        // Search by name
+        if ($request->has('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        // Search by ID
+        if ($request->has('id')) {
+            $query->where('id', $request->input('id'));
+        }
+
+        // Get paginated results with 9 items per page
+        $users = $query->paginate(9);
+
+        if ($users->isEmpty()) {
+            return ResponseMessage('No provider requests found');
+        }
+
+        return ResponseMethod('Provider request list', $users);
     }
 
     // search provider
