@@ -249,7 +249,7 @@ class GetController extends Controller
     // search salon
     public function searchSalon($name = null)
     {
-        $barbar = Provider::get();
+        $barbar = Provider::paginate(9);
         if (!is_null($name)) {
             $salons = Provider::where('business_name', 'like', '%' . $name . '%')->get();
 
@@ -285,6 +285,7 @@ class GetController extends Controller
 
     public function appointmentListbyId($id)
     {
+//        $booking = Booking::with('user','provider')->paginate(12);
         $booking = Booking::select('bookings.*', 'users.name as client_name', 'providers.business_name as name')
             ->join('users', 'bookings.user_id', '=', 'users.id')
             ->join('providers', 'bookings.provider_id', '=', 'providers.id')
@@ -436,6 +437,8 @@ class GetController extends Controller
 
         return ResponseMessage('Provide category name for search');
     }
+
+
 
     public function paymentHistory()
     {
