@@ -44,7 +44,7 @@ class GetController extends Controller
     // salon owner
     public function getProviderRequest()
     {
-        $providerRequest = User::where('user_type', 'provider')->where('user_status', 0)->paginate(12);
+        $providerRequest = Provider::with('user')->where('status', 0)->paginate(12);
         if ($providerRequest) {
             return ResponseMethod('Provider Request', $providerRequest);
         } else {
@@ -54,9 +54,9 @@ class GetController extends Controller
 
     public function approveProviderRequest($id)
     {
-        $provider = User::where('user_type', 'provider')->where('user_status', 0)->where('id', $id)->first();
+        $provider = Provider::with('user')->where('status', 0)->where('id', $id)->first();
         if ($provider) {
-            $provider->user_status = 1;
+            $provider->status = 1;
             $provider->update();
             return ResponseMethod('approve provider request', $provider);
         }
@@ -65,9 +65,9 @@ class GetController extends Controller
 
     public function blockProviderRequest($id)
     {
-        $providerRequest = User::where('user_type', 'provider')->where('user_status', 0)->where('id', $id)->first();
+        $providerRequest = Provider::where('status', 0)->where('id', $id)->first();
         if ($providerRequest) {
-            $providerRequest->user_status = 2;
+            $providerRequest->status = 2;
             $providerRequest->update();
             return ResponseMethod('Cancel Provider Successfully', $providerRequest);
         }
@@ -77,7 +77,7 @@ class GetController extends Controller
     // unblock
     public function providerBlockList()
     {
-        $providerBlockList = User::where('user_type', 'provider')->where('user_status', 2)->select(['image', 'name', 'email'])->paginate(12);
+        $providerBlockList = Provider::with('user')->where('status', 2)->paginate(12);
         if ($providerBlockList) {
             return ResponseMethod('Provider block list', $providerBlockList);
         }
@@ -86,9 +86,20 @@ class GetController extends Controller
 
     public function unblockProvider($id)
     {
-        $providerRequest = User::where('user_type', 'provider')->where('user_status', 2)->where('id', $id)->first();
+        $providerRequest = Provider::with('user')->where('status', 2)->where('id', $id)->first();
         if ($providerRequest) {
-            $providerRequest->user_status = 2;
+            $providerRequest->status = 0;
+            $providerRequest->update();
+            return ResponseMethod('unblock Provider Successfully', $providerRequest);
+        }
+        return ResponseMessage('Provider Request does not exist');
+    }
+
+    public function cancelProviderRequest($id)
+    {
+        $providerRequest = Provider::with('user')->where('id', $id)->first();
+        if ($providerRequest) {
+            $providerRequest->status = 2;
             $providerRequest->update();
             return ResponseMethod('Cancel Provider Successfully', $providerRequest);
         }
@@ -169,7 +180,7 @@ class GetController extends Controller
     // search user
     public function searchUser($name = null)
     {
-        $users = User::where('user_type','user')->paginate(9);
+        $users = User::where('user_type', 'user')->paginate(9);
         if (!is_null($name)) {
             $user = User::where('user_type', 'user')->where('name', 'like', '%' . $name . '%')->get();
 
@@ -187,7 +198,7 @@ class GetController extends Controller
     // search salon
     public function searchSalon($name = null)
     {
-        $barbar = Provider::get();
+        $barbar = Provider::paginate(9);
         if (!is_null($name)) {
             $salons = Provider::where('business_name', 'like', '%' . $name . '%')->get();
 
@@ -199,27 +210,31 @@ class GetController extends Controller
         return response()->json(['message' => 'Salon data', 'salons' => $barbar], 200);
     }
 
+    // public function getAppointmentList(Request $request)
+    // {
+    //     $business_name = $request->business_name;
+    //     $client_name = $request->name;
 
-    public function getAppointmentList()
-    {
-        $booking = Booking::select('bookings.*', 'users.name as client_name', 'providers.business_name as name')
-            ->join('users', 'bookings.user_id', '=', 'users.id')
-            ->join('providers', 'bookings.provider_id', '=', 'providers.id')
-            ->paginate(12);
-        if ($booking) {
-            return response()->json([
-                'status' => 200,
-                'message' => 'booking list',
-                'data' => $booking,
-            ]);
-        } else {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Data Not found',
-                'data' => 'Not found',
-            ]);
-        }
-    }
+    //     $query = Booking::with('user', 'provider')->whereIn('status', [2, 0, 4]);
+
+    //     if ($business_name !== null) {
+    //         $query->whereHas('provider', function ($q) use ($business_name) {
+    //             $q->where('business_name', $business_name);
+    //         });
+    //     }
+    //     if ($client_name !== null) {
+    //         $query->whereHas('user', function ($q) use ($client_name) {
+    //             $q->where('name', $client_name);
+    //         });
+    //     }
+    //     $booking_list = $query->paginate(9);
+
+    //     return response()->json([
+    //         'status' => 200,
+    //         'message' => 'booking list',
+    //         'data' => $booking_list,
+    //     ]);
+    // }
 
     public function appointmentListbyId($id)
     {
@@ -242,6 +257,35 @@ class GetController extends Controller
             ]);
         }
     }
+
+    public function getAppointmentList(Request $request)
+    {
+        $business_name = $request->business_name;
+        $client_name = $request->name;
+
+        $query = Booking::with('user', 'provider')->whereIn('status', [2, 0, 4]);
+
+        if ($business_name !== null) {
+            $query->whereHas('provider', function ($q) use ($business_name) {
+                $q->where('business_name', 'like', '%' . $business_name . '%');
+            });
+        }
+
+        if ($client_name !== null) {
+            $query->whereHas('user', function ($q) use ($client_name) {
+                $q->where('name', 'like', '%' . $client_name . '%');
+            });
+        }
+
+        $booking_list = $query->paginate(9);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'booking list',
+            'data' => $booking_list,
+        ]);
+    }
+
     public function getReviews($providerName = null)
     {
         // Query providers based on the given name if provided
@@ -289,6 +333,7 @@ class GetController extends Controller
             ], 404);
         }
     }
+
     public function getReviewsByProviderId($providerId)
     {
         $provider = Provider::where('id', $providerId)->first();
@@ -311,7 +356,7 @@ class GetController extends Controller
         } else {
             return response()->json([
                 'message' => 'Provider data not found'
-            ],404);
+            ], 404);
         }
     }
 
@@ -379,8 +424,16 @@ class GetController extends Controller
     {
         $payment_history = Payment::with('user', 'package')->paginate(9);
         if ($payment_history) {
+            $gold_count = Payment::where('package_id', 1)->count();
+            $diamond_count = Payment::where('package_id', 1)->count();
+            $platinum_count = Payment::where('package_id', 1)->count();
+            $package_count = [
+                'gold_count' => $gold_count,
+                'diamond_count' => $diamond_count,
+                'platinum_count' => $platinum_count,
+            ];
             return response()->json([
-                'status' => 200,
+                'package_count' => $package_count,
                 'data' => $payment_history,
             ]);
         }

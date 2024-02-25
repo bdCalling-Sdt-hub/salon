@@ -736,6 +736,7 @@ class ProviderController extends Controller
             1 => 'Booking approved',
             2 => 'Booking completed',
             3 => 'Marked as late',
+            4 => 'Marked as Cancel',
             5 => 'Service started',
             6 => 'Service ended'
         ];
