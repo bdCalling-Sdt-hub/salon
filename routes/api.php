@@ -121,23 +121,23 @@ Route::middleware(['admin'])->group(function () {
     Route::get('unblock-provider', [GetController::class, 'unblockProvider']);
     // get User List
     Route::get('user-list', [GetController::class, 'userList']);
+    // provider list
+    Route::get('provider-list', [GetController::class, 'providerList']);
     // single user data
     Route::get('single-user/{id}', [GetController::class, 'singleUser']);
 
     // search
     // provider request search by name and id
-    Route::get('search-provider-request/{name}/{id?}', [GetController::class, 'searchProviderRequest']);
-    // provider list search name,email,phone
-    // provider block list search by name and id
-    // user list search by name email and phone
-    // salon list search by name
-    // delete user from admin
-    Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
+    Route::get('search-provider-request', [GetController::class, 'searchProviderRequest']);
 
     // search
     // provider request search by name and id
     Route::get('search-provider-request/{name?}', [GetController::class, 'searchProviderRequest']);
     // provider list search name,email,phone
+
+    Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
+// provider list search name,email,phone
+
     Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
     // provider block list search by name and id
     Route::get('provider-block-list-search/{name?}', [GetController::class, 'searchProviderBlock']);
