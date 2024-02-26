@@ -116,6 +116,66 @@ class GetController extends Controller
         return ResponseMessage('User is empty');
     }
 
+    //    public function providerList()
+    //    {
+    //        $user = User::where('user_type', 'provider')->select(['name', 'email', 'phone_number', 'created_at'])->paginate(9);
+    //        if ($user) {
+    //            return ResponseMethod('Provider list', $user);
+    //        }
+    //        return ResponseMessage('User is empty');
+    //    }
+
+    // public function providerList(Request $request)
+    // {
+    //     $input = $request->input('input');
+
+    //     $query = User::where('user_type', 'provider');
+
+    //     // Define regular expressions for phone number, email, and string
+    //     $phoneNumberRegex = '/^\d{10}$/';  // Matches 10 digits
+    //     $emailRegex = '/^\S+@\S+\.\S+$/';  // Matches email format
+    //     $stringRegex = '/^[a-zA-Z\s]*$/';  // Matches only letters and spaces
+
+    //     // Validate input against each regex pattern
+    //     if (preg_match($phoneNumberRegex, $input)) {
+    //         return ResponseMethod('Providers list', $query->where('phone_number', $input));
+    //     } elseif (preg_match($emailRegex, $input)) {
+    //         return ResponseMethod('Providers list', $query->where('email', 'like', '%' . $input . '%'));
+    //     } elseif (preg_match($stringRegex, $input)) {
+    //         return ResponseMethod('Providers list', $query->where('name', 'like', '%' . $input . '%'));
+    //     } else {
+    //         return ResponseMethod('Providers list', 'unknown');
+    //     }
+    //     $providers = $query->select(['name', 'email', 'phone_number', 'created_at'])->paginate(9);
+
+    //     if ($providers->isEmpty()) {
+    //         return ResponseMessage('No providers found');
+    //     }
+    // }
+    public function providerList(Request $request)
+    {
+        $query = User::where('user_type', 'provider');
+
+        // Search by name, email, or phone number
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($query) use ($searchTerm) {
+                $query
+                    ->where('name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('email', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('phone_number', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        $providers = $query->paginate(9);
+
+        if ($providers->isEmpty()) {
+            return ResponseMessage('No providers found');
+        }
+
+        return ResponseMethod('Providers list', $providers);
+    }
+
     // single user details
 
     public function singleUser($id)
@@ -139,16 +199,16 @@ class GetController extends Controller
     }
 
     // search provider request
-    public function searchProviderRequest($name)
-    {
-        $query = User::where('user_type', 'provider')->where('user_status', 0);
-
-        if ($name) {
-            $query->where('name', 'like', '%' . $name . '%');
-        }
-        $users = $query->get();
-        return ResponseMethod('provider Request list', $users);
-    }
+    //    public function searchProviderRequest($name)
+    //    {
+    //        $query = User::where('user_type', 'provider')->where('user_status', 0);
+    //
+    //        if ($name) {
+    //            $query->where('name', 'like', '%' . $name . '%');
+    //        }
+    //        $users = $query->get();
+    //        return ResponseMethod('provider Request list', $users);
+    //    }
 
     // search provider block
     public function searchProviderBlock($name = null)
@@ -164,8 +224,32 @@ class GetController extends Controller
         return ResponseMessage('write name which one you want to find');
     }
 
+    public function searchProviderRequest(Request $request)
+    {
+        $query = User::where('user_type', 'provider')->where('user_status', 0);
+
+        // Search by name
+        if ($request->has('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        // Search by ID
+        if ($request->has('id')) {
+            $query->where('id', $request->input('id'));
+        }
+
+        // Get paginated results with 9 items per page
+        $users = $query->paginate(9);
+
+        if ($users->isEmpty()) {
+            return ResponseMessage('No provider requests found');
+        }
+
+        return ResponseMethod('Provider request list', $users);
+    }
+
     // search provider
-    public function searchProvider($name)
+    public function searchProvider(Request $request)
     {
         if (!is_null($name)) {
         }
@@ -238,6 +322,7 @@ class GetController extends Controller
 
     public function appointmentListbyId($id)
     {
+        //        $booking = Booking::with('user','provider')->paginate(12);
         $booking = Booking::select('bookings.*', 'users.name as client_name', 'providers.business_name as name')
             ->join('users', 'bookings.user_id', '=', 'users.id')
             ->join('providers', 'bookings.provider_id', '=', 'providers.id')

@@ -41,7 +41,7 @@ class WebsitePagesController extends Controller
         $website_page->page_description = $request->page_description;
         $website_page->save();
         return response($website_page, 200)->header('Content-Type', 'text/html');
-//        return ResponseMethod('Page added Successfully', $website_page);
+        //        return ResponseMethod('Page added Successfully', $website_page);
     }
 
     public function updateWebsitePage(Request $request, $id)
@@ -49,13 +49,13 @@ class WebsitePagesController extends Controller
         $website_page = WebsitePage::where('id', $id)->first();
         if ($website_page) {
             $validator = Validator::make($request->all(), [
-                'page_title' => 'required',
+                // 'page_title' => 'required',
                 'page_description' => 'required',
             ]);
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 400);
             }
-            $website_page->page_title = $request->page_title;
+            // $website_page->page_title = $request->page_title;
             $website_page->page_description = $request->page_description;
             $website_page->update();
             return response($website_page, 200)->header('Content-Type', 'text/html');
