@@ -75,13 +75,26 @@ class GetController extends Controller
     }
 
     // unblock
-    public function providerBlockList()
+    public function providerBlockList(Request $request)
     {
-        $providerBlockList = Provider::with('user')->where('status', 2)->paginate(12);
-        if ($providerBlockList) {
-            return ResponseMethod('Provider block list', $providerBlockList);
+        $query = Provider::with('user')->where('status', 2);
+        // Search by name, id,
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($query) use ($searchTerm) {
+                $query
+                    ->where('business_name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('id', 'like', '%' . $searchTerm . '%');
+            });
         }
-        return ResponseMessage('Block User list is empty');
+
+        $providers = $query->paginate(9);
+
+        if ($providers->isEmpty()) {
+            return ResponseMessage('Block User List is empty!');
+        }
+
+        return ResponseMethod('Providers Block list', $providers);
     }
 
     public function unblockProvider($id)
@@ -107,51 +120,15 @@ class GetController extends Controller
     }
 
     // user list
-    public function userList()
+    public function userList(Request $request)
     {
-        $user = User::where('user_type', 'user')->select(['name', 'email', 'phone_number', 'created_at'])->paginate(9);
+        $user = User::where('user_type', 'user')->paginate(9);
         if ($user) {
             return ResponseMethod('User list', $user);
         }
         return ResponseMessage('User is empty');
     }
 
-    //    public function providerList()
-    //    {
-    //        $user = User::where('user_type', 'provider')->select(['name', 'email', 'phone_number', 'created_at'])->paginate(9);
-    //        if ($user) {
-    //            return ResponseMethod('Provider list', $user);
-    //        }
-    //        return ResponseMessage('User is empty');
-    //    }
-
-    // public function providerList(Request $request)
-    // {
-    //     $input = $request->input('input');
-
-    //     $query = User::where('user_type', 'provider');
-
-    //     // Define regular expressions for phone number, email, and string
-    //     $phoneNumberRegex = '/^\d{10}$/';  // Matches 10 digits
-    //     $emailRegex = '/^\S+@\S+\.\S+$/';  // Matches email format
-    //     $stringRegex = '/^[a-zA-Z\s]*$/';  // Matches only letters and spaces
-
-    //     // Validate input against each regex pattern
-    //     if (preg_match($phoneNumberRegex, $input)) {
-    //         return ResponseMethod('Providers list', $query->where('phone_number', $input));
-    //     } elseif (preg_match($emailRegex, $input)) {
-    //         return ResponseMethod('Providers list', $query->where('email', 'like', '%' . $input . '%'));
-    //     } elseif (preg_match($stringRegex, $input)) {
-    //         return ResponseMethod('Providers list', $query->where('name', 'like', '%' . $input . '%'));
-    //     } else {
-    //         return ResponseMethod('Providers list', 'unknown');
-    //     }
-    //     $providers = $query->select(['name', 'email', 'phone_number', 'created_at'])->paginate(9);
-
-    //     if ($providers->isEmpty()) {
-    //         return ResponseMessage('No providers found');
-    //     }
-    // }
     public function providerList(Request $request)
     {
         $query = User::where('user_type', 'provider');
@@ -322,7 +299,7 @@ class GetController extends Controller
 
     public function appointmentListbyId($id)
     {
-        //        $booking = Booking::with('user','provider')->paginate(12);
+        // return $booking = Booking::with('user', 'provider')->paginate(12);
         $booking = Booking::select('bookings.*', 'users.name as client_name', 'providers.business_name as name')
             ->join('users', 'bookings.user_id', '=', 'users.id')
             ->join('providers', 'bookings.provider_id', '=', 'providers.id')
@@ -361,27 +338,161 @@ class GetController extends Controller
                 $q->where('name', 'like', '%' . $client_name . '%');
             });
         }
-
         $booking_list = $query->paginate(9);
+
+        $formatted_list = $booking_list->map(function ($booking) {
+            $booking->service = json_decode($booking->service);
+            foreach ($booking->service as $service) {
+                if (isset($service->catalouge_id)) {
+                    $catalogue = Catalogue::find($service->catalouge_id);
+                    if ($catalogue) {
+                        $service->catalog_name = $catalogue->catalog_name;
+                    }
+                }
+            }
+            return $booking;
+        });
 
         return response()->json([
             'status' => 200,
             'message' => 'booking list',
-            'data' => $booking_list,
+            'data' => $formatted_list,
         ]);
     }
 
-    public function getReviews($providerName = null)
-    {
-        // Query providers based on the given name if provided
-        $providersQuery = $providerName ? Provider::where('business_name', 'like', '%' . $providerName . '%') : Provider::query();
+    // public function getReviews($providerName = null)
+    // {
+    //     // Query providers based on the given name if provided
+    //     $providersQuery = $providerName ? Provider::where('business_name', 'like', '%' . $providerName . '%') : Provider::query();
 
-        // Retrieve providers
-        $providers = $providersQuery->get();
+    //     // Retrieve providers
+    //     $providers = $providersQuery->get();
+
+    //     // Array to store results for all providers
+    //     $allProviderData = [];
+
+    //     // Iterate over each provider
+    //     foreach ($providers as $provider) {
+    //         $providerId = $provider->id;
+
+    //         // Retrieve review data for the current provider
+    //         $totalReview = ServiceRating::where('provider_id', $providerId)->count();
+    //         $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $providerId)->sum('rating') / $totalReview : 0;
+
+    //         $serviceDetails = ServiceRating::where('provider_id', $providerId)
+    //             ->with(['user:id,name,image'])
+    //             ->get();
+
+    //         // Store data for the current provider
+    //         $providerData = [
+    //             'salon' => $provider,
+    //             'total_review' => $totalReview,
+    //             'average_rating' => $avgRating,
+    //             'service_details_with_user' => $serviceDetails,
+    //         ];
+
+    //         // Add data to the array
+    //         $allProviderData[] = $providerData;
+    //     }
+
+    //     // Check if any data was found for any provider
+    //     if (!empty($allProviderData)) {
+    //         return response()->json([
+    //             'message' => 'true',
+    //             'providers_data' => $allProviderData,
+    //         ]);
+    //     } else {
+    //         return response()->json([
+    //             'message' => 'No provider data found'
+    //         ], 404);
+    //     }
+    // }
+
+    // public function getReviews(Request $request)
+    // {
+    //     // Start building query for providers
+    //     $providersQuery = Provider::query();
+
+    //     // Apply search filters if provided
+    //     if ($request->has('name')) {
+    //         $providersQuery->where('business_name', 'like', '%' . $request->name . '%');
+    //     }
+
+    //     if ($request->has('id')) {
+    //         $providersQuery->where('id', $request->id);
+    //     }
+
+    //     if ($request->has('date')) {
+    //         $providersQuery->whereDate('created_at', $request->date);
+    //     }
+
+    //     // Paginate the results
+    //     // $perPage = $request->has('page') ? $request->page : 9;
+    //     $providers = $providersQuery->paginate(9);
+
+    //     // Array to store results for all providers
+    //     $allProviderData = [];
+    //     // Iterate over each provider
+    //     foreach ($providers as $provider) {
+    //         $providerId = $provider->id;
+
+    //         // Retrieve review data for the current provider
+    //         $totalReview = ServiceRating::where('provider_id', $providerId)->count();
+    //         $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $providerId)->sum('rating') / $totalReview : 0;
+
+    //         $serviceDetails = ServiceRating::where('provider_id', $providerId)
+    //             ->with(['user:id,name,image'])
+    //             ->get();
+
+    //         // Store data for the current provider
+    //         $providerData = [
+    //             'salon' => $provider,
+    //             'total_review' => $totalReview,
+    //             'average_rating' => $avgRating,
+    //             'service_details_with_user' => $serviceDetails,
+    //         ];
+
+    //         // Add data to the array
+    //         $allProviderData[] = $providerData;
+    //     }
+
+    //     // Check if any data was found for any provider
+    //     if (!empty($allProviderData)) {
+    //         return response()->json([
+    //             'message' => 'true',
+    //             'providers_data' => $allProviderData,
+    //         ]);
+    //     } else {
+    //         return response()->json([
+    //             'message' => 'No provider data found'
+    //         ], 404);
+    //     }
+    // }
+
+    public function getReviews(Request $request)
+    {
+        // Start building query for providers
+        $providersQuery = Provider::query();
+
+        // Apply search filters if provided
+        if ($request->has('name')) {
+            $providersQuery->where('business_name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->has('id')) {
+            $providersQuery->where('id', $request->id);
+        }
+
+        if ($request->has('date')) {
+            $providersQuery->whereDate('created_at', $request->date);
+        }
+
+        // Paginate the results
+        $perPage = $request->has('per_page') ? $request->per_page : 9;
+        $providers = $providersQuery->paginate($perPage);
 
         // Array to store results for all providers
         $allProviderData = [];
-
         // Iterate over each provider
         foreach ($providers as $provider) {
             $providerId = $provider->id;
@@ -391,7 +502,7 @@ class GetController extends Controller
             $avgRating = ($totalReview > 0) ? ServiceRating::where('provider_id', $providerId)->sum('rating') / $totalReview : 0;
 
             $serviceDetails = ServiceRating::where('provider_id', $providerId)
-                ->with(['user:id,name,image'])
+                ->with('user')
                 ->get();
 
             // Store data for the current provider
@@ -409,7 +520,17 @@ class GetController extends Controller
         // Check if any data was found for any provider
         if (!empty($allProviderData)) {
             return response()->json([
-                'message' => 'true',
+                'current_page' => $providers->currentPage(),
+                'first_page_url' => $providers->url(1),
+                'from' => $providers->firstItem(),
+                'last_page' => $providers->lastPage(),
+                'last_page_url' => $providers->url($providers->lastPage()),
+                'next_page_url' => $providers->nextPageUrl(),
+                'path' => $providers->url(1),
+                'per_page' => $providers->perPage(),
+                'prev_page_url' => $providers->previousPageUrl(),
+                'to' => $providers->lastItem(),
+                'total' => $providers->total(),
                 'providers_data' => $allProviderData,
             ]);
         } else {

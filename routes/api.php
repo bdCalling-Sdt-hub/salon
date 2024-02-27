@@ -117,7 +117,7 @@ Route::middleware(['admin'])->group(function () {
 
     // provider block list
     Route::get('provider-block-list', [GetController::class, 'providerBlockList']);
-    Route::get('unblock-provider', [GetController::class, 'unblockProvider']);
+    Route::get('unblock-provider/{id}', [GetController::class, 'unblockProvider']);
     // get User List
     Route::get('user-list', [GetController::class, 'userList']);
     // provider list
@@ -157,14 +157,13 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/send-admin-notification', [UserController::class, 'sendNotification']);
 
     // Review
-    Route::get('review/{name?}', [GetController::class, 'getReviews']);
+    Route::get('review', [GetController::class, 'getReviews']);
     Route::get('review-by-id/{id}', [GetController::class, 'getReviewsByProviderId']);
     // Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
     Route::get('review-average-rating/{id}', [GetController::class, 'test']);
 
     // ====================Trash ==============================//
 
-    Route::get('all-user', [TrashController::class, 'allUser']);
     Route::get('trash-user', [TrashController::class, 'trashUser']);
     Route::get('trash-restore/{id}', [TrashController::class, 'trashRestore']);
 });
