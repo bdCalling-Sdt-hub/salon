@@ -6,6 +6,7 @@ use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
 use App\Models\Catalogue;
 use App\Models\Category;
+use App\Models\Package;
 use App\Models\Payment;
 use App\Models\PostBooking;
 use App\Models\Provider;
@@ -131,26 +132,49 @@ class GetController extends Controller
 
     public function providerList(Request $request)
     {
-        $query = User::where('user_type', 'provider');
+        $search = $request->input('search'); // Assuming 'search' is the parameter name
 
-        // Search by name, email, or phone number
-        if ($request->filled('search')) {
-            $searchTerm = $request->input('search');
-            $query->where(function ($query) use ($searchTerm) {
-                $query
-                    ->where('name', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('email', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('phone_number', 'like', '%' . $searchTerm . '%');
+        $query = Provider::with('user');
+
+        // If a search parameter is provided, apply the search filter
+        if ($search) {
+            $query->whereHas('user',function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('phone_number','like', "%$search%");
             });
         }
 
         $providers = $query->paginate(9);
 
-        if ($providers->isEmpty()) {
-            return ResponseMessage('No providers found');
-        }
+        $providers->getCollection()->transform(function ($provider) {
+            $provider->service = Service::where('provider_id', $provider->id)->get();
+            $provider->package = Payment::with('package')->where('user_id', $provider->user_id)->get();
+            return $provider;
+        });
 
-        return ResponseMethod('Providers list', $providers);
+        return response()->json([
+            'message' => 'Provider list',
+            'data' => $providers->items(),
+            'pagination' => [
+                'current_page' => $providers->currentPage(),
+                'first_page_url' => $providers->url(1),
+                'from' => $providers->firstItem(),
+                'last_page' => $providers->lastPage(),
+                'last_page_url' => $providers->url($providers->lastPage()),
+                'links' => [
+                    'url' => null,
+                    'label' => '&laquo; Previous',
+                    'active' => false,
+                ],
+                'next_page_url' => $providers->nextPageUrl(),
+                'path' => $providers->path(),
+                'per_page' => $providers->perPage(),
+                'prev_page_url' => $providers->previousPageUrl(),
+                'to' => $providers->lastItem(),
+                'total' => $providers->total(),
+            ],
+        ]);
     }
 
     // single user details
