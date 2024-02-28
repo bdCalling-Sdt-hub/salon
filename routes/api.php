@@ -112,11 +112,12 @@ Route::middleware(['admin'])->group(function () {
 
     // update provider request
     Route::get('approve-provider-request/{id}', [GetController::class, 'approveProviderRequest']);
+    Route::get('cancel-provider-request/{id}', [GetController::class, 'cancelProviderRequest']);
     Route::get('block-provider-request/{id}', [GetController::class, 'blockProviderRequest']);
 
     // provider block list
     Route::get('provider-block-list', [GetController::class, 'providerBlockList']);
-    Route::get('unblock-provider', [GetController::class, 'unblockProvider']);
+    Route::get('unblock-provider/{id}', [GetController::class, 'unblockProvider']);
     // get User List
     Route::get('user-list', [GetController::class, 'userList']);
     // provider list
@@ -129,11 +130,15 @@ Route::middleware(['admin'])->group(function () {
     Route::get('search-provider-request', [GetController::class, 'searchProviderRequest']);
 
     Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
+    // provider list search name,email,phone
+
+    Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
 // provider list search name,email,phone
+
     Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
-// provider block list search by name and id
+    // provider block list search by name and id
     Route::get('provider-block-list-search/{name?}', [GetController::class, 'searchProviderBlock']);
-// user list search by name email and phone
+    // user list search by name email and phone
     Route::get('search-user/{name?}', [GetController::class, 'searchUser']);
 
     Route::get('salon-search/{name?}', [GetController::class, 'searchSalon']);
@@ -153,17 +158,16 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/editRating/{id}', [UserController::class, 'editServiceRating']);
 
     // notification
-    Route::post('/send-admin-notification', [UserController::class, 'sendNotification']);
+    Route::get('/admin-notification', [NotificationController::class, 'adminNotification']);
 
     // Review
-    Route::get('review/{name?}', [GetController::class, 'getReviews']);
+    Route::get('review', [GetController::class, 'getReviews']);
     Route::get('review-by-id/{id}', [GetController::class, 'getReviewsByProviderId']);
     // Route::get('review-average-rating/{id}',[GetController::class,'averageReviewRating']);
     Route::get('review-average-rating/{id}', [GetController::class, 'test']);
 
     // ====================Trash ==============================//
 
-    Route::get('all-user', [TrashController::class, 'allUser']);
     Route::get('trash-user', [TrashController::class, 'trashUser']);
     Route::get('trash-restore/{id}', [TrashController::class, 'trashRestore']);
 });
@@ -301,8 +305,6 @@ Route::middleware(['user'])->group(function () {
     Route::get('/read-at/user/notification/{id}', [HomeController::class, 'readAtNotification']);
 });
 
-
-
 Route::get('/filter-nearest-salon/{lat}/{long}', [DistanceController::class, 'findNearestSalon']);
 
 Route::get('earnings', [EarningsController::class, 'Earnings']);
@@ -322,7 +324,6 @@ Route::get('filter/{name?}', [GetController::class, 'filter']);
 
 // both is work for user and provider
 Route::middleware(['user.provider'])->group(function () {
-    Route::post('/booking/accept', [ProviderController::class, 'bookingAccept']);
     Route::get('/service/details/{id}', [HomeController::class, 'serviceDetails']);
     Route::get('relation-filter', [TestController::class, 'relationFilter']);
     Route::get('get-reviews', [TestController::class, 'getReviews']);
@@ -335,6 +336,7 @@ Route::get('/rave/callback', [FlutterwaveController::class, 'callback'])->name('
 Route::get('/rave/callback', [FlutterwaveController::class, 'userCallback'])->name('user.callback');
 
 Route::middleware(['user.admin.provider'])->group(function () {
+    Route::post('/booking/accept', [ProviderController::class, 'bookingAccept']);
     Route::get('category-search/{name?}', [CategoryController::class, 'categorySearch']);
     // category
     Route::get('show-category', [CategoryController::class, 'showCategory']);

@@ -178,8 +178,8 @@ class UserController extends Controller
                 return response()->json(['message' => 'Your email is not verified'], 402);
             } else {
                 // Successful login
-                if ($user->user_type == 'admin'){
-                    $this->loginActivityAdmin($request->email,$request->password);
+                if ($user->user_type == 'admin') {
+                    $this->loginActivityAdmin($request->email, $request->password);
                 }
                 return $this->responseWithToken($token);
             }
@@ -424,13 +424,13 @@ class UserController extends Controller
             $agent = new Agent();
             $browser = $agent->browser();
             $device = $agent->device();
-            $location = $agent->location();
+            $location = 'Dhaka,Bangladesh';
 
             $activity = new LoginActivity([
                 'user_id' => $admin->id,
                 'browser' => $browser,
                 'device_name' => $device,
-                'location' => 'Dhaka ',
+                'location' => $location,
                 'login_time' => now(),
                 'status' => ($admin && Hash::check($password, $admin->password)) ? 1 : 0,
             ]);
@@ -495,30 +495,25 @@ class UserController extends Controller
         return $rating;
     }
 
-
-//    // login activity
-//
-//    public function loginActivityAdmin($email,$password)
-//    {
-//        $admin = User::where('email', $email)->first();
-//        if ($admin && Hash::check($password, $admin->password)) {
-//            $agent = new Agent();
-//            $browser = $agent->browser();
-//            $device = $agent->device();
-//
-//            $activity = new LoginActivity([
-//                'user_id' => $admin->id,
-//                'browser' => $browser,
-//                'device_name' => $device,
-//                'location' => 'Dhaka Bangladesh',
-//                'login_time' => now(),
-//                'status' => ($admin && Hash::check($password, $admin->password)) ? 1 : 0,
-//            ]);
-//            $activity->save();
-//        }
-//    }
-
-
-
-
+    //    // login activity
+    //
+    //    public function loginActivityAdmin($email,$password)
+    //    {
+    //        $admin = User::where('email', $email)->first();
+    //        if ($admin && Hash::check($password, $admin->password)) {
+    //            $agent = new Agent();
+    //            $browser = $agent->browser();
+    //            $device = $agent->device();
+    //
+    //            $activity = new LoginActivity([
+    //                'user_id' => $admin->id,
+    //                'browser' => $browser,
+    //                'device_name' => $device,
+    //                'location' => 'Dhaka Bangladesh',
+    //                'login_time' => now(),
+    //                'status' => ($admin && Hash::check($password, $admin->password)) ? 1 : 0,
+    //            ]);
+    //            $activity->save();
+    //        }
+    //    }
 }

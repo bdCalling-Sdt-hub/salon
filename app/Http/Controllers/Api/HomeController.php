@@ -632,6 +632,14 @@ class HomeController extends Controller
 
             return response()->json([
                 'data' => $decodedBookings,
+                'pagination' => [
+                    'current_page' => $getBooking->currentPage(),
+                    'total_pages' => $getBooking->lastPage(),
+                    'per_page' => $getBooking->perPage(),
+                    'total' => $getBooking->total(),
+                    'next_page_url' => $getBooking->nextPageUrl(),
+                    'prev_page_url' => $getBooking->previousPageUrl(),
+                ]
             ], 200);
         } catch (\Exception $e) {
             // Handle the exception
@@ -644,7 +652,7 @@ class HomeController extends Controller
         try {
             $authUser = auth()->user()->id;
 
-            $getBooking = Booking::where('user_id', $authUser)->with('Provider')->get();
+            $getBooking = Booking::where('user_id', $authUser)->with('Provider')->paginate(10);
 
             if ($getBooking->isEmpty()) {
                 return response()->json([
@@ -684,6 +692,14 @@ class HomeController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => $decodedBookings,
+                'pagination' => [
+                    'current_page' => $getBooking->currentPage(),
+                    'total_pages' => $getBooking->lastPage(),
+                    'per_page' => $getBooking->perPage(),
+                    'total' => $getBooking->total(),
+                    'next_page_url' => $getBooking->nextPageUrl(),
+                    'prev_page_url' => $getBooking->previousPageUrl(),
+                ]
             ], 200);
         } catch (\Exception $e) {
             // Handle the exception
