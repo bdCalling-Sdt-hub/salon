@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $booking_complete = Booking::where('status', 2)->count();
         $booking_cancel = Booking::where('status', 4)->count();
         $booking_pending = Booking::where('status', 0)->count();
-        if ($booking_complete) {
+        if ($total_booking) {
             return response()->json([
                 'booking_completed' => $booking_complete,
                 'booking_cancel' => $booking_cancel,

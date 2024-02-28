@@ -154,7 +154,7 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/editRating/{id}', [UserController::class, 'editServiceRating']);
 
     // notification
-    Route::post('/send-admin-notification', [UserController::class, 'sendNotification']);
+    Route::get('/admin-notification', [NotificationController::class, 'adminNotification']);
 
     // Review
     Route::get('review', [GetController::class, 'getReviews']);

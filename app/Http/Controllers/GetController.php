@@ -354,11 +354,61 @@ class GetController extends Controller
         });
 
         return response()->json([
-            'status' => 200,
             'message' => 'booking list',
             'data' => $formatted_list,
+            'current_page' => $booking_list->currentPage(),
+            'first_page_url' => $booking_list->url(1),
+            'from' => $booking_list->firstItem(),
+            'last_page' => $booking_list->lastPage(),
+            'last_page_url' => $booking_list->url($booking_list->lastPage()),
+            'next_page_url' => $booking_list->nextPageUrl(),
+            'path' => $booking_list->url(1),
+            'per_page' => $booking_list->perPage(),
+            'prev_page_url' => $booking_list->previousPageUrl(),
+            'to' => $booking_list->lastItem(),
+            'total' => $booking_list->total(),
         ]);
     }
+
+    // public function getAppointmentList(Request $request)
+    // {
+    //     $business_name = $request->business_name;
+    //     $client_name = $request->name;
+
+    //     $query = Booking::with('user', 'provider')->whereIn('status', [2, 0, 4]);
+
+    //     if ($business_name !== null) {
+    //         $query->whereHas('provider', function ($q) use ($business_name) {
+    //             $q->where('business_name', 'like', '%' . $business_name . '%');
+    //         });
+    //     }
+
+    //     if ($client_name !== null) {
+    //         $query->whereHas('user', function ($q) use ($client_name) {
+    //             $q->where('name', 'like', '%' . $client_name . '%');
+    //         });
+    //     }
+    //     $booking_list = $query->paginate(9);
+
+    //     $formatted_list = $booking_list->map(function ($booking) {
+    //         $booking->service = json_decode($booking->service);
+    //         foreach ($booking->service as $service) {
+    //             if (isset($service->catalouge_id)) {
+    //                 $catalogue = Catalogue::find($service->catalouge_id);
+    //                 if ($catalogue) {
+    //                     $service->catalog_name = $catalogue->catalog_name;
+    //                 }
+    //             }
+    //         }
+    //         return $booking;
+    //     });
+
+    //     return response()->json([
+    //         'status' => 200,
+    //         'message' => 'booking list',
+    //         'data' => $formatted_list,
+    //     ]);
+    // }
 
     // public function getReviews($providerName = null)
     // {
