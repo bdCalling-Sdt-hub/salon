@@ -131,7 +131,11 @@ Route::middleware(['admin'])->group(function () {
 
     Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
     // provider list search name,email,phone
-    Route::get('search-provider', [GetController::class, 'searchProvider']);
+
+    Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
+// provider list search name,email,phone
+
+    Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
     // provider block list search by name and id
     Route::get('provider-block-list-search/{name?}', [GetController::class, 'searchProviderBlock']);
     // user list search by name email and phone
