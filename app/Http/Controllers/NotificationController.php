@@ -10,34 +10,18 @@ class NotificationController extends Controller
 {
     public function adminNotification()
     {
-        $auth_user = auth()->user()->id;
-        // $provider = Provider::where('user_id', $auth_user)->first();
-
         $notifications = DB::table('notifications')
             ->where('type', 'App\Notifications\AdminNotification')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $notificationsForProvider4 = [];
-
+        // Decode data field for each notification
         foreach ($notifications as $notification) {
-            $data = json_decode($notification->data);
-
-            $notificationData = [
-                'id' => $notification->id,
-                'read_at' => $notification->read_at,
-                'type' => $notification->type,
-                'data' => $data,
-            ];
-            $notificationsForProvider4[] = $notificationData;
-            // }
+            $notification->data = json_decode($notification->data);
         }
-
         return response()->json([
-            'status' => 'success',
-            'notification' => $notificationData,
-            'user_notification' => $this->account_notification(),
-            'next_page_url' => $notifications->nextPageUrl()
+            'aapoinment_notification' => $notifications,
+            'register_notification' => $this->account_notification(),
         ]);
     }
 
