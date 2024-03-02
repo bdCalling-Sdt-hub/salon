@@ -198,6 +198,7 @@ class UserController extends Controller
             'google_id' => auth()->user()->google_id,
             'facebook_id' => auth()->user()->facebook_id,
             'token_type' => 'bearer',
+            'user' => auth()->user(),
             'expires_in' => auth()->factory()->getTTL() * 6000000000000000
         ], 200);
     }

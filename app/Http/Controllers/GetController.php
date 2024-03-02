@@ -243,12 +243,18 @@ class GetController extends Controller
     {
         $users = User::where('user_type', 'user')->paginate(9);
         if (!is_null($name)) {
-            $user = User::where('user_type', 'user')->where('name', 'like', '%' . $name . '%')->get();
+            $user = User::where('user_type', 'user')->where('name', 'like', '%' . $name . '%')->paginate(9);
 
             if ($user->count() > 0) {
-                return ResponseMethod('user data', $user);
+                return response()->json([
+                    'message' => 'User List',
+                    'data' => $user,
+                ]);
             }
-            return ResponseMessage('user not found');
+            return response()->json([
+                'message' => 'Search User is empty',
+                'data' => [],
+            ]);
         }
         return response()->json([
             'message' => 'User List',
@@ -522,7 +528,7 @@ class GetController extends Controller
     public function getReviews(Request $request)
     {
         // Start building query for providers
-        $providersQuery = Provider::query();
+        $providersQuery = Provider::with('user');
 
         // Apply search filters if provided
         if ($request->has('name')) {

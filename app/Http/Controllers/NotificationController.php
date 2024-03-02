@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon;
 use DB;
 
 class NotificationController extends Controller
@@ -22,20 +23,19 @@ class NotificationController extends Controller
         foreach ($notifications as $notification) {
             $data = json_decode($notification->data);
 
-            // if (isset($data->user->provider_id) && $data->user->provider_id === $provider->id) {
-            //     $notificationData = [
-            //         'id' => $notification->id,
-            //         'read_at' => $notification->read_at,
-            //         'type' => $notification->type,
-            //         'data' => $data,
-            //     ];
-            $notificationsForProvider4[] = $data;
+            $notificationData = [
+                'id' => $notification->id,
+                'read_at' => $notification->read_at,
+                'type' => $notification->type,
+                'data' => $data,
+            ];
+            $notificationsForProvider4[] = $notificationData;
             // }
         }
 
         return response()->json([
             'status' => 'success',
-            'notification' => $notificationsForProvider4,
+            'notification' => $notificationData,
             'user_notification' => $this->account_notification(),
             'next_page_url' => $notifications->nextPageUrl()
         ]);
@@ -47,7 +47,7 @@ class NotificationController extends Controller
         return $notifications = $user->notifications;
     }
 
-    public function readAtNotification(Request $request)
+    public function adminReadAtNotification(Request $request)
     {
         $notification = DB::table('notifications')->find($request->id);
         if ($notification) {

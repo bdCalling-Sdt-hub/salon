@@ -133,7 +133,7 @@ Route::middleware(['admin'])->group(function () {
     // provider list search name,email,phone
 
     Route::get('delete-user/{id}', [GetController::class, 'deleteUser']);
-// provider list search name,email,phone
+    // provider list search name,email,phone
 
     Route::get('search-provider/{name?}', [GetController::class, 'searchProvider']);
     // provider block list search by name and id
@@ -159,6 +159,7 @@ Route::middleware(['admin'])->group(function () {
 
     // notification
     Route::get('/admin-notification', [NotificationController::class, 'adminNotification']);
+    Route::get('/admin/read_at/notification', [NotificationController::class, 'adminReadAtNotification']);
 
     // Review
     Route::get('review', [GetController::class, 'getReviews']);
