@@ -13,6 +13,8 @@ use App\Models\Provider;
 use App\Models\Service;
 use App\Models\ServiceRating;
 use App\Models\User;
+use App\Notifications\adminNotification;
+use App\Notifications\providerNotification;
 use App\Notifications\UserNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -461,7 +463,8 @@ class HomeController extends Controller
                     return response()->json([
                         'status' => 'success',
                         'message' => 'Booking success',
-                        'notification' => providerNotification('New booking request', 'New booking request', $post_booking),
+                        'Notification' => providerNotification('Booking request', 'Booking request', $post_booking),
+                        // 'notification' => $this->providerNotification('New booking request', 'New booking request', $post_booking),
                         'admin_notification' => adminNotification('New booking request', 'New booking request', $post_booking),
                     ], 200);
                 } else {

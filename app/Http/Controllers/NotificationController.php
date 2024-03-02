@@ -36,8 +36,7 @@ class NotificationController extends Controller
         return response()->json([
             'status' => 'success',
             'notification' => $notificationData,
-            'user_notification' => $this->account_notification(),
-            'next_page_url' => $notifications->nextPageUrl()
+            'admin_notification' => $this->account_notification(),
         ]);
     }
 
