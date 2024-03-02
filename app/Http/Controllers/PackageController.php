@@ -89,24 +89,25 @@ class PackageController extends Controller
         return responseMessage('Package Not Found');
     }
 
-    public function packageRenew($id){
+    public function packageRenew($id)
+    {
         return $user = User::find($id);
-//        $package_id = $id;
-//        $check_user = auth()->user()->id;
-//        $subscription = Payment::where('user_id',$check_user)->with('package')->first();
-//        $start_date = $subscription['package']['created_at'];
-//        $package_duration = $subscription['package']['package_duration'];
-//        if ($subscription){
-//            return response()->json([
-//                'message' => 'You already have subscription package',
-//                'data' => $subscription,
-//                'created_at' => $start_date,
-//                'package_duration' =>
-//            ]);
-//        }
-//        return $subscription;
+        //        $package_id = $id;
+        //        $check_user = auth()->user()->id;
+        //        $subscription = Payment::where('user_id',$check_user)->with('package')->first();
+        //        $start_date = $subscription['package']['created_at'];
+        //        $package_duration = $subscription['package']['package_duration'];
+        //        if ($subscription){
+        //            return response()->json([
+        //                'message' => 'You already have subscription package',
+        //                'data' => $subscription,
+        //                'created_at' => $start_date,
+        //                'package_duration' =>
+        //            ]);
+        //        }
+        //        return $subscription;
         $package = Package::find($id);
-        if(!$package){
+        if (!$package) {
             return response()->json([
                 'message' => 'Package does not exist',
                 'data' => []
@@ -121,8 +122,6 @@ class PackageController extends Controller
         $subscription->price = $package->price;
         $subscription->save();
         return ResponseMethod('Subscription add successfully', $subscription);
-
-
     }
 
     public function myPlan()
@@ -136,11 +135,11 @@ class PackageController extends Controller
         }
 
         $subscriptions = Payment::where('user_id', $auth_user)->with('package')->get();
-        if(!$subscriptions){
+        if (!$subscriptions) {
             return response()->json([
                 'message' => 'existing plan not found',
                 'data' => []
-            ],404);
+            ], 404);
         }
         $result = [];
         foreach ($subscriptions as $subscription) {
