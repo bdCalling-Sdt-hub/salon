@@ -132,14 +132,15 @@ class GetController extends Controller
 
     public function providerList(Request $request)
     {
-        $search = $request->input('search'); // Assuming 'search' is the parameter name
+        $search = $request->input('search');  // Assuming 'search' is the parameter name
 
         $query = Provider::with('user');
 
         // If a search parameter is provided, apply the search filter
         if ($search) {
             $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
+                $q
+                    ->where('name', 'like', "%$search%")
                     ->orWhere('email', 'like', "%$search%")
                     ->orWhere('phone_number', 'like', "%$search%");
             });
@@ -178,7 +179,6 @@ class GetController extends Controller
             ],
         ]);
     }
-
 
     // single user details
 
