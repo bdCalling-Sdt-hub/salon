@@ -138,10 +138,10 @@ class GetController extends Controller
 
         // If a search parameter is provided, apply the search filter
         if ($search) {
-            $query->whereHas('user',function ($q) use ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
                     ->orWhere('email', 'like', "%$search%")
-                    ->orWhere('phone_number','like', "%$search%");
+                    ->orWhere('phone_number', 'like', "%$search%");
             });
         }
 
@@ -150,6 +150,8 @@ class GetController extends Controller
         $providers->getCollection()->transform(function ($provider) {
             $provider->service = Service::where('provider_id', $provider->id)->get();
             $provider->package = Payment::with('package')->where('user_id', $provider->user_id)->get();
+            // Decode gallary_photo from JSON string to array
+            $provider->gallary_photo = json_decode($provider->gallary_photo, true);
             return $provider;
         });
 
@@ -176,6 +178,7 @@ class GetController extends Controller
             ],
         ]);
     }
+
 
     // single user details
 
