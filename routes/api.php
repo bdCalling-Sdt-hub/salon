@@ -114,6 +114,7 @@ Route::middleware(['admin'])->group(function () {
     Route::get('approve-provider-request/{id}', [GetController::class, 'approveProviderRequest']);
     Route::get('cancel-provider-request/{id}', [GetController::class, 'cancelProviderRequest']);
     Route::get('block-provider-request/{id}', [GetController::class, 'blockProviderRequest']);
+    Route::get('block-provider',[GetController::class,'blockProvider']);
 
     // provider block list
     Route::get('provider-block-list', [GetController::class, 'providerBlockList']);
