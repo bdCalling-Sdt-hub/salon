@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Carbon;
 use DB;
@@ -24,6 +25,24 @@ class NotificationController extends Controller
             'register_notification' => $this->account_notification(),
         ]);
     }
+
+    // public function adminNotification()
+    // {
+    //     $notifications = Notification::with('user')
+    //         ->where('type', 'App\Notifications\AdminNotification')
+    //         ->orderBy('created_at', 'desc')
+    //         ->paginate(10);
+
+    //     // Decode data field for each notification
+    //     foreach ($notifications as $notification) {
+    //         $notification->data = json_decode($notification->data);
+    //     }
+
+    //     return response()->json([
+    //         'appointment_notification' => $notifications,
+    //         'register_notification' => $this->account_notification(),
+    //     ]);
+    // }
 
     public function account_notification()
     {

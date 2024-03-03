@@ -58,48 +58,36 @@ class HomeController extends Controller
 
     public function user_booking_accept_notification()
     {
-        $notifications = DB::table('notifications')
+        $auth_user = auth()->user()->id;
+
+        $user_notifications = DB::table('notifications')
             ->where('type', 'App\Notifications\UserNotification')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+        $decode_notifications = [];
 
-        // Decode data field for each notification
-        foreach ($notifications as $notification) {
-            $notification->data = json_decode($notification->data);
+        foreach ($user_notifications as $notification) {
+            $data = json_decode($notification->data);
+
+            if (isset($data->user->user_id) && $data->user->user_id === $auth_user) {
+                $notificationData = [
+                    'id' => $notification->id,
+                    'read_at' => $notification->read_at,
+                    'type' => $notification->type,
+                    'data' => $data,
+                ];
+                $decode_notifications[] = $notificationData;
+            }
+
+            $user_notification = $this->account_notification();
+            // $data = [$user_notification, $decode_notifications];
         }
         return response()->json([
-            'aapoinment_notification' => $notifications,
-            'register_notification' => $this->account_notification(),
+            'status' => 'success',
+            'decode_notification' => $decode_notifications,
+            'notification' => $user_notification,
+            'next_page_url' => $user_notifications->nextPageUrl()
         ]);
-        // $auth_user = auth()->user()->id;
-
-        // $user_notifications = DB::table('notifications')
-        //     ->where('type', 'App\Notifications\UserNotification')
-        //     ->orderBy('created_at', 'desc')
-        //     ->paginate(10);
-        // $decode_notifications = [];
-
-        // foreach ($user_notifications as $notification) {
-        //     $data = json_decode($notification->data);
-
-        //     if (isset($data->user->user_id) && $data->user->user_id === $auth_user) {
-        //         $notificationData = [
-        //             'id' => $notification->id,
-        //             'read_at' => $notification->read_at,
-        //             'type' => $notification->type,
-        //             'data' => $data,
-        //         ];
-        //         $decode_notifications[] = $notificationData;
-        //     }
-
-        //     $user_notification = $this->account_notification();
-        //     $data = [$user_notification, $decode_notifications];
-        // }
-        // return response()->json([
-        //     'status' => 'success',
-        //     'notification' => $data,
-        //     'next_page_url' => $user_notifications->nextPageUrl()
-        // ]);
     }
 
     public function account_notification()
