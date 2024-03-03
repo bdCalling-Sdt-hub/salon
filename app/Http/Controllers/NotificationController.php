@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon;
@@ -51,8 +52,6 @@ class NotificationController extends Controller
             ],
         ]);
     }
-
-
 
     public function account_notification()
     {
