@@ -2,47 +2,56 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Notification;
+
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon;
 use DB;
 
 class NotificationController extends Controller
 {
-    public function adminNotification()
+    public function adminNotification(Request $request)
     {
-        $notifications = DB::table('notifications')
+        $query = DB::table('notifications')
             ->where('type', 'App\Notifications\AdminNotification')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        // Decode data field for each notification
-        foreach ($notifications as $notification) {
+        $admin_notification = $query->map(function ($notification) {
             $notification->data = json_decode($notification->data);
-        }
+            $user_id = $notification->data->user->user_id;
+            // Fetch user data based on user_id
+            $user = User::find($user_id);
+            if ($user) {
+                // If user exists, attach user data to notification
+                $notification->data->user_details = $user;
+            }
+            return $notification;
+        });
+
         return response()->json([
-            'aapoinment_notification' => $notifications,
-            'register_notification' => $this->account_notification(),
+            'message' => 'Notification list',
+            'data' => $admin_notification,
+            'pagination' => [
+                'current_page' => $query->currentPage(),
+                'first_page_url' => $query->url(1),
+                'from' => $query->firstItem(),
+                'last_page' => $query->lastPage(),
+                'last_page_url' => $query->url($query->lastPage()),
+                'links' => [
+                    'url' => null,
+                    'label' => '&laquo; Previous',
+                    'active' => false,
+                ],
+                'next_page_url' => $query->nextPageUrl(),
+                'path' => $query->path(),
+                'per_page' => $query->perPage(),
+                'prev_page_url' => $query->previousPageUrl(),
+                'to' => $query->lastItem(),
+                'total' => $query->total(),
+            ],
         ]);
     }
-
-    // public function adminNotification()
-    // {
-    //     $notifications = Notification::with('user')
-    //         ->where('type', 'App\Notifications\AdminNotification')
-    //         ->orderBy('created_at', 'desc')
-    //         ->paginate(10);
-
-    //     // Decode data field for each notification
-    //     foreach ($notifications as $notification) {
-    //         $notification->data = json_decode($notification->data);
-    //     }
-
-    //     return response()->json([
-    //         'appointment_notification' => $notifications,
-    //         'register_notification' => $this->account_notification(),
-    //     ]);
-    // }
 
     public function account_notification()
     {
