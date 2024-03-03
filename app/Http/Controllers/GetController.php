@@ -20,6 +20,17 @@ use Illuminate\Support\Facades\Validator;
 
 class GetController extends Controller
 {
+    //block provider
+    public function blockProvider(Request $request){
+        $provider_id = $request->id;
+        $providerRequest = Provider::where('status', 1)->where('id', $provider_id)->first();
+        if ($providerRequest) {
+            $providerRequest->status = 2;
+            $providerRequest->update();
+            return ResponseMethod('Block Provider Successfully', $providerRequest);
+        }
+        return ResponseMessage('Provider Request does not exist');
+    }
     // salon
     public function salonList(Request $request)
     {
