@@ -56,17 +56,18 @@ class CategoryController extends Controller
         if ($category) {
             $validator = Validator::make($request->all(), [
                 'category_name' => 'string|min:2|max:15',
-                'category_image' => 'mimes:jpg,png,jpeg,gif,svg|max:2048',
             ]);
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 400);
             }
 
-            $category->category_name = $request->category_name;
             if ($request->file('category_image')) {
                 unlink($category->category_image);
                 $category->category_image = $this->saveImage($request);
+            } else {
+                $category->category_image = $category->category_image;
             }
+            $category->category_name = $request->category_name;
             $category->update();
             return responseMethod('Category update successfully', $category);
         } else {

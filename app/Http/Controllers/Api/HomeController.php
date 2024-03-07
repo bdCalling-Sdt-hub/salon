@@ -655,7 +655,7 @@ class HomeController extends Controller
         try {
             $authUser = auth()->user()->id;
 
-            $getBooking = Booking::where('user_id', $authUser)->with('Provider')->paginate(10);
+            $getBooking = Booking::where('user_id', $authUser)->where('status', 6)->with('Provider')->paginate(10);
 
             if ($getBooking->isEmpty()) {
                 return response()->json([
@@ -748,7 +748,7 @@ class HomeController extends Controller
                     return response()->json([
                         'status' => 'success',
                         'message' => 'update schedule success',
-                        'Notification' => providerNotification('Client your update booking', 'Client your update booking', $updateBooking),
+                        'Notification' => providerNotification('Client rescheduled a booking', 'Client rescheduled a booking', $updateBooking),
                     ], 200);
                     ResponseMethod('success', 'Booking update success');
                 } else {

@@ -26,6 +26,11 @@ class SendNotification implements ShouldBroadcast
     public function broadcastOn()
     {
         // return new PrivateChannel('channel-name');
-        return new Channel('notify-channel');
+        return new Channel('Notification');
+    }
+
+    public function broadcastAs()
+    {
+        return 'sendNotification';
     }
 }
