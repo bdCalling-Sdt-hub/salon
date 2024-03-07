@@ -673,52 +673,6 @@ class ProviderController extends Controller
         }
     }
 
-    // public function bookingAccept(Request $request)
-    // {
-    //     $updateStatus = Booking::find($request->id);
-    //     $updateStatus->status = $request->status;
-    //     $updateStatus->save();
-    //     if ($updateStatus) {
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'Notification' => sendNotification('Booking accepted', $updateStatus),
-    //             'message' => 'Accept your request'
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'message' => 'Booking status update failed'
-    //         ], 402);
-    //     }
-    // }
-
-    // public function bookingAccept(Request $request)
-    // {
-    //     $updateStatus = Booking::find($request->id);
-
-    //     if (!$updateStatus) {
-    //         return response()->json([
-    //             'message' => 'Booking not found'
-    //         ], 404);
-    //     }
-
-    //     $updateStatus->status = $request->status;
-    //     $updateStatus->save();
-
-    //     if ($updateStatus) {
-    //         // $notification = $this->sendNotification($notificationMessage, $updateStatus);
-
-    //         return response()->json([
-    //             'status' => 'success',
-    //             'Notification' => sendNotification('Accept booking', 'Accept your booking', $updateStatus),
-    //             'message' => 'Booking status updated'
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'message' => 'Booking status update failed'
-    //         ], 500);
-    //     }
-    // }
-
     public function bookingAccept(Request $request)
     {
         $updateStatus = Booking::find($request->id);

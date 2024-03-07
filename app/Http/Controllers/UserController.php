@@ -304,7 +304,9 @@ class UserController extends Controller
 
         //         PasswordReset::where('email', $user->email)->delete();
 
-        return response()->json(['Your password changes'], 200);
+        return response()->json([
+            'message' => 'Your password changes'
+        ], 200);
     }
 
     public function changePassword(Request $request)
@@ -495,26 +497,4 @@ class UserController extends Controller
         $rating = ServiceRating::all();
         return $rating;
     }
-
-    //    // login activity
-    //
-    //    public function loginActivityAdmin($email,$password)
-    //    {
-    //        $admin = User::where('email', $email)->first();
-    //        if ($admin && Hash::check($password, $admin->password)) {
-    //            $agent = new Agent();
-    //            $browser = $agent->browser();
-    //            $device = $agent->device();
-    //
-    //            $activity = new LoginActivity([
-    //                'user_id' => $admin->id,
-    //                'browser' => $browser,
-    //                'device_name' => $device,
-    //                'location' => 'Dhaka Bangladesh',
-    //                'login_time' => now(),
-    //                'status' => ($admin && Hash::check($password, $admin->password)) ? 1 : 0,
-    //            ]);
-    //            $activity->save();
-    //        }
-    //    }
 }

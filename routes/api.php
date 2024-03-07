@@ -114,7 +114,7 @@ Route::middleware(['admin'])->group(function () {
     Route::get('approve-provider-request/{id}', [GetController::class, 'approveProviderRequest']);
     Route::get('cancel-provider-request/{id}', [GetController::class, 'cancelProviderRequest']);
     Route::get('block-provider-request/{id}', [GetController::class, 'blockProviderRequest']);
-    Route::get('block-provider',[GetController::class,'blockProvider']);
+    Route::get('block-provider', [GetController::class, 'blockProvider']);
 
     // provider block list
     Route::get('provider-block-list', [GetController::class, 'providerBlockList']);
@@ -331,9 +331,9 @@ Route::middleware(['user.provider'])->group(function () {
     Route::get('get-reviews', [TestController::class, 'getReviews']);
 });
 
-// The callback url after a payment
-Route::get('/rave/callback', [FlutterwaveController::class, 'callback'])->name('callback');
-// user callback
+// // The callback url after a payment
+Route::get('/callback', [FlutterwaveController::class, 'callback'])->name('callback');
+// // user callback
 
 Route::get('/rave/callback', [FlutterwaveController::class, 'userCallback'])->name('user.callback');
 

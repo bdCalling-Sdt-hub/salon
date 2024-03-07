@@ -25,7 +25,7 @@ class FlutterwaveController extends Controller
             'email' => request()->email,
             'tx_ref' => $reference,
             'currency' => request()->currency,
-            'redirect_url' => url('callback'),
+            'redirect_url' => route('callback'),
             'customer' => [
                 'email' => request()->email,
                 'phone_number' => request()->phone,
@@ -245,8 +245,8 @@ class FlutterwaveController extends Controller
         }
     }
 
-    public function UserpaymentSuccess(Request $request){
-
+    public function UserpaymentSuccess(Request $request)
+    {
         $status = $request->status;
 
         // if payment is successful
