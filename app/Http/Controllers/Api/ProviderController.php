@@ -26,43 +26,79 @@ class ProviderController extends Controller
 
     public function new_booking_request()
     {
-        $auth_user = auth()->user()->id;
-        $provider = Provider::where('user_id', $auth_user)->first();
+        // $auth_user = auth()->user()->id;
+        // $provider = Provider::where('user_id', $auth_user)->first();
 
-        $notifications = DB::table('notifications')
-            ->where('type', 'App\Notifications\SalonNotification')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // $notifications = DB::table('notifications')
+        //     ->where('type', 'App\Notifications\SalonNotification')
+        //     ->orderBy('created_at', 'desc')
+        //     ->paginate(10);
 
-        $notificationsForProvider4 = [];
+        // $notificationsForProvider4 = [];
 
-        foreach ($notifications as $notification) {
-            $data = json_decode($notification->data);
+        // foreach ($notifications as $notification) {
+        //     $data = json_decode($notification->data);
 
-            if (isset($data->user->provider_id) && $data->user->provider_id === $provider->id) {
-                $notificationData = [
-                    'id' => $notification->id,
-                    'read_at' => $notification->read_at,
-                    'type' => $notification->type,
-                    'data' => $data,
-                ];
-                $notificationsForProvider4[] = $notificationData;
-            }
-        }
+        //     if (isset($data->user->provider_id) && $data->user->provider_id === $provider->id) {
+        //         $notificationData = [
+        //             'id' => $notification->id,
+        //             'read_at' => $notification->read_at,
+        //             'type' => $notification->type,
+        //             'data' => $data,
+        //         ];
+        //         $notificationsForProvider4[] = $notificationData;
+        //     }
+        // }
 
-        return response()->json([
-            'status' => 'success',
-            'notification' => $notificationsForProvider4,
-            'user_notification' => $this->account_notification(),
-            'next_page_url' => $notifications->nextPageUrl()
-        ]);
-    }
+        // return response()->json([
+        //     'status' => 'success',
+        //     'notification' => $notificationsForProvider4,
+        //     'user_notification' => $this->account_notification(),
+        //     'next_page_url' => $notifications->nextPageUrl()
+        // ]);
 
-    public function account_notification()
-    {
         $user = auth()->user();
-        return $notifications = $user->notifications;
+
+        if ($user) {
+            $userId = $user->id;
+
+            $query = DB::table('notifications')
+                ->where('notifications.type', 'App\Notifications\SalonNotification')
+                ->where(function ($query) use ($userId) {
+                    $query
+                        ->where(function ($query) use ($userId) {
+                            $query
+                                ->where('notifiable_type', 'App\Models\User')
+                                ->where('notifiable_id', $userId);
+                        })
+                        ->orWhere(function ($query) use ($userId) {
+                            $query->whereJsonContains('data->user->user_id', $userId);
+                        });
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $user_notifications = $query->map(function ($notification) {
+                $notification->data = json_decode($notification->data);
+                return $notification;
+            });
+
+            return response()->json([
+                'message' => 'Notification list',
+                'notifications' => $user_notifications,
+            ], 200);
+        }
+        return response()->json([
+            'message' => 'Notification list',
+            'notifications' => [],
+        ], 200);
     }
+
+    // public function account_notification()
+    // {
+    //     $user = auth()->user();
+    //     return $notifications = $user->notifications;
+    // }
 
     public function readAtNotification(Request $request)
     {

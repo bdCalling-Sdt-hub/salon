@@ -25,75 +25,43 @@ use DB;
 
 class HomeController extends Controller
 {
-    // public function user_booking_accept_notification()
-    // {
-    //     $auth_user = auth()->user()->id;
-
-    //     $user_notifications = DB::table('notifications')
-    //         ->where('type', 'App\Notifications\UserNotification')
-    //         ->orwhere('notifiable_type', User::class)
-    //         ->get();
-
-    //     $decode_notifications = [];
-
-    //     foreach ($user_notifications as $notification) {
-    //         $data = json_decode($notification->data);
-
-    //         if (isset($data->user->user_id) && $data->user->user_id === $auth_user) {
-    //             $notificationData = [
-    //                 'id' => $notification->id,
-    //                 'read_at' => $notification->read_at,
-    //                 'type' => $notification->type,
-    //                 'data' => $data,
-    //             ];
-    //             $decode_notifications[] = $notificationData;
-    //         }
-    //     }
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'notification' => $decode_notifications
-    //     ]);
-    // }
-
     public function user_booking_accept_notification()
     {
-        $auth_user = auth()->user()->id;
+        $user = auth()->user();
 
-        $user_notifications = DB::table('notifications')
-            ->where('type', 'App\Notifications\UserNotification')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        $decode_notifications = [];
+        if ($user) {
+            $userId = $user->id;
 
-        foreach ($user_notifications as $notification) {
-            $data = json_decode($notification->data);
+            $query = DB::table('notifications')
+                ->where('notifications.type', 'App\Notifications\UserNotification')
+                ->where(function ($query) use ($userId) {
+                    $query
+                        ->where(function ($query) use ($userId) {
+                            $query
+                                ->where('notifiable_type', 'App\Models\User')
+                                ->where('notifiable_id', $userId);
+                        })
+                        ->orWhere(function ($query) use ($userId) {
+                            $query->whereJsonContains('data->user->user_id', $userId);
+                        });
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-            if (isset($data->user->user_id) && $data->user->user_id === $auth_user) {
-                $notificationData = [
-                    'id' => $notification->id,
-                    'read_at' => $notification->read_at,
-                    'type' => $notification->type,
-                    'data' => $data,
-                ];
-                $decode_notifications[] = $notificationData;
-            }
+            $user_notifications = $query->map(function ($notification) {
+                $notification->data = json_decode($notification->data);
+                return $notification;
+            });
 
-            $user_notification = $this->account_notification();
-            // $data = [$user_notification, $decode_notifications];
+            return response()->json([
+                'message' => 'Notification list',
+                'notifications' => $user_notifications,
+            ], 200);
         }
         return response()->json([
-            'status' => 'success',
-            'decode_notification' => $decode_notifications,
-            'notification' => $user_notification,
-            'next_page_url' => $user_notifications->nextPageUrl()
-        ]);
-    }
-
-    public function account_notification()
-    {
-        $user = auth()->user();
-        return $notifications = $user->notifications;
+            'message' => 'Notification list',
+            'notifications' => [],
+        ], 200);
     }
 
     public function readAtNotification(Request $request)
