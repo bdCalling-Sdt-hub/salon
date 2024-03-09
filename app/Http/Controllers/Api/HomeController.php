@@ -25,37 +25,6 @@ use DB;
 
 class HomeController extends Controller
 {
-    // public function user_booking_accept_notification()
-    // {
-    //     $auth_user = auth()->user()->id;
-
-    //     $user_notifications = DB::table('notifications')
-    //         ->where('type', 'App\Notifications\UserNotification')
-    //         ->orwhere('notifiable_type', User::class)
-    //         ->get();
-
-    //     $decode_notifications = [];
-
-    //     foreach ($user_notifications as $notification) {
-    //         $data = json_decode($notification->data);
-
-    //         if (isset($data->user->user_id) && $data->user->user_id === $auth_user) {
-    //             $notificationData = [
-    //                 'id' => $notification->id,
-    //                 'read_at' => $notification->read_at,
-    //                 'type' => $notification->type,
-    //                 'data' => $data,
-    //             ];
-    //             $decode_notifications[] = $notificationData;
-    //         }
-    //     }
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'notification' => $decode_notifications
-    //     ]);
-    // }
-
     public function user_booking_accept_notification()
     {
 
@@ -93,13 +62,6 @@ class HomeController extends Controller
             'message' => 'Notification list',
             'notifications' => [],
         ], 200);
-    }
-
-    public function account_notification()
-    {
-        $user = auth()->user();
-        return $notifications = $user->notifications;
-    }
 
     public function readAtNotification(Request $request)
     {
