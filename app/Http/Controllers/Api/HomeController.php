@@ -27,19 +27,20 @@ class HomeController extends Controller
 {
     public function user_booking_accept_notification()
     {
-
         $user = auth()->user();
 
         if ($user) {
             $userId = $user->id;
 
             $query = \Illuminate\Support\Facades\DB::table('notifications')
-                ->where('notifications.type', 'App\\Notifications\\UserNotification')
+                ->where('notifications.type', 'App\Notifications\UserNotification')
                 ->where(function ($query) use ($userId) {
-                    $query->where(function ($query) use ($userId) {
-                        $query->where('notifiable_type', 'App\Models\User')
-                            ->where('notifiable_id', $userId);
-                    })
+                    $query
+                        ->where(function ($query) use ($userId) {
+                            $query
+                                ->where('notifiable_type', 'App\Models\User')
+                                ->where('notifiable_id', $userId);
+                        })
                         ->orWhere(function ($query) use ($userId) {
                             $query->whereJsonContains('data->user->user_id', $userId);
                         });
@@ -56,12 +57,12 @@ class HomeController extends Controller
                 'message' => 'Notification list',
                 'notifications' => $user_notifications,
             ], 200);
-
         }
         return response()->json([
             'message' => 'Notification list',
             'notifications' => [],
         ], 200);
+    }
 
     public function readAtNotification(Request $request)
     {
@@ -563,7 +564,7 @@ class HomeController extends Controller
         try {
             $authUser = auth()->user()->id;
 
-//            $getBooking = Booking::where('user_id', $authUser)->with('Provider')->paginate(10);
+            //            $getBooking = Booking::where('user_id', $authUser)->with('Provider')->paginate(10);
             $getBooking = Booking::where('user_id', $authUser)
                 ->whereIn('status', [10, 5])
                 ->with('Provider')
