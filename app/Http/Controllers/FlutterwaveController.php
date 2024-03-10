@@ -246,12 +246,13 @@ class FlutterwaveController extends Controller
         }
     }
 
-    public function bookingStatusChange($user_id){
-        $booking_user = Booking::find($user_id);
-        if ($booking_user){
+    public function bookingStatusChange($user_id)
+    {
+        $booking_user = Booking::where('user_id', $user_id)->first();
+        if ($booking_user) {
             $booking_user->status = 10;
             $booking_user->update();
-        }else{
+        } else {
             return response()->json([
                 'message' => 'No Booking user found',
                 'data' => [],
@@ -290,11 +291,18 @@ class FlutterwaveController extends Controller
                     $user->user_status = 1;
                     $user->save();
                 }
+
+                // Change booking status to 10
+                $booking = Booking::find($request->booking_id);
+                if ($booking) {
+                    $booking->status = 10;
+                    $booking->save();
+                }
+
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Payment complete',
                     'data' => $payment,
-                    'booking_status' => $this->bookingStatusChange($auth_user),
                 ], 200);
             }
         } elseif ($status == 'cancelled') {
