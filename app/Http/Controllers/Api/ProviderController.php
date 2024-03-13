@@ -26,37 +26,6 @@ class ProviderController extends Controller
 
     public function new_booking_request()
     {
-        // $auth_user = auth()->user()->id;
-        // $provider = Provider::where('user_id', $auth_user)->first();
-
-        // $notifications = DB::table('notifications')
-        //     ->where('type', 'App\Notifications\SalonNotification')
-        //     ->orderBy('created_at', 'desc')
-        //     ->paginate(10);
-
-        // $notificationsForProvider4 = [];
-
-        // foreach ($notifications as $notification) {
-        //     $data = json_decode($notification->data);
-
-        //     if (isset($data->user->provider_id) && $data->user->provider_id === $provider->id) {
-        //         $notificationData = [
-        //             'id' => $notification->id,
-        //             'read_at' => $notification->read_at,
-        //             'type' => $notification->type,
-        //             'data' => $data,
-        //         ];
-        //         $notificationsForProvider4[] = $notificationData;
-        //     }
-        // }
-
-        // return response()->json([
-        //     'status' => 'success',
-        //     'notification' => $notificationsForProvider4,
-        //     'user_notification' => $this->account_notification(),
-        //     'next_page_url' => $notifications->nextPageUrl()
-        // ]);
-
         $user = auth()->user();
 
         if ($user) {
@@ -93,12 +62,6 @@ class ProviderController extends Controller
             'notifications' => [],
         ], 200);
     }
-
-    // public function account_notification()
-    // {
-    //     $user = auth()->user();
-    //     return $notifications = $user->notifications;
-    // }
 
     public function readAtNotification(Request $request)
     {

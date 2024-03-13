@@ -14,6 +14,8 @@ return new class extends Migration {
             $table->id();
             $table->integer('provider_id');
             $table->integer('service_id');
+            // $table->foreignId('provider_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->string('catalog_name');
             $table->text('catalog_description');
             $table->json('image');
@@ -22,7 +24,6 @@ return new class extends Migration {
             $table->string('home_service_charge')->nullable();
             $table->string('booking_money');
             $table->json('service_hour');
-
             $table->timestamps();
         });
     }

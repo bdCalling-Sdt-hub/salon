@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,6 +16,8 @@ return new class extends Migration
             $table->foreign('category_id')->references('id')->on('categories');
             $table->unsignedBigInteger('salon_id');
             $table->foreign('salon_id')->references('id')->on('providers');
+            // $table->foreignId('category_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('salon_id')->constrained()->onDelete('cascade');
             $table->json('service');
             $table->string('time');
             $table->string('date');

@@ -20,8 +20,9 @@ use Illuminate\Support\Facades\Validator;
 
 class GetController extends Controller
 {
-    //block provider
-    public function blockProvider(Request $request){
+    // block provider
+    public function blockProvider(Request $request)
+    {
         $provider_id = $request->id;
         $providerRequest = Provider::where('status', 1)->where('id', $provider_id)->first();
         if ($providerRequest) {
@@ -31,6 +32,7 @@ class GetController extends Controller
         }
         return ResponseMessage('Provider Request does not exist');
     }
+
     // salon
     public function salonList(Request $request)
     {
@@ -775,8 +777,8 @@ class GetController extends Controller
         $payment_history = Payment::with('user', 'package')->paginate(9);
         if ($payment_history) {
             $gold_count = Payment::where('package_id', 1)->count();
-            $diamond_count = Payment::where('package_id', 1)->count();
-            $platinum_count = Payment::where('package_id', 1)->count();
+            $diamond_count = Payment::where('package_id', 2)->count();
+            $platinum_count = Payment::where('package_id', 3)->count();
             $package_count = [
                 'gold_count' => $gold_count,
                 'diamond_count' => $diamond_count,

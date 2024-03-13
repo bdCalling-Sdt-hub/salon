@@ -12,8 +12,10 @@ return new class extends Migration {
     {
         Schema::create('providers', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
+            // $table->integer('user_id');
             $table->integer('category_id');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('category_id');
             $table->text('business_name');
             $table->text('address');
             $table->text('description');

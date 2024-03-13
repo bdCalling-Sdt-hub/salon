@@ -12,7 +12,9 @@ return new class extends Migration {
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
+            // $table->integer('user_id');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('provider_id')->constrained()->onDelete('cascade');
             $table->integer('provider_id');
             $table->json('service');
             $table->integer('catalouge_id')->nullable();
