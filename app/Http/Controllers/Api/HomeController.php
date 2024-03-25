@@ -120,6 +120,7 @@ class HomeController extends Controller
                 * sin( radians( latitude ) ) ) ) AS distance")
             )
                 ->where('id', $providerId)  // Add this condition to get details for the specific provider
+                    ->where('status',1)
                 ->first();
 
             if ($salons) {
@@ -627,7 +628,7 @@ class HomeController extends Controller
         try {
             $authUser = auth()->user()->id;
 
-            $getBooking = Booking::where('user_id', $authUser)->where('status', 6)->with('Provider')->paginate(10);
+            $getBooking = Booking::where('user_id', $authUser)->whereIn('status', [1,3,5,6,10])->with('Provider')->paginate(10);
 
             if ($getBooking->isEmpty()) {
                 return response()->json([
@@ -813,6 +814,7 @@ class HomeController extends Controller
             )
                 ->havingRaw('distance < 10000')
                 ->orderBy('average_rating', 'desc')
+                ->where('status',1)
                 ->get();
 
             return response()->json([
@@ -878,6 +880,7 @@ class HomeController extends Controller
             )
                 ->havingRaw('distance < 10000')
                 ->orderBy('distance')
+                ->where('status',1)
                 ->get();
 
             return response()->json([

@@ -269,11 +269,12 @@ class FlutterwaveController extends Controller
             $auth_user = $request->user_id;
             $provider = UserPayment::where('user_id', $auth_user)->first();
 
-            if (!$provider) {
-                $payment = new UserPayment();
-            } else {
-                $payment = $provider;
-            }
+//            if (!$provider) {
+//                $payment = new UserPayment();
+//            } else {
+//                $payment = $provider;
+//            }
+            $payment = new UserPayment();
             $payment->booking_id = $request->booking_id;
             $payment->provider_id = $request->provider_id;
             $payment->user_id = $request->user_id;
