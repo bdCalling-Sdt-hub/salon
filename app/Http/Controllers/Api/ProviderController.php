@@ -758,7 +758,7 @@ class ProviderController extends Controller
         if ($cancelBooking) {
             return ResponseMethod('success', 'Booking delete success');
         } else {
-            return ResponseErrorMethod('error', 'Booking delete faile');
+            return ResponseErrorMethod('error', 'Booking delete failed');
         }
     }
 
@@ -836,8 +836,8 @@ class ProviderController extends Controller
 
             $providerId = $provider->id;
             $bookings = Booking::where('provider_id', $providerId)
-                ->where('status', '1')
-//                ->whereIn('status', [1, 2])
+//                ->where('status', '1')
+                ->whereIn('status', [1, 6])
                 ->with(['user' => function ($bookings) {
                     $bookings->where('user_status', 1);
                 }])
@@ -978,9 +978,8 @@ class ProviderController extends Controller
             }
 
             $providerId = $provider->id;
-            $getBooking = Booking::where('provider_id', $providerId)
-                ->whereIn('status', [2, 3, 4, 5, 6])
-                ->with('user')
+            $getBooking = Booking::with('user')->where('provider_id', $providerId)
+                ->where('status', 2)
                 ->orderBy('id', 'DESC')
                 ->paginate(10);
 
