@@ -73,7 +73,7 @@ class PackageController extends Controller
             $package->package_features = $request->package_features;
             $package->price = $request->price;
             $package->update();
-            return responseMethod('package update successfully', $package);
+            return responseMethod('package updated successfully', $package);
         } else {
             return responseMessage('package Not found');
         }

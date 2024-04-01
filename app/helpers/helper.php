@@ -72,5 +72,15 @@ function adminNotification($message = null, $description = null, $data = null, $
         return response()->json(['success' => false, 'msg' => $e->getMessage()]);
     }
 }
-
+function ResponseErrorMessage($message,$data){
+    return response()->json([
+        'message' => $message,
+    ]);
+}
+function ResponseErrorMethod($message,$data){
+    return response()->json([
+        'message' => $message,
+        'data' => $data,
+    ]);
+}
 ?>

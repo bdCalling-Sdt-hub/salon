@@ -775,8 +775,8 @@ class GetController extends Controller
         $payment_history = Payment::with('user', 'package')->paginate(9);
         if ($payment_history) {
             $gold_count = Payment::where('package_id', 1)->count();
-            $diamond_count = Payment::where('package_id', 1)->count();
-            $platinum_count = Payment::where('package_id', 1)->count();
+            $diamond_count = Payment::where('package_id', 2)->count();
+            $platinum_count = Payment::where('package_id', 3)->count();
             $package_count = [
                 'gold_count' => $gold_count,
                 'diamond_count' => $diamond_count,
@@ -792,6 +792,7 @@ class GetController extends Controller
             'message' => 'No data found'
         ]);
     }
+
 
     public function paymentHistoryById($id)
     {
